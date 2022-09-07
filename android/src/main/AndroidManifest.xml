@@ -1,3 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="uz.udevs.udevs_video_player">
+    <application>
+        <activity android:name=".activities.UdevsVideoPlayerActivity"/>
+    </application>
 </manifest>

@@ -7,13 +7,15 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockUdevsVideoPlayerPlatform
     with MockPlatformInterfaceMixin
     implements UdevsVideoPlayerPlatform {
-
   @override
-  Future<String?> playVideo(String url) => Future.value('42');
+  Future<String?> playVideo(
+          String url, int lastPosition, int duration, String title) =>
+      Future.value('42');
 }
 
 void main() {
-  final UdevsVideoPlayerPlatform initialPlatform = UdevsVideoPlayerPlatform.instance;
+  final UdevsVideoPlayerPlatform initialPlatform =
+      UdevsVideoPlayerPlatform.instance;
 
   test('$MethodChannelUdevsVideoPlayer is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelUdevsVideoPlayer>());
@@ -24,6 +26,6 @@ void main() {
     MockUdevsVideoPlayerPlatform fakePlatform = MockUdevsVideoPlayerPlatform();
     UdevsVideoPlayerPlatform.instance = fakePlatform;
 
-    expect(await udevsVideoPlayerPlugin.playVideo(''), '42');
+    expect(await udevsVideoPlayerPlugin.playVideo('', 0, 0, ''), '42');
   });
 }

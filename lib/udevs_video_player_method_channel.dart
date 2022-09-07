@@ -10,7 +10,17 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   final methodChannel = const MethodChannel('udevs_video_player');
 
   @override
-  playVideo(String url) async {
-    await methodChannel.invokeMethod<String>('playVideo',[url]);
+  playVideo(
+    String url,
+    int lastPosition,
+    int duration,
+    String title,
+  ) async {
+    await methodChannel.invokeMethod<Map>('playVideo', <String, dynamic>{
+      'url': url,
+      'lastPosition': lastPosition,
+      'duration': duration,
+      'title': title,
+    });
   }
 }

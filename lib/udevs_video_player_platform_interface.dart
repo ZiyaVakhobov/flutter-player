@@ -23,7 +23,12 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  playVideo(String url) {
+  playVideo(
+    String url,
+    int lastPosition,
+    int duration,
+    String title,
+  ) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

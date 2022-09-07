@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uz.udevs.udevs_video_player_example">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
    <application
         android:label="udevs_video_player_example"
         android:name="${applicationName}"
