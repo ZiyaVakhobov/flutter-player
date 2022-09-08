@@ -94,7 +94,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:text="00:01"
+                android:text="00:00"
                 android:textColor="#ffffff" />
 
             <TextView

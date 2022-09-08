@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="uz.udevs.udevs_video_player">
+    package="uz.udevs.udevs_video_player">
+
     <application>
-        <activity android:name=".activities.UdevsVideoPlayerActivity"/>
+        <activity
+            android:name=".activities.UdevsVideoPlayerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
     </application>
 </manifest>

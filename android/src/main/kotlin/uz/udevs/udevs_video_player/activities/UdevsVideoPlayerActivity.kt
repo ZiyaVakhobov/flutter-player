@@ -1,13 +1,19 @@
 package uz.udevs.udevs_video_player.activities
 
 import android.app.Activity
+import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -16,13 +22,16 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 
+
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
+    private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
     private var close: ImageView? = null
     private var more: ImageView? = null
@@ -31,12 +40,16 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var forward: ImageView? = null
     private var playPause: ImageView? = null
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player)
         actionBar?.hide()
-        val playerView: PlayerView = findViewById(R.id.exo_player_view)
-        val playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = Color.BLACK
+        playerView = findViewById(R.id.exo_player_view)
+        val playerConfiguration =
+            intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -53,7 +66,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         forward?.setOnClickListener(this)
         playPause?.setOnClickListener(this)
 
-        playVideo(playerView, playerConfiguration!!.url, playerConfiguration.lastPosition)
+        playVideo(playerConfiguration!!.url, playerConfiguration.lastPosition)
     }
 
     override fun onBackPressed() {
@@ -78,21 +91,13 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         player?.playWhenReady = true
     }
 
-    private fun setFullScreen() {
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
-    }
-
-    private fun playVideo(playerView: PlayerView, url: String, lastPosition: Long) {
+    private fun playVideo(url: String, lastPosition: Long) {
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
         player = ExoPlayer.Builder(this).build()
-        playerView.player = player
-        playerView.keepScreenOn = true
+        playerView?.player = player
+        playerView?.keepScreenOn = true
 
         player?.setMediaSource(hlsMediaSource)
         player?.prepare()
@@ -137,5 +142,36 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setFullScreen()
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        } else {
+            cutFullScreen()
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
+    }
+
+    private fun setFullScreen() {
+//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).let { controller ->
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+
+    private fun cutFullScreen() {
+//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//        window.clearFlags(View.SYSTEM_UI_FLAG_FULLSCREEN)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
+            WindowInsetsCompat.Type.systemBars()
+        )
     }
 }
