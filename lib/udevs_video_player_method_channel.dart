@@ -13,13 +13,11 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   playVideo(
     String url,
     int lastPosition,
-    int duration,
     String title,
   ) async {
     await methodChannel.invokeMethod<Map>('playVideo', <String, dynamic>{
       'url': url,
       'lastPosition': lastPosition,
-      'duration': duration,
       'title': title,
     });
   }

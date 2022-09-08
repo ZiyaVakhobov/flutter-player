@@ -19,6 +19,6 @@ void main() {
   });
 
   test('playVideo', () async {
-    expect(await platform.playVideo('', 0, 0, ''), '42');
+    expect(await platform.playVideo('', 0, ''), '42');
   });
 }

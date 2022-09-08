@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
 
   playVideo() async {
     try {
-      await _udevsVideoPlayerPlugin.playVideo(_url, 10, 213123, 'Title movie');
+      await _udevsVideoPlayerPlugin.playVideo(_url, 10000, 'Shan-Chi');
     } on PlatformException {
       debugPrint('Failed to get platform version.');
     }

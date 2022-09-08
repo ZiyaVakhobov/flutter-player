@@ -4,13 +4,11 @@ class UdevsVideoPlayer {
   playVideo(
     String url,
     int lastPosition,
-    int duration,
     String title,
   ) {
     UdevsVideoPlayerPlatform.instance.playVideo(
       url,
       lastPosition,
-      duration,
       title,
     );
   }

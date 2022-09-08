@@ -9,7 +9,7 @@ class MockUdevsVideoPlayerPlatform
     implements UdevsVideoPlayerPlatform {
   @override
   Future<String?> playVideo(
-          String url, int lastPosition, int duration, String title) =>
+          String url, int lastPosition, String title) =>
       Future.value('42');
 }
 
@@ -26,6 +26,6 @@ void main() {
     MockUdevsVideoPlayerPlatform fakePlatform = MockUdevsVideoPlayerPlatform();
     UdevsVideoPlayerPlatform.instance = fakePlatform;
 
-    expect(await udevsVideoPlayerPlugin.playVideo('', 0, 0, ''), '42');
+    expect(await udevsVideoPlayerPlugin.playVideo('', 0, ''), '42');
   });
 }

@@ -29,16 +29,14 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "playVideo") {
-            if (call.hasArgument("url") && call.hasArgument("lastPosition") && call.hasArgument("duration") && call.hasArgument("title")) {
-                println(call.arguments.toString())
+            if (call.hasArgument("url") && call.hasArgument("lastPosition") && call.hasArgument("title")) {
                 val url = call.argument("url") as String?
                 val lastPosition = call.argument("lastPosition") as Int?
-                val duration = call.argument("duration") as Int?
                 val title = call.argument("title") as String?
                 val intent = Intent(activity?.applicationContext, UdevsVideoPlayerActivity::class.java)
                 intent.putExtra(
                     EXTRA_ARGUMENT,
-                    PlayerConfiguration(url!!, lastPosition!!.toLong(), duration!!.toLong(), title!!)
+                    PlayerConfiguration(url!!, lastPosition!!.toLong(), title!!)
                 )
                 activity?.startActivity(intent)
             }
