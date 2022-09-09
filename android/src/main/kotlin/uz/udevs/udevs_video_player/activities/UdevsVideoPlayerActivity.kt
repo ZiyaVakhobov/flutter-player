@@ -6,9 +6,8 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.view.ViewGroup
+import android.widget.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -21,6 +20,7 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
@@ -48,6 +48,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var tvProgramsText: TextView? = null
     private var zoom: ImageView? = null
     private var orientation: ImageView? = null
+    private var exoProgress: DefaultTimeBar? = null
+    private var customSeekBar: SeekBar? = null
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +95,15 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         }
         zoom = findViewById(R.id.zoom)
         orientation = findViewById(R.id.orientation)
+        exoProgress = findViewById(R.id.exo_progress)
+        customSeekBar = findViewById(R.id.progress_bar)
+        customSeekBar?.isEnabled = false
+        if(playerConfiguration?.isLive == true) {
+            exoProgress?.visibility = View.GONE
+            rewind?.visibility = View.GONE
+            forward?.visibility = View.GONE
+            customSeekBar?.visibility = View.VISIBLE
+        }
 
         close?.setOnClickListener(this)
         more?.setOnClickListener(this)
@@ -140,9 +151,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
         player?.setMediaSource(hlsMediaSource)
         player?.prepare()
-        if(playerConfiguration?.isLive != true) {
-            player?.seekTo(playerConfiguration!!.lastPosition)
-        }
+        player?.seekTo(playerConfiguration!!.lastPosition)
         player?.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {

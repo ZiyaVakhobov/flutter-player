@@ -97,18 +97,21 @@
 
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/video_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical"
         android:visibility="visible">
 
         <LinearLayout
             android:id="@+id/bottom_top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingHorizontal="15dp">
 
             <LinearLayout
                 android:id="@+id/timer"
@@ -121,7 +124,6 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="10dp"
                     android:fontFamily="@font/semibold"
                     android:text="00:00"
                     android:textColor="#ffffff"
@@ -272,7 +274,6 @@
                     android:id="@+id/orientation"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:layout_marginRight="10dp"
                     android:padding="5dp"
                     android:src="@drawable/ic_landscape" />
 
@@ -285,8 +286,21 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/bottom_top"
             android:layout_centerVertical="true"
+            android:paddingHorizontal="7dp"
             app:played_color="#ffffff"
             app:scrubber_color="#2196F3"
-            app:unplayed_color="#80C8C8C8" />
-    </RelativeLayout>
+            app:unplayed_color="#C8C8C8" />
+
+        <SeekBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="5dp"
+            android:paddingHorizontal="15dp"
+            android:progress="100"
+            android:progressDrawable="@drawable/custom_progress_bar"
+            android:thumb="@drawable/custom_thumb"
+            android:visibility="gone" />
+    </LinearLayout>
 </RelativeLayout>
