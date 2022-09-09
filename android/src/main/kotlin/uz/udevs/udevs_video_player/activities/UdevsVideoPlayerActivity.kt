@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -32,6 +31,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
     private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
+    private var playerConfiguration: PlayerConfiguration? = null
     private var close: ImageView? = null
     private var more: ImageView? = null
     private var title: TextView? = null
@@ -55,8 +55,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         setContentView(R.layout.player)
         actionBar?.hide()
         playerView = findViewById(R.id.exo_player_view)
-        val playerConfiguration =
-            intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
+        playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -78,19 +77,19 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         episodesText = findViewById(R.id.text_episodes)
         if (playerConfiguration?.isSerial == true) {
             episodesButton?.visibility = View.VISIBLE
-            episodesText?.text = playerConfiguration.episodeButtonText
+            episodesText?.text = playerConfiguration?.episodeButtonText
         }
         nextButton = findViewById(R.id.button_next)
         nextText = findViewById(R.id.text_next)
         if (playerConfiguration?.isSerial == true) {
             nextButton?.visibility = View.VISIBLE
-            nextText?.text = playerConfiguration.nextButtonText
+            nextText?.text = playerConfiguration?.nextButtonText
         }
         tvProgramsButton = findViewById(R.id.button_tv_programs)
         tvProgramsText = findViewById(R.id.text_tv_programs)
         if (playerConfiguration?.isLive == true) {
             tvProgramsButton?.visibility = View.VISIBLE
-            tvProgramsText?.text = playerConfiguration.tvProgramsText
+            tvProgramsText?.text = playerConfiguration?.tvProgramsText
         }
         zoom = findViewById(R.id.zoom)
         orientation = findViewById(R.id.orientation)
@@ -106,7 +105,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         zoom?.setOnClickListener(this)
         orientation?.setOnClickListener(this)
 
-        playVideo(playerConfiguration!!.url, playerConfiguration.lastPosition)
+        playVideo()
     }
 
     override fun onBackPressed() {
@@ -131,18 +130,19 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         player?.playWhenReady = true
     }
 
-    private fun playVideo(url: String, lastPosition: Long) {
+    private fun playVideo() {
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
+            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.url)))
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
 
         player?.setMediaSource(hlsMediaSource)
         player?.prepare()
-        player?.seekTo(lastPosition)
-
+        if(playerConfiguration?.isLive != true) {
+            player?.seekTo(playerConfiguration!!.lastPosition)
+        }
         player?.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
