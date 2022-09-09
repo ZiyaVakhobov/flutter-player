@@ -15,13 +15,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _url =
-      'https://cdn.uzd.udevs.io/uzdigital/videos/9fd7dce75a9e80f8da032930ea0032cb/master.m3u8';
+  final _url ='https://st1.uzdigital.tv/Discovery_Channel/video.m3u8?token=aeed03b389781a03231bc4b20cf97007c0ef7404-5150454f666e76614a74566f49486245-1661951863-1661941063&remote=89.236.205.221';
+      // 'https://cdn.uzd.udevs.io/uzdigital/videos/9fd7dce75a9e80f8da032930ea0032cb/master.m3u8';
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
   playVideo() async {
     try {
-      await _udevsVideoPlayerPlugin.playVideo(_url, 10000, 'Shan-Chi');
+      await _udevsVideoPlayerPlugin.playVideo(_url, 100000, 'Shan-Chi', false, 'Episodes', 'Next', true, 'TV Programs');
     } on PlatformException {
       debugPrint('Failed to get platform version.');
     }

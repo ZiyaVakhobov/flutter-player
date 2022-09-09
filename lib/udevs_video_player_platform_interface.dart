@@ -27,6 +27,11 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     String url,
     int lastPosition,
     String title,
+    bool isSerial,
+    String episodeButtonText,
+    String nextButtonText,
+    bool isLive,
+    String tvProgramsText,
   ) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

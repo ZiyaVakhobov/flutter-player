@@ -1,16 +1,15 @@
 package uz.udevs.udevs_video_player.activities
 
 import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
-import android.os.Build
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -39,14 +38,22 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var rewind: ImageView? = null
     private var forward: ImageView? = null
     private var playPause: ImageView? = null
+    private var timer: LinearLayout? = null
+    private var live: LinearLayout? = null
+    private var episodesButton: LinearLayout? = null
+    private var episodesText: TextView? = null
+    private var nextButton: LinearLayout? = null
+    private var nextText: TextView? = null
+    private var tvProgramsButton: LinearLayout? = null
+    private var tvProgramsText: TextView? = null
+    private var zoom: ImageView? = null
+    private var orientation: ImageView? = null
+    private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player)
         actionBar?.hide()
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = Color.BLACK
         playerView = findViewById(R.id.exo_player_view)
         val playerConfiguration =
             intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
@@ -59,12 +66,45 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         rewind = findViewById(R.id.video_rewind)
         forward = findViewById(R.id.video_forward)
         playPause = findViewById(R.id.video_play_pause)
+        timer = findViewById(R.id.timer)
+        if (playerConfiguration?.isLive == true) {
+            timer?.visibility = View.GONE
+        }
+        live = findViewById(R.id.live)
+        if (playerConfiguration?.isLive == true) {
+            live?.visibility = View.VISIBLE
+        }
+        episodesButton = findViewById(R.id.button_episodes)
+        episodesText = findViewById(R.id.text_episodes)
+        if (playerConfiguration?.isSerial == true) {
+            episodesButton?.visibility = View.VISIBLE
+            episodesText?.text = playerConfiguration.episodeButtonText
+        }
+        nextButton = findViewById(R.id.button_next)
+        nextText = findViewById(R.id.text_next)
+        if (playerConfiguration?.isSerial == true) {
+            nextButton?.visibility = View.VISIBLE
+            nextText?.text = playerConfiguration.nextButtonText
+        }
+        tvProgramsButton = findViewById(R.id.button_tv_programs)
+        tvProgramsText = findViewById(R.id.text_tv_programs)
+        if (playerConfiguration?.isLive == true) {
+            tvProgramsButton?.visibility = View.VISIBLE
+            tvProgramsText?.text = playerConfiguration.tvProgramsText
+        }
+        zoom = findViewById(R.id.zoom)
+        orientation = findViewById(R.id.orientation)
 
         close?.setOnClickListener(this)
         more?.setOnClickListener(this)
         rewind?.setOnClickListener(this)
         forward?.setOnClickListener(this)
         playPause?.setOnClickListener(this)
+        episodesButton?.setOnClickListener(this)
+        nextButton?.setOnClickListener(this)
+        tvProgramsButton?.setOnClickListener(this)
+        zoom?.setOnClickListener(this)
+        orientation?.setOnClickListener(this)
 
         playVideo(playerConfiguration!!.url, playerConfiguration.lastPosition)
     }
@@ -141,23 +181,35 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                     playPause?.setImageResource(R.drawable.ic_pause)
                 }
             }
+            R.id.zoom -> {}
+            R.id.orientation -> {
+                requestedOrientation =
+                    if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    } else {
+                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    }
+            }
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-
+        currentOrientation = newConfig.orientation
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
+            zoom?.visibility = View.VISIBLE
+            orientation?.setImageResource(R.drawable.ic_portrait)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
         } else {
             cutFullScreen()
+            zoom?.visibility = View.GONE
+            orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
     }
 
     private fun setFullScreen() {
-//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
@@ -167,8 +219,6 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     }
 
     private fun cutFullScreen() {
-//        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//        window.clearFlags(View.SYSTEM_UI_FLAG_FULLSCREEN)
         WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
             WindowInsetsCompat.Type.systemBars()

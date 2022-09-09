@@ -29,14 +29,36 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "playVideo") {
-            if (call.hasArgument("url") && call.hasArgument("lastPosition") && call.hasArgument("title")) {
+            if (call.hasArgument("url") && call.hasArgument("lastPosition") && call.hasArgument("title") && call.hasArgument(
+                    "isSerial"
+                )
+                && call.hasArgument("episodeButtonText") && call.hasArgument("nextButtonText") && call.hasArgument(
+                    "isLive"
+                )
+                && call.hasArgument("tvProgramsText")
+            ) {
                 val url = call.argument("url") as String?
                 val lastPosition = call.argument("lastPosition") as Int?
                 val title = call.argument("title") as String?
-                val intent = Intent(activity?.applicationContext, UdevsVideoPlayerActivity::class.java)
+                val isSerial = call.argument("isSerial") as Boolean?
+                val episodeButtonText = call.argument("episodeButtonText") as String?
+                val nextButtonText = call.argument("nextButtonText") as String?
+                val isLive = call.argument("isLive") as Boolean?
+                val tvProgramsText = call.argument("tvProgramsText") as String?
+                val intent =
+                    Intent(activity?.applicationContext, UdevsVideoPlayerActivity::class.java)
                 intent.putExtra(
                     EXTRA_ARGUMENT,
-                    PlayerConfiguration(url!!, lastPosition!!.toLong(), title!!)
+                    PlayerConfiguration(
+                        url!!,
+                        lastPosition!!.toLong(),
+                        title!!,
+                        isSerial!!,
+                        episodeButtonText!!,
+                        nextButtonText!!,
+                        isLive!!,
+                        tvProgramsText!!,
+                    )
                 )
                 activity?.startActivity(intent)
             }

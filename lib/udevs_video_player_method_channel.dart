@@ -14,11 +14,21 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     String url,
     int lastPosition,
     String title,
+    bool isSerial,
+    String episodeButtonText,
+    String nextButtonText,
+    bool isLive,
+    String tvProgramsText,
   ) async {
     await methodChannel.invokeMethod<Map>('playVideo', <String, dynamic>{
       'url': url,
       'lastPosition': lastPosition,
       'title': title,
+      'isSerial': isSerial,
+      'episodeButtonText': episodeButtonText,
+      'nextButtonText': nextButtonText,
+      'isLive': isLive,
+      'tvProgramsText': tvProgramsText,
     });
   }
 }
