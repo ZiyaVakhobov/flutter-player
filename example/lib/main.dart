@@ -23,7 +23,23 @@ class _MyAppState extends State<MyApp> {
 
   playVideo() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.playVideo(_url, 0, 'Shan-Chi', false, 'Episodes', 'Next', false, 'TV Programs') ?? 'nothing';
+      var s = await _udevsVideoPlayerPlugin.playVideo(
+            cryptKey: '#&',
+            initialResolution: {'Auto': _url},
+            resolutions: {'Auto': _url, '720p': _url},
+            qualityText: 'Quality',
+            speedText: 'Speed',
+            lastPosition: 1000,
+            title: 'Shan-chi',
+            isSerial: false,
+            episodeButtonText: 'Episodes',
+            nextButtonText: 'Next',
+            seasons: {'': []},
+            isLive: false,
+            tvProgramsText: 'Programs',
+            tvPrograms: [],
+          ) ??
+          'nothing';
       print('result: $s');
     } on PlatformException {
       debugPrint('Failed to get platform version.');

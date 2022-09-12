@@ -21,8 +21,11 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
+import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
+import uz.udevs.udevs_video_player.databinding.PlayerBinding
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
@@ -49,6 +52,10 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var exoProgress: DefaultTimeBar? = null
     private var customSeekBar: SeekBar? = null
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
+    private var speeds =
+        mutableListOf("0.25x", "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x")
+    private var currentQuality = ""
+    private var currentSpeed = "1.0x"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +63,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         actionBar?.hide()
         playerView = findViewById(R.id.exo_player_view)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
+        currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -142,7 +150,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private fun playVideo() {
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.url)))
+            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.initialResolution.values.first())))
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
@@ -197,6 +205,9 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     }
             }
+            R.id.video_more -> {
+                showSettingsBottomSheet()
+            }
         }
     }
 
@@ -230,5 +241,57 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
             WindowInsetsCompat.Type.systemBars()
         )
+    }
+
+    private var qualityText: TextView? = null
+    private var speedText: TextView? = null
+    private fun showSettingsBottomSheet() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
+        val quality = bottomSheetDialog.findViewById<LinearLayout>(R.id.quality)
+        val speed = bottomSheetDialog.findViewById<LinearLayout>(R.id.speed)
+        qualityText = bottomSheetDialog.findViewById(R.id.quality_settings_value_text)
+        speedText = bottomSheetDialog.findViewById(R.id.speed_settings_value_text)
+        qualityText?.text = currentQuality
+        speedText?.text = currentSpeed
+        quality?.setOnClickListener {
+            showQualitySpeedSheet(
+                currentQuality,
+                playerConfiguration?.resolutions?.keys?.toList() as ArrayList,
+                true,
+            )
+        }
+        speed?.setOnClickListener {
+            showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
+        }
+        bottomSheetDialog.show()
+    }
+
+    private fun showQualitySpeedSheet(
+        initialValue: String,
+        list: ArrayList<String>,
+        fromQuality: Boolean
+    ) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
+        val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
+        val adapter = QualitySpeedAdapter(
+            initialValue,
+            this,
+            list, (object : QualitySpeedAdapter.OnClickListener {
+                override fun onClick(position: Int) {
+                    if (fromQuality) {
+                        currentQuality = list[position]
+                        qualityText?.text = currentQuality
+                    } else {
+                        currentSpeed = list[position]
+                        speedText?.text = currentSpeed
+                    }
+                    bottomSheetDialog.dismiss()
+                }
+            })
+        )
+        listView.adapter = adapter
+        bottomSheetDialog.show()
     }
 }

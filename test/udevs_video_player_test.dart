@@ -8,16 +8,22 @@ class MockUdevsVideoPlayerPlatform
     with MockPlatformInterfaceMixin
     implements UdevsVideoPlayerPlatform {
   @override
-  Future<String?> playVideo(
-    String url,
-    int lastPosition,
-    String title,
-    bool isSerial,
-    String episodeButtonText,
-    String nextButtonText,
-    bool isLive,
-    String tvProgramsText,
-  ) =>
+  Future<String?> playVideo({
+    required String cryptKey,
+    required Map<String, String> initialResolution,
+    required Map<String, String> resolutions,
+    required String qualityText,
+    required String speedText,
+    required int lastPosition,
+    required String title,
+    required bool isSerial,
+    required String episodeButtonText,
+    required String nextButtonText,
+    required Map<String, List<String>> seasons,
+    required bool isLive,
+    required String tvProgramsText,
+    required List<String> tvPrograms,
+  }) =>
       Future.value('42');
 }
 
@@ -36,7 +42,21 @@ void main() {
 
     expect(
         await udevsVideoPlayerPlugin.playVideo(
-            '', 0, '', false, '', '', false, ''),
+          cryptKey: '#&',
+          initialResolution: {'Auto': '_url'},
+          resolutions: {'Auto': '_url', '720p': '_url'},
+          qualityText: 'Quality',
+          speedText: 'Speed',
+          lastPosition: 1000,
+          title: 'Shan-chi',
+          isSerial: false,
+          episodeButtonText: 'Episodes',
+          nextButtonText: 'Next',
+          seasons: {'': []},
+          isLive: false,
+          tvProgramsText: 'Programs',
+          tvPrograms: [],
+        ),
         '42');
   });
 }
