@@ -23,7 +23,7 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  playVideo(
+  Future<String?> playVideo(
     String url,
     int lastPosition,
     String title,

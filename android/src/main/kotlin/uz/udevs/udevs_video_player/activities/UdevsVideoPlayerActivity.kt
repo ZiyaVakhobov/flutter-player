@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,7 +24,6 @@ import androidx.media3.ui.PlayerView
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
-
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 

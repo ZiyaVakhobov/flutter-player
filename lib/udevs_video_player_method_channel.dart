@@ -10,7 +10,7 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   final methodChannel = const MethodChannel('udevs_video_player');
 
   @override
-  playVideo(
+  Future<String?> playVideo(
     String url,
     int lastPosition,
     String title,
@@ -20,7 +20,7 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     bool isLive,
     String tvProgramsText,
   ) async {
-    await methodChannel.invokeMethod<Map>('playVideo', <String, dynamic>{
+    final res = await methodChannel.invokeMethod<String>('playVideo', <String, dynamic>{
       'url': url,
       'lastPosition': lastPosition,
       'title': title,
@@ -30,5 +30,6 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
       'isLive': isLive,
       'tvProgramsText': tvProgramsText,
     });
+    return res;
   }
 }

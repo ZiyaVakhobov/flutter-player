@@ -1,7 +1,7 @@
 import 'udevs_video_player_platform_interface.dart';
 
 class UdevsVideoPlayer {
-  playVideo(
+  Future<String?> playVideo(
     String url,
     int lastPosition,
     String title,
@@ -11,7 +11,7 @@ class UdevsVideoPlayer {
     bool isLive,
     String tvProgramsText,
   ) {
-    UdevsVideoPlayerPlatform.instance.playVideo(
+    return UdevsVideoPlayerPlatform.instance.playVideo(
       url,
       lastPosition,
       title,
