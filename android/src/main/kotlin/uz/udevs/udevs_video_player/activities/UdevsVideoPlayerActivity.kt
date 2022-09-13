@@ -1,5 +1,6 @@
 package uz.udevs.udevs_video_player.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -18,11 +19,16 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
+import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
+
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
@@ -48,10 +54,6 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var exoProgress: DefaultTimeBar? = null
     private var customSeekBar: SeekBar? = null
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
-    private var speeds =
-        mutableListOf("0.25x", "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x")
-    private var currentQuality = ""
-    private var currentSpeed = "1.0x"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +102,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         exoProgress = findViewById(R.id.exo_progress)
         customSeekBar = findViewById(R.id.progress_bar)
         customSeekBar?.isEnabled = false
-        if(playerConfiguration?.isLive == true) {
+        if (playerConfiguration?.isLive == true) {
             exoProgress?.visibility = View.GONE
             rewind?.visibility = View.GONE
             forward?.visibility = View.GONE
@@ -164,6 +166,14 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                 ) {
 
                 }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if(isPlaying) {
+                        playPause?.setImageResource(R.drawable.ic_pause)
+                    } else {
+                        playPause?.setImageResource(R.drawable.ic_play)
+                    }
+                }
             })
         player?.playWhenReady = true
     }
@@ -185,10 +195,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             R.id.video_play_pause -> {
                 if (player?.isPlaying == true) {
                     player?.pause()
-                    playPause?.setImageResource(R.drawable.ic_play)
                 } else {
                     player?.play()
-                    playPause?.setImageResource(R.drawable.ic_pause)
                 }
             }
             R.id.zoom -> {}
@@ -202,6 +210,9 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             }
             R.id.video_more -> {
                 showSettingsBottomSheet()
+            }
+            R.id.button_episodes -> {
+                showEpisodesBottomSheet()
             }
         }
     }
@@ -238,8 +249,47 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         )
     }
 
+    private fun showEpisodesBottomSheet() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.episodes)
+        val titleBottomSheet = bottomSheetDialog.findViewById<TextView>(R.id.episodes_sheet_title)
+        titleBottomSheet?.text = title?.text
+        val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.episode_tabs)
+        val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.episode_view_pager)
+        viewPager?.adapter = EpisodePagerAdapter(
+            this,
+            playerConfiguration!!.seasons,
+            object : EpisodePagerAdapter.OnClickListener {
+                @SuppressLint("SetTextI18n")
+                override fun onClick(episodeIndex: Int, seasonIndex: Int) {
+                    title?.text = "S${seasonIndex+1} E${episodeIndex + 1} ${playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title}"
+                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                    val hlsMediaSource: HlsMediaSource =
+                        HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    player?.setMediaSource(hlsMediaSource)
+                    player?.prepare()
+                    player?.playWhenReady
+                    bottomSheetDialog.dismiss()
+                }
+            })
+        TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
+            tab.text = playerConfiguration!!.seasons[position].title
+        }.attach()
+        bottomSheetDialog.show()
+        player?.pause()
+        bottomSheetDialog.setOnDismissListener {
+            player?.play()
+        }
+    }
+
+    private var speeds =
+        mutableListOf("0.25x", "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x")
+    private var currentQuality = ""
+    private var currentSpeed = "1.0x"
     private var qualityText: TextView? = null
     private var speedText: TextView? = null
+
     private fun showSettingsBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
@@ -260,6 +310,10 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
+        player?.pause()
+        bottomSheetDialog.setOnDismissListener {
+            player?.play()
+        }
     }
 
     private fun showQualitySpeedSheet(
@@ -280,12 +334,12 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                         qualityText?.text = currentQuality
                         if (player?.isPlaying == true) {
                             player?.pause()
-                            playPause?.setImageResource(R.drawable.ic_play)
                         }
                         val currentPosition = player?.currentPosition
                         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                        val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.resolutions[currentQuality])))
+                        val hlsMediaSource: HlsMediaSource =
+                            HlsMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.resolutions[currentQuality])))
                         player?.setMediaSource(hlsMediaSource)
                         player?.seekTo(currentPosition!!)
                         player?.prepare()
@@ -293,7 +347,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                     } else {
                         currentSpeed = list[position]
                         speedText?.text = currentSpeed
-                        player?.setPlaybackSpeed(currentSpeed.replace("x","").toFloat())
+                        player?.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
                     }
                     bottomSheetDialog.dismiss()
                 }

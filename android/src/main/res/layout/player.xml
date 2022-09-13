@@ -10,7 +10,7 @@
         android:id="@+id/exo_player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#1c192c"
+        android:background="@color/main"
         app:auto_show="false"
         app:animation_enabled="false"
         app:controller_layout_id="@layout/custom_playback_view"
@@ -18,7 +18,7 @@
         app:resize_mode="fit"
         app:show_buffering="always"
         app:show_timeout="6000"
-        app:shutter_background_color="#1c192c"
+        app:shutter_background_color="@color/main"
         app:surface_type="surface_view"
         app:use_controller="true" />
 </RelativeLayout>

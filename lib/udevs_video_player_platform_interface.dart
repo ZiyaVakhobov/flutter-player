@@ -24,20 +24,7 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
   }
 
   Future<String?> playVideo({
-    required String cryptKey,
-    required Map<String, String> initialResolution,
-    required Map<String, String> resolutions,
-    required String qualityText,
-    required String speedText,
-    required int lastPosition,
-    required String title,
-    required bool isSerial,
-    required String episodeButtonText,
-    required String nextButtonText,
-    required Map<String, List<String>> seasons,
-    required bool isLive,
-    required String tvProgramsText,
-    required List<String> tvPrograms,
+    required String playerConfigJsonString,
   }) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

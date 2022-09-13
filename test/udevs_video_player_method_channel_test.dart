@@ -20,22 +20,7 @@ void main() {
 
   test('playVideo', () async {
     expect(
-        await platform.playVideo(
-          cryptKey: '#&',
-          initialResolution: {'Auto': '_url'},
-          resolutions: {'Auto': '_url', '720p': '_url'},
-          qualityText: 'Quality',
-          speedText: 'Speed',
-          lastPosition: 1000,
-          title: 'Shan-chi',
-          isSerial: false,
-          episodeButtonText: 'Episodes',
-          nextButtonText: 'Next',
-          seasons: {'': []},
-          isLive: false,
-          tvProgramsText: 'Programs',
-          tvPrograms: [],
-        ),
+        await platform.playVideo(playerConfigJsonString: ''),
         '42');
   });
 }

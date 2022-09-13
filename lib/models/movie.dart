@@ -1,10 +1,9 @@
-import 'dart:ffi';
 
 class Movie {
   String? title;
   String? description;
   String? image;
-  Int64? duration;
+  int? duration;
   Map<String, String>? resolutions;
 
   Movie.fromJson(dynamic json) {

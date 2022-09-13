@@ -4,7 +4,6 @@
     android:id="@+id/quality_speed_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#1c192c"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="20dp"
@@ -17,7 +16,7 @@
         android:layout_weight="1"
         android:fontFamily="@font/regular"
         android:text="1080p"
-        android:textColor="#ffffff"
+        android:textColor="@color/white"
         android:textSize="16sp"
         tools:ignore="HardcodedText" />
 

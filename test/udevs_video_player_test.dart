@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:udevs_video_player/models/player_configuration.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'package:udevs_video_player/udevs_video_player_platform_interface.dart';
 import 'package:udevs_video_player/udevs_video_player_method_channel.dart';
@@ -9,20 +10,7 @@ class MockUdevsVideoPlayerPlatform
     implements UdevsVideoPlayerPlatform {
   @override
   Future<String?> playVideo({
-    required String cryptKey,
-    required Map<String, String> initialResolution,
-    required Map<String, String> resolutions,
-    required String qualityText,
-    required String speedText,
-    required int lastPosition,
-    required String title,
-    required bool isSerial,
-    required String episodeButtonText,
-    required String nextButtonText,
-    required Map<String, List<String>> seasons,
-    required bool isLive,
-    required String tvProgramsText,
-    required List<String> tvPrograms,
+    required String playerConfigJsonString,
   }) =>
       Future.value('42');
 }
@@ -42,21 +30,7 @@ void main() {
 
     expect(
         await udevsVideoPlayerPlugin.playVideo(
-          cryptKey: '#&',
-          initialResolution: {'Auto': '_url'},
-          resolutions: {'Auto': '_url', '720p': '_url'},
-          qualityText: 'Quality',
-          speedText: 'Speed',
-          lastPosition: 1000,
-          title: 'Shan-chi',
-          isSerial: false,
-          episodeButtonText: 'Episodes',
-          nextButtonText: 'Next',
-          seasons: {'': []},
-          isLive: false,
-          tvProgramsText: 'Programs',
-          tvPrograms: [],
-        ),
+            playerConfig: PlayerConfiguration()),
         '42');
   });
 }

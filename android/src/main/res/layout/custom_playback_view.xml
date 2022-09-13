@@ -33,7 +33,7 @@
             android:gravity="center_horizontal"
             android:maxLines="2"
             android:text="Avengers: End game"
-            android:textColor="#ffffff"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <ImageView
@@ -126,7 +126,7 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/semibold"
                     android:text="00:00"
-                    android:textColor="#ffffff"
+                    android:textColor="@color/white"
                     android:textSize="15dp" />
 
                 <TextView
@@ -136,7 +136,7 @@
                     android:layout_centerVertical="true"
                     android:fontFamily="@font/semibold"
                     android:text=" / "
-                    android:textColor="#ffffff"
+                    android:textColor="@color/white"
                     android:textSize="15dp" />
 
                 <TextView
@@ -148,7 +148,7 @@
                     android:layout_marginRight="10dp"
                     android:fontFamily="@font/semibold"
                     android:text="35:22"
-                    android:textColor="#ffffff"
+                    android:textColor="@color/white"
                     android:textSize="15dp" />
             </LinearLayout>
 
@@ -172,7 +172,7 @@
                     android:layout_marginLeft="5dp"
                     android:fontFamily="@font/semibold"
                     android:text="LIVE"
-                    android:textColor="#F44336"
+                    android:textColor="@color/red"
                     android:textFontWeight="900"
                     android:textSize="15dp" />
 
@@ -204,7 +204,7 @@
                         android:layout_centerVertical="true"
                         android:fontFamily="@font/semibold"
                         android:text="Episodes"
-                        android:textColor="#ffffff"
+                        android:textColor="@color/white"
                         android:textSize="15dp" />
 
                 </LinearLayout>
@@ -231,7 +231,7 @@
                         android:layout_centerVertical="true"
                         android:fontFamily="@font/semibold"
                         android:text="Nxt ep"
-                        android:textColor="#ffffff"
+                        android:textColor="@color/white"
                         android:textSize="15dp" />
                 </LinearLayout>
 
@@ -257,7 +257,7 @@
                         android:layout_centerVertical="true"
                         android:fontFamily="@font/semibold"
                         android:text="TV programmes"
-                        android:textColor="#ffffff"
+                        android:textColor="@color/white"
                         android:textSize="15dp" />
                 </LinearLayout>
 
@@ -287,9 +287,9 @@
             android:layout_below="@+id/bottom_top"
             android:layout_centerVertical="true"
             android:paddingHorizontal="7dp"
-            app:played_color="#ffffff"
-            app:scrubber_color="#2196F3"
-            app:unplayed_color="#C8C8C8" />
+            app:played_color="@color/white"
+            app:scrubber_color="@color/blue"
+            app:unplayed_color="@color/grey10" />
 
         <SeekBar
             android:id="@+id/progress_bar"

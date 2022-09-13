@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:ffi';
 
 import 'package:udevs_video_player/models/season.dart';
 import 'package:udevs_video_player/models/tv_program.dart';
@@ -9,7 +8,7 @@ class PlayerConfiguration {
   Map<String, String>? filmResolutions;
   String? qualityText;
   String? speedText;
-  Int64? lastPosition;
+  int? lastPosition;
   String? title;
   bool? isSerial;
   String? episodeButtonText;
@@ -67,4 +66,19 @@ class PlayerConfiguration {
     return map;
   }
 
+  PlayerConfiguration({
+    this.initialResolution,
+    this.filmResolutions,
+    this.qualityText,
+    this.speedText,
+    this.lastPosition,
+    this.title,
+    this.isSerial,
+    this.episodeButtonText,
+    this.nextButtonText,
+    this.seasons,
+    this.isLive,
+    this.tvProgramsText,
+    this.tvPrograms,
+  });
 }
