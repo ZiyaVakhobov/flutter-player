@@ -10,10 +10,7 @@ import android.widget.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
+import androidx.media3.common.*
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -25,7 +22,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
-import uz.udevs.udevs_video_player.databinding.PlayerBinding
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
@@ -154,10 +150,9 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
-
         player?.setMediaSource(hlsMediaSource)
-        player?.prepare()
         player?.seekTo(playerConfiguration!!.lastPosition)
+        player?.prepare()
         player?.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
@@ -283,9 +278,22 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                     if (fromQuality) {
                         currentQuality = list[position]
                         qualityText?.text = currentQuality
+                        if (player?.isPlaying == true) {
+                            player?.pause()
+                            playPause?.setImageResource(R.drawable.ic_play)
+                        }
+                        val currentPosition = player?.currentPosition
+                        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                        val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.resolutions[currentQuality])))
+                        player?.setMediaSource(hlsMediaSource)
+                        player?.seekTo(currentPosition!!)
+                        player?.prepare()
+                        player?.playWhenReady
                     } else {
                         currentSpeed = list[position]
                         speedText?.text = currentSpeed
+                        player?.setPlaybackSpeed(currentSpeed.replace("x","").toFloat())
                     }
                     bottomSheetDialog.dismiss()
                 }

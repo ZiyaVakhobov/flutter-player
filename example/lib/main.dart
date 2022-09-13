@@ -15,26 +15,46 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _url =
-      // 'https://bl.uma.media/route/3d905b2773e54aa484818843bed55b12.m3u8?guids=45f02b41-5662-4bf7-b62b-b6b929b46c35_1440x1072_4691968_avc1.640028_mp4a.40.2,3b727e61-74a1-4156-8141-eeff69d57afc_960x720_3128000_avc1.64001f_mp4a.40.2,18c54b08-3c6a-41ef-9456-4c7a30ebf2d6_640x480_1627968_avc1.4d401e_mp4a.40.2,5adfac23-259d-4c05-a47d-64568f07dbe5_480x360_1363968_avc1.42c015_mp4a.40.2&sign=8HjuH6LdV9ztzBG1qUng2A&expire=1662802020';
-      // 'https://st1.uzdigital.tv/RU_TV/video.m3u8?token=69bd0ba9a2d3c9bbb109dfaecdf7f9473cd5a50b-4f6c414d7656557a4554436159647161-1662733101-1662722301&remote=89.236.205.221';
-      'https://cdn.uzd.udevs.io/uzdigital/videos/9fd7dce75a9e80f8da032930ea0032cb/master.m3u8';
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
   playVideo() async {
+    var cryptKey = '#&';
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
-            cryptKey: '#&',
-            initialResolution: {'Auto': _url},
-            resolutions: {'Auto': _url, '720p': _url},
+            cryptKey: cryptKey,
+            initialResolution: {
+              'Auto':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
+            },
+            resolutions: {
+              'Auto':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+              '1080p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+              '720p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
+              '480p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+              '360p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+              '240p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+            },
             qualityText: 'Quality',
             speedText: 'Speed',
             lastPosition: 1000,
-            title: 'Shan-chi',
-            isSerial: false,
+            title: 'Женщина-Халк: Адвокат',
+            isSerial: true,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
-            seasons: {'': []},
+            seasons: {
+              '1 Season': [
+                'Женщина-Халк: Адвокат$cryptKeyПосле переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.'
+                    '${cryptKey}https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg${cryptKey}2122'
+                    '$cryptKey{"Auto":""}',
+                ''
+              ]
+            },
             isLive: false,
             tvProgramsText: 'Programs',
             tvPrograms: [],

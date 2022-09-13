@@ -7,4 +7,5 @@ data class Movie(
     val description: String,
     val image: String,
     val duration: Long,
+    val resolutions: HashMap<String, String>
 ) : Serializable
