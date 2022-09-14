@@ -24,7 +24,7 @@ class Season {
   }
 
   Season({
-    this.title,
-    this.movies,
+    required this.title,
+    required this.movies,
   });
 }

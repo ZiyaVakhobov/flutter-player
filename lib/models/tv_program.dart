@@ -15,7 +15,7 @@ class TvProgram {
   }
 
   TvProgram({
-    this.scheduledTime,
-    this.programTitle,
+    required this.scheduledTime,
+    required this.programTitle,
   });
 }

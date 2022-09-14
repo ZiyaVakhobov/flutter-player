@@ -25,10 +25,10 @@ class Movie {
   }
 
   Movie({
-    this.title,
-    this.description,
-    this.image,
-    this.duration,
-    this.resolutions,
+    required this.title,
+    required this.description,
+    required this.image,
+    required this.duration,
+    required this.resolutions,
   });
 }

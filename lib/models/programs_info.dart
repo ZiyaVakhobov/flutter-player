@@ -24,7 +24,7 @@ class ProgramsInfo {
   }
 
   ProgramsInfo({
-    this.day,
-    this.tvPrograms,
+    required this.day,
+    required this.tvPrograms,
   });
 }
