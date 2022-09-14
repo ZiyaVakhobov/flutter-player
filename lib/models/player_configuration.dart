@@ -1,11 +1,11 @@
 import 'dart:core';
 
+import 'package:udevs_video_player/models/programs_info.dart';
 import 'package:udevs_video_player/models/season.dart';
-import 'package:udevs_video_player/models/tv_program.dart';
 
 class PlayerConfiguration {
   Map<String, String>? initialResolution;
-  Map<String, String>? filmResolutions;
+  Map<String, String>? resolutions;
   String? qualityText;
   String? speedText;
   int? lastPosition;
@@ -16,11 +16,11 @@ class PlayerConfiguration {
   List<Season>? seasons;
   bool? isLive;
   String? tvProgramsText;
-  List<TvProgram>? tvPrograms;
+  List<ProgramsInfo>? programsInfoList;
 
   PlayerConfiguration.fromJson(dynamic json) {
     initialResolution = json['initialResolution'];
-    filmResolutions = json['filmResolutions'];
+    resolutions = json['resolutions'];
     qualityText = json['qualityText'];
     speedText = json['speedText'];
     lastPosition = json['lastPosition'];
@@ -36,10 +36,10 @@ class PlayerConfiguration {
     }
     isLive = json['isLive'];
     tvProgramsText = json['tvProgramsText'];
-    if (json['tvPrograms'] != null) {
-      tvPrograms = [];
-      json['tvPrograms'].forEach((v) {
-        tvPrograms?.add(TvProgram.fromJson(v));
+    if (json['programsInfoList'] != null) {
+      programsInfoList = [];
+      json['programsInfoList'].forEach((v) {
+        programsInfoList?.add(ProgramsInfo.fromJson(v));
       });
     }
   }
@@ -47,7 +47,7 @@ class PlayerConfiguration {
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
     map['initialResolution'] = initialResolution;
-    map['filmResolutions'] = filmResolutions;
+    map['resolutions'] = resolutions;
     map['qualityText'] = qualityText;
     map['speedText'] = speedText;
     map['lastPosition'] = lastPosition;
@@ -60,15 +60,15 @@ class PlayerConfiguration {
     }
     map['isLive'] = isLive;
     map['tvProgramsText'] = tvProgramsText;
-    if (tvPrograms != null) {
-      map['tvPrograms'] = tvPrograms?.map((v) => v.toJson()).toList();
+    if (programsInfoList != null) {
+      map['programsInfoList'] = programsInfoList?.map((v) => v.toJson()).toList();
     }
     return map;
   }
 
   PlayerConfiguration({
     this.initialResolution,
-    this.filmResolutions,
+    this.resolutions,
     this.qualityText,
     this.speedText,
     this.lastPosition,
@@ -79,6 +79,6 @@ class PlayerConfiguration {
     this.seasons,
     this.isLive,
     this.tvProgramsText,
-    this.tvPrograms,
+    this.programsInfoList,
   });
 }

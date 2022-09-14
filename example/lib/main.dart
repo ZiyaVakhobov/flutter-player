@@ -144,7 +144,7 @@ class _MyAppState extends State<MyApp> {
               'Auto':
                   'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
             },
-            filmResolutions: {
+            resolutions: {
               'Auto':
                   'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
               '1080p':
@@ -168,7 +168,7 @@ class _MyAppState extends State<MyApp> {
             seasons: seasons,
             isLive: false,
             tvProgramsText: 'Programs',
-            tvPrograms: tvPrograms,
+            programsInfoList: [],
           )) ??
           'nothing';
       print('result: $s');

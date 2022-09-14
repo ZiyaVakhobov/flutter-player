@@ -6,7 +6,7 @@ import java.io.Serializable
 data class PlayerConfiguration(
     @SerializedName("initialResolution")
     val initialResolution: HashMap<String, String>,
-    @SerializedName("filmResolutions")
+    @SerializedName("resolutions")
     val resolutions: HashMap<String, String>,
     @SerializedName("qualityText")
     val qualityText: String,
@@ -28,6 +28,6 @@ data class PlayerConfiguration(
     val isLive: Boolean,
     @SerializedName("tvProgramsText")
     val tvProgramsText: String,
-    @SerializedName("tvPrograms")
-    val tvPrograms: List<TvProgram>,
+    @SerializedName("programsInfoList")
+    val programsInfoList: List<ProgramsInfo>,
 ) : Serializable
