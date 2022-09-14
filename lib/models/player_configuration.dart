@@ -67,18 +67,18 @@ class PlayerConfiguration {
   }
 
   PlayerConfiguration({
-    this.initialResolution,
-    this.resolutions,
-    this.qualityText,
-    this.speedText,
-    this.lastPosition,
-    this.title,
-    this.isSerial,
-    this.episodeButtonText,
-    this.nextButtonText,
-    this.seasons,
-    this.isLive,
-    this.tvProgramsText,
-    this.programsInfoList,
+    required this.initialResolution,
+    required this.resolutions,
+    required this.qualityText,
+    required this.speedText,
+    required this.lastPosition,
+    required this.title,
+    required this.isSerial,
+    required this.episodeButtonText,
+    required this.nextButtonText,
+    required this.seasons,
+    required this.isLive,
+    required this.tvProgramsText,
+    required this.programsInfoList,
   });
 }

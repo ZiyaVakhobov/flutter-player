@@ -30,7 +30,21 @@ void main() {
 
     expect(
         await udevsVideoPlayerPlugin.playVideo(
-            playerConfig: PlayerConfiguration()),
+            playerConfig: PlayerConfiguration(
+              initialResolution: null,
+              resolutions: null,
+              qualityText: null,
+              speedText: null,
+              lastPosition: null,
+              title: null,
+              isSerial: null,
+              episodeButtonText: null,
+              nextButtonText: null,
+              seasons: null,
+              isLive: null,
+              tvProgramsText: null,
+              programsInfoList: null,
+            )),
         '42');
   });
 }
