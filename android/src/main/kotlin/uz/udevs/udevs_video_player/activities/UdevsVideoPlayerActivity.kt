@@ -30,6 +30,7 @@ import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
+import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
@@ -64,7 +65,6 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         playerView = findViewById(R.id.exo_player_view)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
-        println("playerConfiguration: ${playerConfiguration.toString()}")
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -231,11 +231,35 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            when (currentBottomSheet) {
+                BottomSheet.EPISODES -> {
+                    backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
+                }
+                BottomSheet.SETTINGS -> {
+                    backButtonSettingsBottomSheet?.visibility = View.VISIBLE
+                }
+                BottomSheet.TV_PROGRAMS -> {}
+                BottomSheet.QUALITY_OR_SPEED -> backButtonQualitySpeedBottomSheet?.visibility =
+                    View.VISIBLE
+                BottomSheet.NONE -> {}
+            }
         } else {
             cutFullScreen()
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            when (currentBottomSheet) {
+                BottomSheet.EPISODES -> {
+                    backButtonEpisodeBottomSheet?.visibility = View.GONE
+                }
+                BottomSheet.SETTINGS -> {
+                    backButtonSettingsBottomSheet?.visibility = View.GONE
+                }
+                BottomSheet.TV_PROGRAMS -> {}
+                BottomSheet.QUALITY_OR_SPEED -> backButtonSettingsBottomSheet?.visibility =
+                    View.GONE
+                BottomSheet.NONE -> {}
+            }
         }
     }
 
@@ -255,13 +279,16 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         )
     }
 
+    private var currentBottomSheet = BottomSheet.NONE
+
     private fun showTvProgramsBottomSheet() {
+        currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
         bottomSheetDialog.setContentView(R.layout.tv_programs_sheet)
-
-        val backButtonBottomSheet = bottomSheetDialog.findViewById<ImageView>(R.id.tv_program_sheet_back)
+        val backButtonBottomSheet =
+            bottomSheetDialog.findViewById<ImageView>(R.id.tv_program_sheet_back)
         backButtonBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
@@ -274,11 +301,27 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             tab.text = playerConfiguration!!.programsInfoList[position].day
         }.attach()
         bottomSheetDialog.show()
+        bottomSheetDialog.setOnDismissListener {
+            currentBottomSheet = BottomSheet.NONE
+        }
     }
 
+    private var backButtonEpisodeBottomSheet: ImageView? = null
     private fun showEpisodesBottomSheet() {
+        currentBottomSheet = BottomSheet.EPISODES
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
+        backButtonEpisodeBottomSheet =
+            bottomSheetDialog.findViewById(R.id.episode_sheet_back)
+        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            backButtonEpisodeBottomSheet?.visibility = View.GONE
+        } else {
+            backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
+        }
+        backButtonEpisodeBottomSheet?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
         val titleBottomSheet = bottomSheetDialog.findViewById<TextView>(R.id.episodes_sheet_title)
         titleBottomSheet?.text = title?.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.episode_tabs)
@@ -289,7 +332,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             object : EpisodePagerAdapter.OnClickListener {
                 @SuppressLint("SetTextI18n")
                 override fun onClick(episodeIndex: Int, seasonIndex: Int) {
-                    title?.text = "S${seasonIndex+1} E${episodeIndex + 1} ${playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title}"
+                    title?.text =
+                        "S${seasonIndex + 1} E${episodeIndex + 1} ${playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title}"
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource =
                         HlsMediaSource.Factory(dataSourceFactory)
@@ -306,6 +350,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.show()
         player?.pause()
         bottomSheetDialog.setOnDismissListener {
+            currentBottomSheet = BottomSheet.NONE
             player?.play()
         }
     }
@@ -317,9 +362,21 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var qualityText: TextView? = null
     private var speedText: TextView? = null
 
+    private var backButtonSettingsBottomSheet: ImageView? = null
     private fun showSettingsBottomSheet() {
+        currentBottomSheet = BottomSheet.SETTINGS
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
+        backButtonSettingsBottomSheet = bottomSheetDialog.findViewById(R.id.settings_sheet_back)
+        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            backButtonSettingsBottomSheet?.visibility = View.GONE
+        } else {
+            backButtonSettingsBottomSheet?.visibility = View.VISIBLE
+        }
+        backButtonSettingsBottomSheet?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
         val quality = bottomSheetDialog.findViewById<LinearLayout>(R.id.quality)
         val speed = bottomSheetDialog.findViewById<LinearLayout>(R.id.speed)
         qualityText = bottomSheetDialog.findViewById(R.id.quality_settings_value_text)
@@ -339,17 +396,31 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.show()
         player?.pause()
         bottomSheetDialog.setOnDismissListener {
+            currentBottomSheet = BottomSheet.NONE
             player?.play()
         }
     }
 
+    private var backButtonQualitySpeedBottomSheet: ImageView? = null
     private fun showQualitySpeedSheet(
         initialValue: String,
         list: ArrayList<String>,
         fromQuality: Boolean
     ) {
+        currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
+        backButtonQualitySpeedBottomSheet =
+            bottomSheetDialog.findViewById(R.id.quality_speed_sheet_back)
+        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            backButtonQualitySpeedBottomSheet?.visibility = View.GONE
+        } else {
+            backButtonQualitySpeedBottomSheet?.visibility = View.VISIBLE
+        }
+        backButtonQualitySpeedBottomSheet?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         val adapter = QualitySpeedAdapter(
             initialValue,
@@ -382,5 +453,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         )
         listView.adapter = adapter
         bottomSheetDialog.show()
+        bottomSheetDialog.setOnDismissListener {
+            currentBottomSheet = BottomSheet.SETTINGS
+        }
     }
 }

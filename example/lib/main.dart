@@ -137,50 +137,37 @@ class _MyAppState extends State<MyApp> {
     ));
     seasons.add(Season(title: '1 Season', movies: movies1));
     seasons.add(Season(title: '2 Season', movies: movies1));
-    List<TvProgram> tvPrograms = [];
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
-    tvPrograms.add(TvProgram(programTitle: 'Program1', scheduledTime: '16:52'));
     List<ProgramsInfo> programsInfoList = [];
-    programsInfoList
-        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
-    programsInfoList.add(ProgramsInfo(day: 'Today', tvPrograms: tvPrograms));
-    programsInfoList.add(ProgramsInfo(day: 'Tomorrow', tvPrograms: tvPrograms));
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
             initialResolution: {
               'Auto':
-                  'https://st1.uzdigital.tv/Discovery_Channel/video.m3u8?token=cdb9ce039992b0a00c1976a82f3e6b422c31257e-6a736b52496173564f7348487167535a-1663160536-1663149736&remote=89.236.205.221'
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
             },
             resolutions: {
               'Auto':
-                  'https://st1.uzdigital.tv/Discovery_Channel/video.m3u8?token=cdb9ce039992b0a00c1976a82f3e6b422c31257e-6a736b52496173564f7348487167535a-1663160536-1663149736&remote=89.236.205.221',
-              '576p':
-                  'http://st1.uzdigital.tv/Discovery_Channel/tracks-v1a1a2/mono.m3u8?token=cdb9ce039992b0a00c1976a82f3e6b422c31257e-6a736b52496173564f7348487167535a-1663160536-1663149736&remote=89.236.205.221',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+              '1080p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+              '720p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
               '480p':
-                  'http://st1.uzdigital.tv/Discovery_Channel/tracks-v2a1a2/mono.m3u8?token=cdb9ce039992b0a00c1976a82f3e6b422c31257e-6a736b52496173564f7348487167535a-1663160536-1663149736&remote=89.236.205.221',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
               '360p':
-                  'http://st1.uzdigital.tv/Discovery_Channel/tracks-v3a1a2/mono.m3u8?token=cdb9ce039992b0a00c1976a82f3e6b422c31257e-6a736b52496173564f7348487167535a-1663160536-1663149736&remote=89.236.205.221',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+              '240p':
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
             },
             qualityText: 'Quality',
             speedText: 'Speed',
             lastPosition: 1000,
             title: 'Женщина-Халк: Адвокат',
-            isSerial: false,
+            isSerial: true,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
-            seasons: [],
-            isLive: true,
+            seasons: seasons,
+            isLive: false,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
           )) ??
