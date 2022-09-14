@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class ProgramsInfo(
-    @SerializedName("title")
-    val title: String,
-    @SerializedName("movies")
-    val movies: List<TvProgram>,
+    @SerializedName("day")
+    val day: String,
+    @SerializedName("tvPrograms")
+    val tvPrograms: List<TvProgram>,
 ) : Serializable

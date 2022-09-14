@@ -29,10 +29,8 @@
         app:tabIndicatorColor="@color/blue"
         app:tabMode="scrollable"
         app:tabSelectedTextColor="@color/blue"
-        app:tabTextAppearance="@style/MineCustomTabText"
-        app:tabTextColor="@color/grey10">
-
-    </com.google.android.material.tabs.TabLayout>
+        app:tabTextAppearance="@style/EpisodeTabText"
+        app:tabTextColor="@color/grey10"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/episode_view_pager"

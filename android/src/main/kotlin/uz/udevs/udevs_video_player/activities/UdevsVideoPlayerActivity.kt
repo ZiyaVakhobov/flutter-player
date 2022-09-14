@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -20,6 +21,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -27,8 +29,8 @@ import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
+import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
-
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
@@ -62,6 +64,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         playerView = findViewById(R.id.exo_player_view)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
+        println("playerConfiguration: ${playerConfiguration.toString()}")
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -168,7 +171,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                 }
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if(isPlaying) {
+                    if (isPlaying) {
                         playPause?.setImageResource(R.drawable.ic_pause)
                     } else {
                         playPause?.setImageResource(R.drawable.ic_play)
@@ -214,6 +217,9 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             R.id.button_episodes -> {
                 showEpisodesBottomSheet()
             }
+            R.id.button_tv_programs -> {
+                showTvProgramsBottomSheet()
+            }
         }
     }
 
@@ -247,6 +253,27 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
             WindowInsetsCompat.Type.systemBars()
         )
+    }
+
+    private fun showTvProgramsBottomSheet() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        bottomSheetDialog.setContentView(R.layout.tv_programs_sheet)
+
+        val backButtonBottomSheet = bottomSheetDialog.findViewById<ImageView>(R.id.tv_program_sheet_back)
+        backButtonBottomSheet?.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+        val titleBottomSheet = bottomSheetDialog.findViewById<TextView>(R.id.tv_program_sheet_title)
+        titleBottomSheet?.text = title?.text
+        val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_programs_tabs)
+        val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_programs_view_pager)
+        viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration!!.programsInfoList)
+        TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
+            tab.text = playerConfiguration!!.programsInfoList[position].day
+        }.attach()
+        bottomSheetDialog.show()
     }
 
     private fun showEpisodesBottomSheet() {

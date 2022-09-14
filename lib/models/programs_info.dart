@@ -1,4 +1,3 @@
-import 'package:udevs_video_player/models/movie.dart';
 import 'package:udevs_video_player/models/tv_program.dart';
 
 class ProgramsInfo {
