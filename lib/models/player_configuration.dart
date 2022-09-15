@@ -18,7 +18,8 @@ class PlayerConfiguration {
   String tvProgramsText;
   List<ProgramsInfo> programsInfoList;
   bool showController;
-  Map<bool, String> playVideoAsset;
+  bool playVideoFromAsset;
+  String assetPath;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
@@ -36,7 +37,8 @@ class PlayerConfiguration {
     map['tvProgramsText'] = tvProgramsText;
     map['programsInfoList'] = programsInfoList.map((v) => v.toJson()).toList();
     map['showController'] = showController;
-    map['playVideoAsset'] = playVideoAsset;
+    map['playVideoFromAsset'] = playVideoFromAsset;
+    map['assetPath'] = assetPath;
     return map;
   }
 
@@ -55,6 +57,7 @@ class PlayerConfiguration {
     required this.tvProgramsText,
     required this.programsInfoList,
     required this.showController,
-    required this.playVideoAsset,
+    required this.playVideoFromAsset,
+    required this.assetPath,
   });
 }

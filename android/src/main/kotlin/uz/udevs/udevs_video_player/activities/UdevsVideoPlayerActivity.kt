@@ -51,6 +51,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var rewind: ImageView? = null
     private var forward: ImageView? = null
     private var playPause: ImageView? = null
+    private var progressbar: ProgressBar? = null
     private var timer: LinearLayout? = null
     private var live: LinearLayout? = null
     private var episodesButton: LinearLayout? = null
@@ -81,6 +82,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         rewind = findViewById(R.id.video_rewind)
         forward = findViewById(R.id.video_forward)
         playPause = findViewById(R.id.video_play_pause)
+        progressbar = findViewById(R.id.video_progress_bar)
         timer = findViewById(R.id.timer)
         if (playerConfiguration?.isLive == true) {
             timer?.visibility = View.GONE
@@ -130,7 +132,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         zoom?.setOnClickListener(this)
         orientation?.setOnClickListener(this)
 
-        if (playerConfiguration?.playVideoAsset?.keys?.first() == true) {
+        if (playerConfiguration?.playVideoFromAsset == true) {
             playFromAsset()
         } else {
             playVideo()
@@ -170,13 +172,14 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
     private fun playFromAsset() {
         val uri =
-            Uri.parse("asset:///flutter_assets/${playerConfiguration!!.playVideoAsset.values.first()}")
+            Uri.parse("asset:///flutter_assets/${playerConfiguration!!.assetPath}")
         val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
         val mediaSource: MediaSource = buildMediaSource(uri, dataSourceFactory)
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
         playerView?.useController = false
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
         player?.setMediaSource(mediaSource)
         player?.prepare()
         player?.playWhenReady = true
@@ -211,6 +214,23 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                         playPause?.setImageResource(R.drawable.ic_pause)
                     } else {
                         playPause?.setImageResource(R.drawable.ic_play)
+                    }
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    when (playbackState) {
+                        Player.STATE_BUFFERING -> {
+                            playPause?.visibility = View.GONE
+                            progressbar?.visibility = View.VISIBLE
+                        }
+                        Player.STATE_READY -> {
+                            playPause?.visibility = View.VISIBLE
+                            progressbar?.visibility = View.GONE
+                        }
+                        Player.STATE_ENDED -> {
+                            playPause?.setImageResource(R.drawable.ic_play)
+                        }
+                        Player.STATE_IDLE -> {}
                     }
                 }
             })

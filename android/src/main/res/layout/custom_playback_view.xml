@@ -77,7 +77,13 @@
                 android:id="@+id/video_play_pause"
                 android:layout_width="65dp"
                 android:layout_height="65dp"
-                android:src="@drawable/ic_pause" />
+                android:src="@drawable/ic_pause"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/video_progress_bar"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
 
         </LinearLayout>
 

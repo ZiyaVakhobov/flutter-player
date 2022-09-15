@@ -45,7 +45,8 @@ void main() {
               tvProgramsText: '',
               programsInfoList: [],
               showController: false,
-              playVideoAsset: {},
+              playVideoFromAsset: false,
+              assetPath: '',
             )),
         '42');
   });
