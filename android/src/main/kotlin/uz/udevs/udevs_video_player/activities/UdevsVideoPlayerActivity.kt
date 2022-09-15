@@ -84,7 +84,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         }
         episodesButton = findViewById(R.id.button_episodes)
         episodesText = findViewById(R.id.text_episodes)
-        if (playerConfiguration?.isSerial == true) {
+        if (playerConfiguration?.seasons?.isNotEmpty() == true) {
             episodesButton?.visibility = View.VISIBLE
             episodesText?.text = playerConfiguration?.episodeButtonText
         }
