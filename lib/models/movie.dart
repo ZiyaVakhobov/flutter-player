@@ -16,6 +16,11 @@ class Movie {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'Movie{title: $title, description: $description, image: $image, duration: $duration, resolutions: $resolutions}';
+  }
+
   Movie({
     required this.title,
     required this.description,

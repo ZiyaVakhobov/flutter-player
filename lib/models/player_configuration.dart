@@ -42,6 +42,11 @@ class PlayerConfiguration {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'PlayerConfiguration{initialResolution: $initialResolution, resolutions: $resolutions, qualityText: $qualityText, speedText: $speedText, lastPosition: $lastPosition, title: $title, isSerial: $isSerial, episodeButtonText: $episodeButtonText, nextButtonText: $nextButtonText, seasons: $seasons, isLive: $isLive, tvProgramsText: $tvProgramsText, programsInfoList: $programsInfoList, showController: $showController, playVideoFromAsset: $playVideoFromAsset, assetPath: $assetPath}';
+  }
+
   PlayerConfiguration({
     required this.initialResolution,
     required this.resolutions,

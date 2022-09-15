@@ -11,6 +11,11 @@ class Season {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'Season{title: $title, movies: $movies}';
+  }
+
   Season({
     required this.title,
     required this.movies,

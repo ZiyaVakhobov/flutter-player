@@ -11,6 +11,11 @@ class ProgramsInfo {
     return map;
   }
 
+  @override
+  String toString() {
+    return 'ProgramsInfo{day: $day, tvPrograms: $tvPrograms}';
+  }
+
   ProgramsInfo({
     required this.day,
     required this.tvPrograms,

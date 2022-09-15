@@ -411,10 +411,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             tab.text = playerConfiguration!!.seasons[position].title
         }.attach()
         bottomSheetDialog.show()
-        player?.pause()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
-            player?.play()
         }
     }
 
@@ -457,10 +455,8 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
-        player?.pause()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
-            player?.play()
         }
     }
 
