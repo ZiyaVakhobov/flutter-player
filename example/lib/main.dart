@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
-import 'package:udevs_video_player/models/movie.dart';
-import 'package:udevs_video_player/models/player_configuration.dart';
-import 'package:udevs_video_player/models/programs_info.dart';
-import 'package:udevs_video_player/models/season.dart';
-import 'package:udevs_video_player/models/tv_program.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 
 void main() {
@@ -170,6 +165,7 @@ class _MyAppState extends State<MyApp> {
             isLive: false,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
+            showController: false,
           )) ??
           'nothing';
       print('result: $s');

@@ -44,6 +44,7 @@ void main() {
               isLive: null,
               tvProgramsText: null,
               programsInfoList: null,
+              showController: null,
             )),
         '42');
   });

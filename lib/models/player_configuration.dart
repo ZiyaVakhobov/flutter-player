@@ -17,6 +17,7 @@ class PlayerConfiguration {
   bool? isLive;
   String? tvProgramsText;
   List<ProgramsInfo>? programsInfoList;
+  bool? showController;
 
   PlayerConfiguration.fromJson(dynamic json) {
     initialResolution = json['initialResolution'];
@@ -42,6 +43,7 @@ class PlayerConfiguration {
         programsInfoList?.add(ProgramsInfo.fromJson(v));
       });
     }
+    showController = json['showController'];
   }
 
   Map<String, dynamic> toJson() {
@@ -63,6 +65,7 @@ class PlayerConfiguration {
     if (programsInfoList != null) {
       map['programsInfoList'] = programsInfoList?.map((v) => v.toJson()).toList();
     }
+    map['showController'] = showController;
     return map;
   }
 
@@ -80,5 +83,6 @@ class PlayerConfiguration {
     required this.isLive,
     required this.tvProgramsText,
     required this.programsInfoList,
+    required this.showController,
   });
 }

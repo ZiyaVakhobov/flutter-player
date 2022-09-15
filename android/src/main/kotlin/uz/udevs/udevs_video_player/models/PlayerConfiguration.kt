@@ -30,4 +30,6 @@ data class PlayerConfiguration(
     val tvProgramsText: String,
     @SerializedName("programsInfoList")
     val programsInfoList: List<ProgramsInfo>,
-) : Serializable
+    @SerializedName("showController")
+    val showController: Boolean,
+    ) : Serializable

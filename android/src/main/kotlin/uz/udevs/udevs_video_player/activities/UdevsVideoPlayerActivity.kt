@@ -2,6 +2,7 @@ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -26,6 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
+import uz.udevs.udevs_video_player.PLAYER_ACTIVITY_FINISH
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
@@ -60,7 +62,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.player)
+        setContentView(R.layout.player_activity)
         actionBar?.hide()
         playerView = findViewById(R.id.exo_player_view)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
@@ -127,10 +129,18 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         if (player?.isPlaying == true) {
             player?.stop()
         }
+        var seconds = 0L
+        if(player?.currentPosition != null) {
+            seconds = player?.currentPosition!! / 1000
+        }
+        val intent = Intent()
+        intent.putExtra("position", seconds.toString())
+        setResult(PLAYER_ACTIVITY_FINISH, intent)
+        finish()
+        super.onBackPressed()
     }
 
     override fun onPause() {
@@ -155,19 +165,14 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
+        playerView?.useController = playerConfiguration!!.showController
         player?.setMediaSource(hlsMediaSource)
-        player?.seekTo(playerConfiguration!!.lastPosition)
+        player?.seekTo(playerConfiguration!!.lastPosition * 1000)
         player?.prepare()
         player?.addListener(
             object : Player.Listener {
                 override fun onPlayerError(error: PlaybackException) {
                     println(error.errorCode)
-                }
-
-                override fun onTimelineChanged(
-                    timeline: Timeline, reason: @Player.TimelineChangeReason Int
-                ) {
-
                 }
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -187,6 +192,13 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                 if (player?.isPlaying == true) {
                     player?.stop()
                 }
+                var seconds = 0L
+                if(player?.currentPosition != null) {
+                    seconds = player?.currentPosition!! / 1000
+                }
+                val intent = Intent()
+                intent.putExtra("position", seconds.toString())
+                setResult(PLAYER_ACTIVITY_FINISH, intent)
                 finish()
             }
             R.id.video_rewind -> {

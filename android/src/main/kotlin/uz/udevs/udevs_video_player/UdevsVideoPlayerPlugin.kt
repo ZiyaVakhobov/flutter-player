@@ -13,16 +13,18 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import org.json.JSONObject
 import uz.udevs.udevs_video_player.activities.UdevsVideoPlayerActivity
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 
 const val EXTRA_ARGUMENT = "uz.udevs.udevs_video_player.ARGUMENT"
+const val PLAYER_ACTIVITY = 111
+const val PLAYER_ACTIVITY_FINISH = 222
 
 class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-    PluginRegistry.NewIntentListener {
+    PluginRegistry.NewIntentListener, PluginRegistry.ActivityResultListener {
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
+    private var resultMethod: Result? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
@@ -37,7 +39,8 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val playerConfiguration = gson.fromJson(playerConfigJsonString, PlayerConfiguration::class.java)
                 val intent = Intent(activity?.applicationContext, UdevsVideoPlayerActivity::class.java)
                 intent.putExtra(EXTRA_ARGUMENT, playerConfiguration)
-                activity?.startActivity(intent)
+                activity?.startActivityForResult(intent, PLAYER_ACTIVITY)
+                resultMethod = result
             }
         } else {
             result.notImplemented()
@@ -51,6 +54,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity as FlutterActivity
         binding.addOnNewIntentListener(this)
+        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -66,6 +70,13 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
+        return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if(requestCode == PLAYER_ACTIVITY && resultCode == PLAYER_ACTIVITY_FINISH) {
+            resultMethod?.success(data?.getStringExtra("position"))
+        }
         return true
     }
 }
