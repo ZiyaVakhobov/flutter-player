@@ -53,10 +53,8 @@ android {
 
     dependencies {
         implementation "androidx.media3:media3-exoplayer:$media3_version"
-        implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
         implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
         implementation "androidx.media3:media3-ui:$media3_version"
-        implementation "androidx.media3:media3-session:$media3_version"
 
         def multidex_version = "2.0.1"
         implementation "androidx.multidex:multidex:$multidex_version"

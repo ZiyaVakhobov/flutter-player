@@ -165,7 +165,7 @@ class _MyAppState extends State<MyApp> {
             isLive: false,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
-            showController: false,
+            showController: true,
           )) ??
           'nothing';
       print('result: $s');
