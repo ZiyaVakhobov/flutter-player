@@ -166,6 +166,7 @@ class _MyAppState extends State<MyApp> {
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
             showController: true,
+            playVideoAsset: {},
           )) ??
           'nothing';
       print('result: $s');

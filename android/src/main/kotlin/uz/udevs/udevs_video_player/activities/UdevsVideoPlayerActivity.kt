@@ -15,9 +15,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.*
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
@@ -34,6 +37,8 @@ import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
+import java.util.*
+
 
 class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
 
@@ -125,7 +130,11 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         zoom?.setOnClickListener(this)
         orientation?.setOnClickListener(this)
 
-        playVideo()
+        if (playerConfiguration?.playVideoAsset?.keys?.first() == true) {
+            playFromAsset()
+        } else {
+            playVideo()
+        }
     }
 
     override fun onBackPressed() {
@@ -133,7 +142,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             player?.stop()
         }
         var seconds = 0L
-        if(player?.currentPosition != null) {
+        if (player?.currentPosition != null) {
             seconds = player?.currentPosition!! / 1000
         }
         val intent = Intent()
@@ -156,6 +165,28 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     override fun onRestart() {
         super.onRestart()
         player?.playWhenReady = true
+    }
+
+
+    private fun playFromAsset() {
+        val uri =
+            Uri.parse("asset:///flutter_assets/${playerConfiguration!!.playVideoAsset.values.first()}")
+        val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
+        val mediaSource: MediaSource = buildMediaSource(uri, dataSourceFactory)
+        player = ExoPlayer.Builder(this).build()
+        playerView?.player = player
+        playerView?.keepScreenOn = true
+        playerView?.useController = false
+        player?.setMediaSource(mediaSource)
+        player?.prepare()
+        player?.playWhenReady = true
+    }
+
+    private fun buildMediaSource(
+        uri: Uri, mediaDataSourceFactory: DataSource.Factory
+    ): MediaSource {
+        return ProgressiveMediaSource.Factory(mediaDataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(uri))
     }
 
     private fun playVideo() {
@@ -193,7 +224,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
                     player?.stop()
                 }
                 var seconds = 0L
-                if(player?.currentPosition != null) {
+                if (player?.currentPosition != null) {
                     seconds = player?.currentPosition!! / 1000
                 }
                 val intent = Intent()

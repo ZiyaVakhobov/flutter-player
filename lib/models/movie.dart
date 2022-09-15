@@ -1,18 +1,10 @@
 
 class Movie {
-  String? title;
-  String? description;
-  String? image;
-  int? duration;
-  Map<String, String>? resolutions;
-
-  Movie.fromJson(dynamic json) {
-    title = json['title'];
-    description = json['description'];
-    image = json['image'];
-    duration = json['duration'];
-    resolutions = json['resolutions'];
-  }
+  String title;
+  String description;
+  String image;
+  int duration;
+  Map<String, String> resolutions;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};

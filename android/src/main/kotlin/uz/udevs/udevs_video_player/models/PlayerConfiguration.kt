@@ -32,4 +32,6 @@ data class PlayerConfiguration(
     val programsInfoList: List<ProgramsInfo>,
     @SerializedName("showController")
     val showController: Boolean,
+    @SerializedName("playVideoAsset")
+    val playVideoAsset: HashMap<Boolean, String>,
     ) : Serializable

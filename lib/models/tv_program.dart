@@ -1,11 +1,6 @@
 class TvProgram {
-  String? scheduledTime;
-  String? programTitle;
-
-  TvProgram.fromJson(dynamic json) {
-    scheduledTime = json['scheduledTime'];
-    programTitle = json['programTitle'];
-  }
+  String scheduledTime;
+  String programTitle;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
