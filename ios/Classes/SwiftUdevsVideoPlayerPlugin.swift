@@ -2,18 +2,15 @@ import Flutter
 import UIKit
 
 public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
-    
-   
+
     public static var viewController = FlutterViewController()
     var flutterResult: FlutterResult?
     
-   
-    
   public static func register(with registrar: FlutterPluginRegistrar) {
-      viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
-      let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
-    let instance = SwiftUdevsVideoPlayerPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+     viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
+     let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
+     let instance = SwiftUdevsVideoPlayerPlugin()
+     registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
