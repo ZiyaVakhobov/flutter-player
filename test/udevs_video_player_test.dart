@@ -47,6 +47,7 @@ void main() {
               showController: false,
               playVideoFromAsset: false,
               assetPath: '',
+              locale: "en"
             )),
         '42');
   });

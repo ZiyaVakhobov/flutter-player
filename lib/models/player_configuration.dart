@@ -7,8 +7,10 @@ class PlayerConfiguration {
   Map<String, String> initialResolution;
   Map<String, String> resolutions;
   String qualityText;
+  String locale;
   String speedText;
   int lastPosition;
+  int duration;
   String title;
   bool isSerial;
   String episodeButtonText;
@@ -29,6 +31,8 @@ class PlayerConfiguration {
     map['speedText'] = speedText;
     map['lastPosition'] = lastPosition;
     map['title'] = title;
+    map['locale'] = locale;
+    map['duration'] = duration;
     map['isSerial'] = isSerial;
     map['episodeButtonText'] = episodeButtonText;
     map['nextButtonText'] = nextButtonText;
@@ -64,5 +68,7 @@ class PlayerConfiguration {
     required this.showController,
     required this.playVideoFromAsset,
     required this.assetPath,
+    required this.locale,
+    required this.duration,
   });
 }
