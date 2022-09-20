@@ -2,18 +2,24 @@ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.*
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.media3.common.*
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -37,10 +43,10 @@ import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
-import java.util.*
+import kotlin.math.abs
 
-
-class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
+class UdevsVideoPlayerActivity : Activity(),
+    GestureDetector.OnGestureListener {
 
     private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
@@ -64,15 +70,35 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     private var orientation: ImageView? = null
     private var exoProgress: DefaultTimeBar? = null
     private var customSeekBar: SeekBar? = null
-    private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
+    private var customPlayback: RelativeLayout? = null
+    private var layoutBrightness: LinearLayout? = null
+    private var brightnessSeekbar: SeekBar? = null
+    private var volumeSeekBar: SeekBar? = null
+    private var layoutVolume: LinearLayout? = null
+    private var audioManager: AudioManager? = null
+    private var gestureDetector: GestureDetector? = null
+    private var brightness: Double = 0.0
+    private var maxBrightness: Double = 30.0
+    private var volume: Double = 0.0
+    private var maxVolume: Double = 0.0
+    private var sWidth: Int = 0
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
         actionBar?.hide()
-        playerView = findViewById(R.id.exo_player_view)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
+
+        playerView = findViewById(R.id.exo_player_view)
+        customPlayback = findViewById(R.id.custom_playback)
+        layoutBrightness = findViewById(R.id.layout_brightness)
+        brightnessSeekbar = findViewById(R.id.brightness_seek)
+        brightnessSeekbar?.isEnabled = false
+        layoutVolume = findViewById(R.id.layout_volume)
+        volumeSeekBar = findViewById(R.id.volume_seek)
+        volumeSeekBar?.isEnabled = false
 
         close = findViewById(R.id.video_close)
         more = findViewById(R.id.video_more)
@@ -121,16 +147,29 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
             customSeekBar?.visibility = View.VISIBLE
         }
 
-        close?.setOnClickListener(this)
-        more?.setOnClickListener(this)
-        rewind?.setOnClickListener(this)
-        forward?.setOnClickListener(this)
-        playPause?.setOnClickListener(this)
-        episodesButton?.setOnClickListener(this)
-        nextButton?.setOnClickListener(this)
-        tvProgramsButton?.setOnClickListener(this)
-        zoom?.setOnClickListener(this)
-        orientation?.setOnClickListener(this)
+        initializeClickListeners()
+
+        sWidth = Resources.getSystem().displayMetrics.widthPixels
+
+        gestureDetector = GestureDetector(this, this)
+        brightnessSeekbar?.max = 30
+        brightnessSeekbar?.progress = this.window.attributes.screenBrightness.toInt()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        maxVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
+        volume = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
+        volumeSeekBar?.max = maxVolume.toInt()
+        volumeSeekBar?.progress = volume.toInt()
+
+        findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
+            if (playerView?.isControllerFullyVisible == false) {
+                gestureDetector?.onTouchEvent(motionEvent)
+                if (motionEvent.action == MotionEvent.ACTION_UP) {
+                    layoutBrightness?.visibility = View.GONE
+                    layoutVolume?.visibility = View.GONE
+                }
+            }
+            return@setOnTouchListener true
+        }
 
         if (playerConfiguration?.playVideoFromAsset == true) {
             playFromAsset()
@@ -162,13 +201,13 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
         player?.playWhenReady = true
+        if (brightness != 0.0) setScreenBrightness(brightness.toInt())
     }
 
     override fun onRestart() {
         super.onRestart()
         player?.playWhenReady = true
     }
-
 
     private fun playFromAsset() {
         val uri =
@@ -237,58 +276,59 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         player?.playWhenReady = true
     }
 
-    override fun onClick(p0: View?) {
-        when (p0?.id) {
-            R.id.video_close -> {
-                if (player?.isPlaying == true) {
-                    player?.stop()
-                }
-                var seconds = 0L
-                if (player?.currentPosition != null) {
-                    seconds = player?.currentPosition!! / 1000
-                }
-                val intent = Intent()
-                intent.putExtra("position", seconds.toString())
-                setResult(PLAYER_ACTIVITY_FINISH, intent)
-                finish()
+    private fun initializeClickListeners() {
+        customPlayback?.setOnClickListener {
+            playerView?.hideController()
+        }
+        close?.setOnClickListener {
+            if (player?.isPlaying == true) {
+                player?.stop()
             }
-            R.id.video_rewind -> {
-                player?.seekTo(player!!.currentPosition - 10000)
+            var seconds = 0L
+            if (player?.currentPosition != null) {
+                seconds = player?.currentPosition!! / 1000
             }
-            R.id.video_forward -> {
-                player?.seekTo(player!!.currentPosition + 10000)
+            val intent = Intent()
+            intent.putExtra("position", seconds.toString())
+            setResult(PLAYER_ACTIVITY_FINISH, intent)
+            finish()
+        }
+        more?.setOnClickListener {
+            showSettingsBottomSheet()
+        }
+        rewind?.setOnClickListener {
+            player?.seekTo(player!!.currentPosition - 10000)
+        }
+        forward?.setOnClickListener {
+            player?.seekTo(player!!.currentPosition + 10000)
+        }
+        playPause?.setOnClickListener {
+            if (player?.isPlaying == true) {
+                player?.pause()
+            } else {
+                player?.play()
             }
-            R.id.video_play_pause -> {
-                if (player?.isPlaying == true) {
-                    player?.pause()
+        }
+        episodesButton?.setOnClickListener {
+            showEpisodesBottomSheet()
+        }
+        nextButton?.setOnClickListener {}
+        tvProgramsButton?.setOnClickListener {
+            showTvProgramsBottomSheet()
+        }
+        zoom?.setOnClickListener {}
+        orientation?.setOnClickListener {
+            requestedOrientation =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
-                    player?.play()
+                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
-            }
-            R.id.zoom -> {}
-            R.id.orientation -> {
-                requestedOrientation =
-                    if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    } else {
-                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    }
-            }
-            R.id.video_more -> {
-                showSettingsBottomSheet()
-            }
-            R.id.button_episodes -> {
-                showEpisodesBottomSheet()
-            }
-            R.id.button_tv_programs -> {
-                showTvProgramsBottomSheet()
-            }
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        currentOrientation = newConfig.orientation
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             zoom?.visibility = View.VISIBLE
@@ -377,7 +417,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.setContentView(R.layout.episodes)
         backButtonEpisodeBottomSheet =
             bottomSheetDialog.findViewById(R.id.episode_sheet_back)
-        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             backButtonEpisodeBottomSheet?.visibility = View.GONE
         } else {
             backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
@@ -430,7 +470,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
         backButtonSettingsBottomSheet = bottomSheetDialog.findViewById(R.id.settings_sheet_back)
-        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             backButtonSettingsBottomSheet?.visibility = View.GONE
         } else {
             backButtonSettingsBottomSheet?.visibility = View.VISIBLE
@@ -472,7 +512,7 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
         backButtonQualitySpeedBottomSheet =
             bottomSheetDialog.findViewById(R.id.quality_speed_sheet_back)
-        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             backButtonQualitySpeedBottomSheet?.visibility = View.GONE
         } else {
             backButtonQualitySpeedBottomSheet?.visibility = View.VISIBLE
@@ -515,5 +555,49 @@ class UdevsVideoPlayerActivity : Activity(), View.OnClickListener {
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.SETTINGS
         }
+    }
+
+    override fun onDown(p0: MotionEvent?): Boolean = false
+    override fun onShowPress(p0: MotionEvent?) = Unit
+    override fun onSingleTapUp(p0: MotionEvent?): Boolean {
+        playerView?.showController()
+        return false
+    }
+    override fun onLongPress(p0: MotionEvent?) = Unit
+    override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
+
+    override fun onScroll(
+        event: MotionEvent?,
+        event1: MotionEvent?,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        if (abs(distanceX) < abs(distanceY)) {
+            if (event!!.x < sWidth / 2) {
+                layoutBrightness?.visibility = View.VISIBLE
+                layoutVolume?.visibility = View.GONE
+                val increase = distanceY > 0
+                val newValue: Double = if (increase) brightness + 0.2 else brightness - 0.2
+                if (newValue in 0.0..maxBrightness) brightness = newValue
+                brightnessSeekbar?.progress = brightness.toInt()
+                setScreenBrightness(brightness.toInt())
+            } else {
+                layoutBrightness?.visibility = View.GONE
+                layoutVolume?.visibility = View.VISIBLE
+                val increase = distanceY > 0
+                val newValue = if (increase) volume + 0.2 else volume - 0.2
+                if (newValue in 0.0..maxVolume) volume = newValue
+                volumeSeekBar?.progress = volume.toInt()
+                audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, volume.toInt(), 0)
+            }
+        }
+        return true
+    }
+
+    private fun setScreenBrightness(value: Int) {
+        val d = 1.0f / 30
+        val lp = this.window.attributes
+        lp.screenBrightness = d * value
+        this.window.attributes = lp
     }
 }
