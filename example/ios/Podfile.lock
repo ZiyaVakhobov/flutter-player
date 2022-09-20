@@ -43,7 +43,7 @@ SPEC CHECKSUMS:
   SDWebImage: af5bbffef2cde09f148d826f9733dcde1a9414cd
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   TinyConstraints: 7b7ccc0c485bb3bb47082138ff28bc33cd49897f
-  udevs_video_player: 73f994bb6c96b45314f2a6745e3adc79ee673c86
+  udevs_video_player: a8ff8e748408582e918c82ad15c1dcc594b8c089
   XLActionController: 24140d835ab9e260270711afebc5efabebe9d392
 
 PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d

@@ -20,6 +20,7 @@ A new Flutter plugin project.
   s.dependency 'XLActionController'
   s.dependency 'SnapKit', '~> 4.0'
   s.dependency 'SDWebImage', '~> 5.0'
+  s.resources = 'Assets/*.png'
 
   s.platform = :ios, '11.0'
   # Flutter.framework does not contain a i386 slice.

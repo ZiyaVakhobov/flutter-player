@@ -62,4 +62,5 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         print("Duration: \(duration)")
     }
     
+    
 }

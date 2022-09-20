@@ -187,7 +187,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private var blockBottomView: UIView = {
         let view = UIView()
-//                view.backgroundColor = .darkGray
         return view
     }()
     
@@ -206,8 +205,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     //MARK: - BottomActionsStackView
     private lazy var bottomActionsStackView: UIStackView = {
         let spacer = UIView()
-//        let stackView = UIStackView(arrangedSubviews: [settingsButton,blockButton,episodesButton,nextEpisodeButton])
-//        let stackView = UIStackView(arrangedSubviews: [episodesButton,nextEpisodeButton])
         let stackView = UIStackView(arrangedSubviews: [episodesButton])
         stackView.axis = .horizontal
         stackView.backgroundColor = .clear
@@ -224,7 +221,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }()
     //MARK: - *************Time Stack View ***************
     private lazy var timeStackView: UIStackView = {
-//        let stackView = UIStackView(arrangedSubviews: [timeSlider,leftTimeLabel])
         let stackView = UIStackView(arrangedSubviews: [timeSlider])
         stackView.axis = .horizontal
         stackView.spacing = 12
@@ -240,35 +236,23 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
         return slider
     }()
+    
     private var exitButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "exitIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
-        button.size(CGSize(width: 50, height: 50))
+        button.size(CGSize(width: 32, height: 32))
         button.backgroundColor = .clear
         button.imageView?.contentMode = .scaleAspectFit
-//        button.imageEdgeInsets = UIEdgeInsets(top: Constants.topButtonInset, left: Constants.topButtonInset, bottom: Constants.topButtonInset, right: Constants.topButtonInset)
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
-//    private var maximizeButton: UIButton = {
-//        let button = UIButton()
-//        button.setImage(UIImage(named: "zoomIcon"), for: .normal)
-//        button.tintColor = .white
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
-//        button.imageView?.contentMode = .center
-//        button.imageEdgeInsets = UIEdgeInsets(top: 32, left: 32, bottom: 32, right: 32)
-//        button.addTarget(self, action: #selector(maxButtonPressed(_:)), for: .touchUpInside)
-//        return button
-//    }()
-    
     private var playButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "playIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 5
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.imageView?.contentMode = .scaleAspectFit
         button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
         button.size(CGSize(width: 48, height: 48))
@@ -278,39 +262,31 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private var skipForwardButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "skpForwardIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_skip_forward",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 3
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
+
         button.imageView?.contentMode = .scaleAspectFit
         button.size(CGSize(width: 48, height: 48))
-//        button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
         button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
-//    private var skipLabel: UILabel = {
-//        let label = UILabel()
-//        label.textColor = .white
-//        label.text = "+10"
-//        label.font = UIFont.systemFont(ofSize: 15)
-//        return label
-//    }()
     
     private var skipBackwardButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "skipBackwardIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_replay",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 3
         button.size(CGSize(width: 48, height: 48))
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
+
         button.imageView?.contentMode = .scaleAspectFit
-//        button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
-//
+
     private  var unblockButton: UIButton = {
         let button = UIButton()
+        button.setTitle("blockIcon", for: .normal)
         button.setImage(UIImage(named: "blockIcon"), for: .normal)
         button.tintColor = UIColor(named: "baseTextColor")
         button.backgroundColor = .white
@@ -323,7 +299,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private  var unblockButtonWithInfo: UIButton = {
         let button = UIButton()
-       
+        button.setTitle("blocIcon1", for: .normal)
         button.setImage(UIImage(named: "blockIcon"), for: .normal)
         button.tintColor = UIColor(named: "baseTextColor")
         button.titleLabel?.backgroundColor = .clear
@@ -360,7 +336,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private  var settingsButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "more"), for: .normal)
-//        button.setTitle("Настройки", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -391,7 +366,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
        var qualitySelectionButton: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "qualityIcon"), for: .normal)
         button.setTitle("Качество", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -408,7 +382,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private  var speedButton: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "speedIcon"), for: .normal)
         button.setTitle("Скорость (1х)", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -424,7 +397,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private  var blockButton: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "ic_lock"), for: .normal)
         button.setTitle("Блокировка", for: .normal)
         button.layer.zPosition = 3
@@ -440,7 +412,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private var activityIndicatorView: NVActivityIndicatorView = {
         let activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: .white)
-        //        activityView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         return activityView
     }()
     
@@ -472,6 +443,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             result(nil)
             break
         case "closePlayer":
+            result(nil);
             self.dismiss(animated: true, completion: nil)
             break
         default:
@@ -498,9 +470,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         videoView.layer.addSublayer(playerLayer)
         selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
         selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-//        if let startDuration = startAt {
-//            player.seek(to: CMTimeMake(value: startDuration, timescale: 1))
-//        }
         if let titleText = title {
             if(UIDevice.current.orientation.isLandscape){
                 titleLabel.text = titleText
@@ -535,7 +504,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             qualityText = "Avto"
         }
         let resList = resolutions ?? ["480p":urlString!]
-        var listOfQuality = [String]()
         sortedResolutions = Array(resList.keys).sorted().reversed()
         Array(resList.keys).sorted().reversed().forEach { quality in
             if quality == "1080p"{
@@ -544,7 +512,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             }
         }
         debugPrint("Resolution \(String(describing: resolutions))");
-        videoPlayerChannel = FlutterMethodChannel(name: "uz.sharqtv/video_player_channel", binaryMessenger: binaryMessenger!)
+        videoPlayerChannel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: binaryMessenger!)
         self.videoPlayerChannel?.setMethodCallHandler(handle)
 
         view.backgroundColor = UIColor(named: "moreColor")
@@ -584,7 +552,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         super.viewDidLayoutSubviews()
         playerLayer.frame = videoView.bounds
         setNeedsUpdateOfHomeIndicatorAutoHidden()
-
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -768,19 +735,16 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         if(isSerial) {
         bottomActionsStackView.snp.makeConstraints { make in
             make.right.equalToSuperview().offset(-10)
-//            make.bottom.equalTo(timeStackView).offset(bottomPad - 30)
         }
         }else {
             bottomActionsStackView.snp.makeConstraints { make in
                 make.left.equalToSuperview().offset(80)
                 make.right.equalToSuperview().offset(-80)
-//                make.bottom.equalTo(bottomView).offset(-16)
             }
         }
         currentTimeLabel.snp.makeConstraints { make in
             make.left.equalTo(bottomView).offset(16)
         }
-//        currentTimeLabel.left(to: bottomView)
         currentTimeLabel.bottomToTop(of: timeSlider, offset: bottomPad)
         seperatorLabel.leftToRight(of: currentTimeLabel)
         seperatorLabel.centerY(to: currentTimeLabel)
@@ -790,15 +754,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         landscapeButton.snp.makeConstraints { make in
             make.right.equalTo(bottomView).offset(-16)
         }
-//        maximizeButton.width(Constants.maxButtonSize)
-//        maximizeButton.height(Constants.maxButtonSize)
-//        maximizeButton.right(to: bottomView)
-//        maximizeButton.bottomToTop(of: timeSlider, offset: bottomPad)
-//        maximizeButton.layer.cornerRadius = Constants.maxButtonSize/2
-//
-//        bottomActionsStackView.leading(to: bottomView)
-//        bottomActionsStackView.trailing(to: bottomView)
-//        bottomActionsStackView.bottom(to: bottomView, offset: -16)
         speedButton.width(150)
         speedButton.height(Constants.bottomViewButtonSize)
         speedButton.layer.cornerRadius = 8
@@ -846,11 +801,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
         
-//        exitButton.width(Constants.topButtonSize)
-//        exitButton.height(Constants.topButtonSize)
-//        exitButton.right(to: topView)
-//        exitButton.centerY(to: topView)
-//        exitButton.layer.cornerRadius = Constants.topButtonSize / 2
     }
     
     func addVideosLandscapeConstraints() {
@@ -905,7 +855,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self.player.rate = Float(self.playerRate)
             resetTimer()
         } else {
-            playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+            playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             player.pause()
             timer?.invalidate()
             showControls()
@@ -913,11 +863,10 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }
     
     @objc func exitButtonPressed(_ sender: UIButton){
-        self.dismiss(animated: true, completion: nil)
+        self.dismiss(animated: true, completion: nil);
     }
     
     @objc func changeOrientation(_ sender: UIButton){
-        print("Heello world")
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
         landscapeButton.setImage(UIImage(named: "horizontal"), for: .normal)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
