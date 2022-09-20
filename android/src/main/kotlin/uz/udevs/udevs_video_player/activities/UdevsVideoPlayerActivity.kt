@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.*
 import androidx.core.view.WindowCompat
@@ -45,8 +46,8 @@ import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import kotlin.math.abs
 
-class UdevsVideoPlayerActivity : Activity(),
-    GestureDetector.OnGestureListener {
+class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
+    ScaleGestureDetector.OnScaleGestureListener {
 
     private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
@@ -77,8 +78,9 @@ class UdevsVideoPlayerActivity : Activity(),
     private var layoutVolume: LinearLayout? = null
     private var audioManager: AudioManager? = null
     private var gestureDetector: GestureDetector? = null
-    private var brightness: Double = 0.0
-    private var maxBrightness: Double = 30.0
+    private var scaleGestureDetector: ScaleGestureDetector? = null
+    private var brightness: Double = 15.0
+    private var maxBrightness: Double = 31.0
     private var volume: Double = 0.0
     private var maxVolume: Double = 0.0
     private var sWidth: Int = 0
@@ -158,16 +160,20 @@ class UdevsVideoPlayerActivity : Activity(),
         sWidth = Resources.getSystem().displayMetrics.widthPixels
 
         gestureDetector = GestureDetector(this, this)
+        scaleGestureDetector = ScaleGestureDetector(this, this)
         brightnessSeekbar?.max = 30
-        brightnessSeekbar?.progress = this.window.attributes.screenBrightness.toInt()
+        brightnessSeekbar?.progress = 15
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         maxVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
         volume = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
         volumeSeekBar?.max = maxVolume.toInt()
+        maxVolume += 1.0
         volumeSeekBar?.progress = volume.toInt()
 
         findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
-            if (playerView?.isControllerFullyVisible == false) {
+            if (motionEvent.pointerCount == 2) {
+                scaleGestureDetector?.onTouchEvent(motionEvent)
+            } else if (playerView?.isControllerFullyVisible == false && motionEvent.pointerCount == 1) {
                 gestureDetector?.onTouchEvent(motionEvent)
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
                     layoutBrightness?.visibility = View.GONE
@@ -224,7 +230,7 @@ class UdevsVideoPlayerActivity : Activity(),
         playerView?.player = player
         playerView?.keepScreenOn = true
         playerView?.useController = false
-        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         player?.setMediaSource(mediaSource)
         player?.prepare()
         player?.playWhenReady = true
@@ -347,9 +353,9 @@ class UdevsVideoPlayerActivity : Activity(),
             showTvProgramsBottomSheet()
         }
         zoom?.setOnClickListener {
-            if (playerView?.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FILL)
+            if (playerView?.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
                 playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            else playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            else playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         }
         orientation?.setOnClickListener {
             requestedOrientation =
@@ -367,7 +373,7 @@ class UdevsVideoPlayerActivity : Activity(),
             setFullScreen()
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             when (currentBottomSheet) {
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
@@ -609,6 +615,7 @@ class UdevsVideoPlayerActivity : Activity(),
         playerView?.showController()
         return false
     }
+
     override fun onLongPress(p0: MotionEvent?) = Unit
     override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
 
@@ -645,5 +652,23 @@ class UdevsVideoPlayerActivity : Activity(),
         val lp = this.window.attributes
         lp.screenBrightness = d * value
         this.window.attributes = lp
+    }
+
+    private var scaleFactor: Float = 0f
+    override fun onScale(detector: ScaleGestureDetector?): Boolean {
+        scaleFactor = detector?.scaleFactor!!
+        return true
+    }
+
+    override fun onScaleBegin(p0: ScaleGestureDetector?): Boolean {
+        return true
+    }
+
+    override fun onScaleEnd(p0: ScaleGestureDetector?) {
+        if (scaleFactor > 1) {
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        } else {
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
     }
 }
