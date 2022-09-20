@@ -36,4 +36,8 @@ data class PlayerConfiguration(
     val playVideoFromAsset: Boolean,
     @SerializedName("assetPath")
     val assetPath: String,
+    @SerializedName("seasonIndex")
+    val seasonIndex: Int,
+    @SerializedName("episodeIndex")
+    val episodeIndex: Int,
 ) : Serializable

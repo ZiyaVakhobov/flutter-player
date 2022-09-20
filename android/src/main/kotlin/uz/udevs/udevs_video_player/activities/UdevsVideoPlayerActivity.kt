@@ -82,6 +82,8 @@ class UdevsVideoPlayerActivity : Activity(),
     private var volume: Double = 0.0
     private var maxVolume: Double = 0.0
     private var sWidth: Int = 0
+    private var seasonIndex: Int = 0
+    private var episodeIndex: Int = 0
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +91,8 @@ class UdevsVideoPlayerActivity : Activity(),
         setContentView(R.layout.player_activity)
         actionBar?.hide()
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
+        seasonIndex = playerConfiguration!!.seasonIndex
+        episodeIndex = playerConfiguration!!.episodeIndex
         currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
 
         playerView = findViewById(R.id.exo_player_view)
@@ -125,7 +129,9 @@ class UdevsVideoPlayerActivity : Activity(),
         }
         nextButton = findViewById(R.id.button_next)
         nextText = findViewById(R.id.text_next)
-        if (playerConfiguration?.isSerial == true) {
+        if (playerConfiguration?.isSerial == true && !(seasonIndex == playerConfiguration!!.seasons.size - 1 &&
+                    episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1)
+        ) {
             nextButton?.visibility = View.VISIBLE
             nextText?.text = playerConfiguration?.nextButtonText
         }
@@ -276,6 +282,7 @@ class UdevsVideoPlayerActivity : Activity(),
         player?.playWhenReady = true
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initializeClickListeners() {
         customPlayback?.setOnClickListener {
             playerView?.hideController()
@@ -312,11 +319,38 @@ class UdevsVideoPlayerActivity : Activity(),
         episodesButton?.setOnClickListener {
             showEpisodesBottomSheet()
         }
-        nextButton?.setOnClickListener {}
+        nextButton?.setOnClickListener {
+            if (seasonIndex < playerConfiguration!!.seasons.size) {
+                if (episodeIndex < playerConfiguration!!.seasons[seasonIndex].movies.size - 1) {
+                    episodeIndex++
+                } else {
+                    seasonIndex++
+                }
+            }
+            if (seasonIndex == playerConfiguration!!.seasons.size - 1 &&
+                episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1
+            ) {
+                nextButton?.visibility = View.GONE
+            }
+            title?.text =
+                "S${seasonIndex + 1} E${episodeIndex + 1} " +
+                        playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title
+            val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+            val hlsMediaSource: HlsMediaSource =
+                HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+            player?.setMediaSource(hlsMediaSource)
+            player?.prepare()
+            player?.playWhenReady
+        }
         tvProgramsButton?.setOnClickListener {
             showTvProgramsBottomSheet()
         }
-        zoom?.setOnClickListener {}
+        zoom?.setOnClickListener {
+            if (playerView?.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FILL)
+                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            else playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        }
         orientation?.setOnClickListener {
             requestedOrientation =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -434,13 +468,25 @@ class UdevsVideoPlayerActivity : Activity(),
             playerConfiguration!!.seasons,
             object : EpisodePagerAdapter.OnClickListener {
                 @SuppressLint("SetTextI18n")
-                override fun onClick(episodeIndex: Int, seasonIndex: Int) {
+                override fun onClick(epIndex: Int, seasIndex: Int) {
+                    seasonIndex = seasIndex
+                    episodeIndex = epIndex
                     title?.text =
-                        "S${seasonIndex + 1} E${episodeIndex + 1} ${playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title}"
+                        "S${seasonIndex + 1} E${episodeIndex + 1} " +
+                                playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource =
                         HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                            .createMediaSource(
+                                MediaItem.fromUri(
+                                    Uri.parse(
+                                        playerConfiguration!!
+                                            .seasons[seasonIndex]
+                                            .movies[episodeIndex]
+                                            .resolutions[currentQuality]
+                                    )
+                                )
+                            )
                     player?.setMediaSource(hlsMediaSource)
                     player?.prepare()
                     player?.playWhenReady

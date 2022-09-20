@@ -49,6 +49,6 @@ class EpisodePagerAdapter(
     }
 
     interface OnClickListener {
-        fun onClick(episodeIndex: Int, seasonIndex: Int)
+        fun onClick(epIndex: Int, seasIndex: Int)
     }
 }

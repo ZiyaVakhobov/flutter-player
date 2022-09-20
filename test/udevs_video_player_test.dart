@@ -47,6 +47,8 @@ void main() {
               showController: false,
               playVideoFromAsset: false,
               assetPath: '',
+              seasonIndex: 0,
+              episodeIndex: 0,
             )),
         '42');
   });
