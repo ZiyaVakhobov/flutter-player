@@ -532,6 +532,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         }
         val quality = bottomSheetDialog.findViewById<LinearLayout>(R.id.quality)
         val speed = bottomSheetDialog.findViewById<LinearLayout>(R.id.speed)
+        bottomSheetDialog.findViewById<TextView>(R.id.quality_settings_text)?.text = playerConfiguration!!.qualityText
+        bottomSheetDialog.findViewById<TextView>(R.id.speed_settings_text)?.text = playerConfiguration!!.speedText
         qualityText = bottomSheetDialog.findViewById(R.id.quality_settings_value_text)
         speedText = bottomSheetDialog.findViewById(R.id.speed_settings_value_text)
         qualityText?.text = currentQuality
@@ -572,6 +574,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         backButtonQualitySpeedBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
+        bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text = playerConfiguration!!.qualityText
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         val adapter = QualitySpeedAdapter(
             initialValue,
