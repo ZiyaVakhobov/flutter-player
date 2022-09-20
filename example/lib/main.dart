@@ -157,6 +157,7 @@ class _MyAppState extends State<MyApp> {
             qualityText: 'Quality',
             speedText: 'Speed',
             lastPosition: 1000,
+            duration: 1669,
             title: 'Женщина-Халк: Адвокат',
             isSerial: true,
             episodeButtonText: 'Episodes',
@@ -168,6 +169,7 @@ class _MyAppState extends State<MyApp> {
             showController: true,
             playVideoFromAsset: false,
             assetPath: 'assets/splash.mp4',
+            locale: "en",
           )) ??
           'nothing';
       print('result: $s');
