@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,19 +15,18 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
 
   @override
   Future<String?> playVideo({
-    required PlayerConfiguration playerConfigJsonString,
-    required bool isIos,
+    required String playerConfigJsonString,
   }) async {
-    if (isIos) {
+    if (Platform.isIOS) {
       final res = await methodChannel
           .invokeMethod<String>('playVideo', <String, dynamic>{
-        'playerConfigJsonString': playerConfigJsonString.toJson(),
+        'playerConfigJsonString': jsonEncode(playerConfigJsonString),
       });
       return res;
     }
     final res =
         await methodChannel.invokeMethod<String>('playVideo', <String, dynamic>{
-      'playerConfigJsonString': jsonEncode(playerConfigJsonString),
+      'playerConfigJsonString': playerConfigJsonString,
     });
     return res;
   }
