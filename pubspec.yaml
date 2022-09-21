@@ -1,7 +1,7 @@
 name: udevs_video_player
 description: Play video natively and easily
 version: 0.0.1
-homepage:
+homepage: https://github.com/MobileUdevs/udevs_video_player.git
 
 environment:
   sdk: '>=2.17.6 <3.0.0'
@@ -24,4 +24,4 @@ flutter:
         package: uz.udevs.udevs_video_player
         pluginClass: UdevsVideoPlayerPlugin
       ios:
-        pluginClass: UdevsVideoPlayerPlugin
+        pluginClass: SwiftUdevsVideoPlayerPlugin
