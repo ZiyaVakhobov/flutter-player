@@ -17,10 +17,9 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     required String playerConfigJsonString,
   }) async {
     if (Platform.isIOS) {
-      print("MethodChannelUdevsVideoPlayer.playVideo() is called");
       final res = await methodChannel
           .invokeMethod<String>('playVideo', <String, dynamic>{
-        'playerConfigJsonString': jsonEncode(playerConfigJsonString),
+        'playerConfigJsonString': jsonDecode(playerConfigJsonString),
       });
       return res;
     }

@@ -159,11 +159,9 @@ packages:
   udevs_video_player:
     dependency: "direct main"
     description:
-      path: "."
-      ref: Sunnatillo
-      resolved-ref: cfdb5f93c1984b7a42298be060016c9a6ed224ad
-      url: "https://github.com/MobileUdevs/udevs_video_player.git"
-    source: git
+      path: ".."
+      relative: true
+    source: path
     version: "0.0.1"
   vector_math:
     dependency: transitive

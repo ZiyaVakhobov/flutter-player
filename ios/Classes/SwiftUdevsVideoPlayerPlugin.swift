@@ -9,7 +9,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
   public static func register(with registrar: FlutterPluginRegistrar) {
      viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
      let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
-     let instance = UdevsVideoPlayerPlugin()
+     let instance = SwiftUdevsVideoPlayerPlugin()
      registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
@@ -20,12 +20,12 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
          vc.dismiss(animated: true, completion: nil)
       }
       if(call.method == "playVideo"){
-         guard let args = call.arguments else {
+          guard let args = call.arguments else {
             return
          }
-         let a = (args as! [String:Any])["playerConfigJsonString"];
-         if let myArgs = a as? [String: Any],
-            let url = (myArgs["initialResolution"] as! [String:String])["Auto"],
+    
+         let json = (args as! [String:Any])["playerConfigJsonString"]
+         if let myArgs = json as? [String: Any],let url = (myArgs["initialResolution"] as! [String:String]).values.first,
             let title = myArgs["title"] as? String,
             let qualityText = myArgs["qualityText"] as? String,
             let speedText = myArgs["speedText"] as? String,
@@ -36,6 +36,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 guard URL(string: url) != nil else {
                    return
                 }
+                print("fvjnkm,l")
                 let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 let vc = VideoPlayerViewController()
                 vc.modalPresentationStyle = .fullScreen
