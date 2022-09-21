@@ -98,7 +98,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     
     lazy var cancelBtn: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "exitIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.imageView?.contentMode = .scaleAspectFill
         button.tintColor = .white
         button.addTarget(self, action: #selector(tap), for: .touchUpInside)
@@ -129,7 +129,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
             print("running on iPad")
         }
         
-        view.backgroundColor = .clear
+        view.backgroundColor = .black
 //        view.addSubview(collectionView)
         view.addSubview(backdropView)
         view.addSubview(menuView)

@@ -30,7 +30,7 @@ class CancelCell: UITableViewCell {
      }()
     lazy var cancelBtn: UIImageView = {
         let imageView = UIImageView()
-        let image = UIImage(named: "exitIcon")
+        let image = UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
         imageView.image = image
         imageView.size(CGSize(width: 24, height: 24))
         imageView.contentMode = .scaleAspectFit
@@ -107,8 +107,6 @@ class CancelCell: UITableViewCell {
     
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
 }

@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> {
             speedText: 'Speed',
             lastPosition: 1000,
             title: 'Женщина-Халк: Адвокат',
-            isSerial: false,
+            isSerial: true,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
             seasons: seasons,

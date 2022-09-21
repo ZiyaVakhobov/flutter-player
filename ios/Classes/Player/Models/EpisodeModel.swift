@@ -9,9 +9,9 @@ import Foundation
 
 struct Seasons{
     
-    var id, seasonNumber,plot, releaseYear,active,isSelected : String
+    var id,title, seasonNumber,plot, releaseYear,active,isSelected : String
     var episodeList = [Episodes]()
-    init(id:String, seasonNumber :String,plot: String,releaseYear: String,active :String,isSelected: String, episodes: [Episodes]){
+    init(id:String, title:String,seasonNumber :String,plot: String,releaseYear: String,active :String,isSelected: String, episodes: [Episodes]){
         self.id = id
         self.seasonNumber = seasonNumber
         self.plot = plot
@@ -19,6 +19,7 @@ struct Seasons{
         self.active = active
         self.isSelected = isSelected
         self.episodeList = episodes
+        self.title = title
     }
     
     static func fromDictinary(map: [Dictionary<String, Any>])-> [Seasons]{
@@ -44,7 +45,7 @@ struct Seasons{
             })
             
             let season = Seasons(
-                id: seasonsData["id"] as? String ?? "", seasonNumber: seasonsData["season_number"] as? String ?? "", plot: seasonsData["plot"] as? String ?? "", releaseYear: seasonsData["release_year"] as? String ?? "", active: "", isSelected: "", episodes: episodes)
+                id: seasonsData["id"] as? String ?? "",title: "", seasonNumber: seasonsData["season_number"] as? String ?? "", plot: seasonsData["plot"] as? String ?? "", releaseYear: seasonsData["release_year"] as? String ?? "", active: "", isSelected: "", episodes: episodes)
             seasons.append(season)
         })
         return seasons

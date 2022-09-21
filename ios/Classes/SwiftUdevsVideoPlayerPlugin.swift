@@ -22,7 +22,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
          vc.dismiss(animated: true, completion: nil)
       }
       if(call.method == "playVideo"){
-         var seasons = [Dictionary<String, Any>()]
          guard let args = call.arguments else {
             return
          }
@@ -30,8 +29,10 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
          if let myArgs = a as? [String: Any],
             let url = (myArgs["initialResolution"] as! [String:String])["Auto"],
             let title = myArgs["title"] as? String,
-            let duration = myArgs["duration"] as? Int,
-            let locale = myArgs["locale"] as? String,
+            let qualityText = myArgs["qualityText"] as? String,
+            let speedText = myArgs["speedText"] as? String,
+            let duration = myArgs["lastPosition"] as? Int,
+            let seasons = myArgs["seasons"] as? [Dictionary<String, Any>],
             let isSerial = myArgs["isSerial"] as? Bool,
             let resolutions = myArgs["resolutions"] as? [String:String] {
                 guard URL(string: url) != nil else {
@@ -41,9 +42,11 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 let vc = VideoPlayerViewController()
                 vc.modalPresentationStyle = .fullScreen
                 vc.delegate = self
-                vc.locale = locale
+                vc.locale = "en"
                 vc.urlString = url
                 vc.startPosition = 0
+                vc.qualityLabelText = qualityText
+                vc.speedLabelText = speedText
                 vc.hasNextVideo = false
                 vc.resolutions = sortedResolutions
                 vc.isSerial = isSerial
