@@ -31,6 +31,7 @@ void main() {
     expect(
         await udevsVideoPlayerPlugin.playVideo(
             playerConfig: PlayerConfiguration(
+              duration: 0,
               initialResolution: {},
               resolutions: {},
               qualityText: '',
@@ -49,6 +50,7 @@ void main() {
               assetPath: '',
               seasonIndex: 0,
               episodeIndex: 0,
+              locale: "en"
             )),
         '42');
   });

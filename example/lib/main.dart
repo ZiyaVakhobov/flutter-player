@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
@@ -90,8 +91,9 @@ class _MyAppState extends State<MyApp> {
             qualityText: 'Quality',
             speedText: 'Speed',
             lastPosition: 1000,
+            duration: 1669,
             title: 'Женщина-Халк: Адвокат',
-            isSerial: true,
+            isSerial: false,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
             seasons: seasons,
@@ -103,9 +105,12 @@ class _MyAppState extends State<MyApp> {
             assetPath: 'assets/splash.mp4',
             seasonIndex: 0,
             episodeIndex: 0,
+            locale: "en",
           )) ??
           'nothing';
-      print('result: $s');
+      if (kDebugMode) {
+        print('result: $s');
+      }
     } on PlatformException {
       debugPrint('Failed to get platform version.');
     }
