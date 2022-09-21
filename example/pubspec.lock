@@ -160,8 +160,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: uzdigital_mobile
-      resolved-ref: ad9196c3fba700d697adcdff33eaa320569aed9d
+      ref: Sunnatillo
+      resolved-ref: cfdb5f93c1984b7a42298be060016c9a6ed224ad
       url: "https://github.com/MobileUdevs/udevs_video_player.git"
     source: git
     version: "0.0.1"
