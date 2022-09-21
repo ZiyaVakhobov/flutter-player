@@ -30,7 +30,7 @@ class CancelCell: UITableViewCell {
      }()
     lazy var cancelBtn: UIImageView = {
         let imageView = UIImageView()
-        let image = UIImage(named: "ic_exit",in: Bundle(for: UdevsVideoPlayerPlugin.self),compatibleWith: nil)
+        let image = UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
         imageView.image = image
         imageView.size(CGSize(width: 24, height: 24))
         imageView.contentMode = .scaleAspectFit
