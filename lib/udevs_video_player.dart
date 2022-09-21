@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:udevs_video_player/models/player_configuration.dart';
 
 import 'udevs_video_player_platform_interface.dart';
@@ -10,11 +12,10 @@ export 'package:udevs_video_player/models/programs_info.dart';
 class UdevsVideoPlayer {
   Future<String?> playVideo({
     required PlayerConfiguration playerConfig,
-    required bool isIos,
   }) {
+    String jsonStringConfig = jsonEncode(playerConfig);
     return UdevsVideoPlayerPlatform.instance.playVideo(
-      playerConfigJsonString: playerConfig,
-      isIos: isIos,
+      playerConfigJsonString: jsonStringConfig,
     );
   }
 }
