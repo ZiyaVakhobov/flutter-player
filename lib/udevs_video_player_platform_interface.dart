@@ -1,5 +1,6 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'udevs_video_player.dart';
 import 'udevs_video_player_method_channel.dart';
 
 abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
@@ -24,7 +25,8 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
   }
 
   Future<String?> playVideo({
-    required String playerConfigJsonString,
+    required PlayerConfiguration playerConfigJsonString,
+    required bool isIos,
   }) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

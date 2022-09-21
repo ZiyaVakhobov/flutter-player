@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'udevs_video_player.dart';
 import 'udevs_video_player_platform_interface.dart';
 
 /// An implementation of [UdevsVideoPlayerPlatform] that uses method channels.
@@ -14,18 +14,19 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
 
   @override
   Future<String?> playVideo({
-    required String playerConfigJsonString,
+    required PlayerConfiguration playerConfigJsonString,
+    required bool isIos,
   }) async {
-    if (Platform.isIOS) {
+    if (isIos) {
       final res = await methodChannel
           .invokeMethod<String>('playVideo', <String, dynamic>{
-        'playerConfigJsonString': jsonDecode(playerConfigJsonString),
+        'playerConfigJsonString': playerConfigJsonString.toJson(),
       });
       return res;
     }
     final res =
         await methodChannel.invokeMethod<String>('playVideo', <String, dynamic>{
-      'playerConfigJsonString': playerConfigJsonString,
+      'playerConfigJsonString': jsonEncode(playerConfigJsonString),
     });
     return res;
   }
