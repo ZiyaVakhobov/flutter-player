@@ -7,14 +7,14 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Color
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.View
+import android.view.*
 import android.widget.*
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -45,6 +45,7 @@ import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import kotlin.math.abs
+
 
 class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
@@ -92,6 +93,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
         actionBar?.hide()
+        hideSystemBars(window)
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         seasonIndex = playerConfiguration!!.seasonIndex
         episodeIndex = playerConfiguration!!.episodeIndex
@@ -409,7 +411,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun setFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).let { controller ->
-            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.hide(WindowInsetsCompat.Type.statusBars())
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
@@ -418,8 +420,18 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun cutFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
-            WindowInsetsCompat.Type.systemBars()
+            WindowInsetsCompat.Type.statusBars()
         )
+    }
+
+    private fun hideSystemBars(window: Window) {
+        val windowInsetsController =
+            ViewCompat.getWindowInsetsController(window.decorView) ?: return
+        // Configure the behavior of the hidden system bars
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // Hide both the status bar and the navigation bar
+        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     }
 
     private var currentBottomSheet = BottomSheet.NONE
@@ -443,6 +455,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.programsInfoList[position].day
         }.attach()
+        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
@@ -502,6 +515,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.seasons[position].title
         }.attach()
+        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
@@ -549,6 +563,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
+        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
         }
@@ -606,6 +621,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             })
         )
         listView.adapter = adapter
+        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.SETTINGS
