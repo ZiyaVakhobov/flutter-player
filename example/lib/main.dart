@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
@@ -159,7 +160,7 @@ class _MyAppState extends State<MyApp> {
             lastPosition: 1000,
             duration: 1669,
             title: 'Женщина-Халк: Адвокат',
-            isSerial: true,
+            isSerial: false,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
             seasons: seasons,
@@ -172,7 +173,9 @@ class _MyAppState extends State<MyApp> {
             locale: "en",
           )) ??
           'nothing';
-      print('result: $s');
+      if (kDebugMode) {
+        print('result: $s');
+      }
     } on PlatformException {
       debugPrint('Failed to get platform version.');
     }

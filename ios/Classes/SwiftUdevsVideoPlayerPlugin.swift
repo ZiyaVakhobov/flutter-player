@@ -4,16 +4,18 @@ import UIKit
 public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
 
     public static var viewController = FlutterViewController()
-    var flutterResult: FlutterResult?
+    public var flutterResult: FlutterResult?
+    public static var methodChannel: FlutterMethodChannel?
     
   public static func register(with registrar: FlutterPluginRegistrar) {
      viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
      let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
+     methodChannel = channel;
      let instance = SwiftUdevsVideoPlayerPlugin()
      registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       flutterResult = result;
       if (call.method == "closePlayer" ) {
          let vc = VideoPlayerViewController()
@@ -58,7 +60,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
   }
     
     func getDuration(duration: Double) {
-        flutterResult!(Int(duration))
+        flutterResult!("\(duration)")
         print("Duration: \(duration)")
     }
     

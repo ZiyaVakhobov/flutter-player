@@ -335,7 +335,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private  var settingsButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "more"), for: .normal)
+        button.setImage(UIImage(named: "ic_more",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -429,7 +429,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             let arguments = call.arguments as? [String:Any]
             if let args = arguments {
                 let res = NextVideoResult.fromMap(map: args)
-                print(res)
                 if res.has {
                     hasNextVideo = res.hasNextVideo
                     if !hasNextVideo {
@@ -511,14 +510,11 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-        debugPrint("Resolution \(String(describing: resolutions))");
-        videoPlayerChannel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: binaryMessenger!)
+
         self.videoPlayerChannel?.setMethodCallHandler(handle)
 
         view.backgroundColor = UIColor(named: "moreColor")
-//        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         if #available(iOS 13.0, *) {
-//            appDelegate.restrictRotation = .landscape
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
         } else {
@@ -542,6 +538,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         activityIndicatorView.startAnimating()
         setupDataSource(title: titleText, urlString: urlString,startAt: nil)
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         if (selectedSpeedText == speedList[1]) {
             isRegular = true
@@ -573,8 +570,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         delegate?.getDuration(duration: player.currentTime().seconds)
         let value = UIInterfaceOrientationMask.portrait.rawValue
         UIDevice.current.setValue(value, forKey: "orientation")
-//        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-//        appDelegate.restrictRotation = .portrait
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -607,6 +602,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         view.addGestureRecognizer(swipeGesture)
         view.addGestureRecognizer(tapGesture)
     }
+    
     func addSubviews() {
         view.addSubview(videoView)
         view.addSubview(overlayView)
@@ -619,30 +615,18 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         overlayView.addSubview(activityIndicatorView)
         overlayView.addSubview(bottomView)
         overlayView.addSubview(landscapeButton)
-//        overlayView.addSubview(blockBottomView)
-//        overlayView.addSubview(skipLabel)
-//        view.addSubview(bottomActionsView)
         addTopViewSubviews()
         addBottomViewSubviews()
     }
     
     //MARK: - addBottomViewSubviews
     func addBottomViewSubviews() {
-        
         bottomView.addSubview(currentTimeLabel)
         bottomView.addSubview(durationTimeLabel)
         bottomView.addSubview(seperatorLabel)
         bottomView.addSubview(timeSlider)
-//        bottomView.addSubview(maximizeButton)
         bottomView.addSubview(timeStackView)
-        //Here!!
         bottomView.addSubview(bottomActionsStackView)
-        
-//        blockBottomView.addSubview(unblockButton)
-//        blockBottomView.addSubview(unblockButtonWithInfo)
-//        blockBottomView.addSubview(blockLabel)
-//        blockBottomView.addSubview(blockLabelInfo)
-        
     }
     
     func addTopViewSubviews() {
@@ -850,7 +834,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     @objc func playButtonPressed(_ sender: UIButton){
         if !player.isPlaying {
             player.play()
-            playButton.setImage(UIImage(named: "pauseIcon"), for: .normal)
+            playButton.setImage(UIImage(named: "ic_pause"), for: .normal)
             self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
             self.player.rate = Float(self.playerRate)
             resetTimer()
@@ -876,27 +860,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
         UIDevice.current.setValue(value, forKey: "orientation")
         UIViewController.attemptRotationToDeviceOrientation()
-//        if (UIDevice.current.orientation.isLandscape){
-//            let value = UIInterfaceOrientationMask.portrait.rawValue
-//            UIDevice.current.setValue(value, forKey: "orientation")
-//        } else {
-//            let value = UIInterfaceOrientationMask.landscapeLeft.rawValue
-//            UIDevice.current.setValue(value, forKey: "orientation")
-//        }
     }
-    
-//    @objc func maxButtonPressed(_ sender: UIButton){
-//        if self.isMax {
-//            //                self.maximizeButton.setImage(UIImage(named: "zoomIcon"), for: .normal)
-//            self.playerLayer.videoGravity = .resizeAspect
-//            self.isMax = false
-//        } else {
-//            //                self.maximizeButton.setImage(UIImage(named: "minIcon"), for: .normal)
-//            self.playerLayer.videoGravity = .resizeAspectFill
-//            self.isMax = true
-//        }
-//        resetTimer()
-//    }
     
     @objc func skipBackButtonPressed(_ sender: UIButton){
         self.backwardTouches += 1
@@ -930,7 +894,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         episodeVC.seasons = self.seasons
         episodeVC.delegate = self
         episodeVC.selectedSeasonIndex = selectedSeason
-//        episodeVC.seasonSelectBtn.setTitle("\(selectedSeason + 1) seson", for: .normal)
         self.present(episodeVC, animated: true, completion: nil)
     }
     
@@ -1014,13 +977,13 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 DispatchQueue.main.async {[weak self] in
                     if newStatus == .playing{
                         print("PLAYING")
-                        self?.playButton.setImage(UIImage(named: "pauseIcon"), for: .normal)
+                        self?.playButton.setImage(UIImage(named: "ic_pause",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
                     } else if newStatus == .paused {
                         print("PAUSE")
-                        self?.playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+                        self?.playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
@@ -1045,7 +1008,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 }
             } else {
                 self?.player.seek(to: CMTime.zero)
-                self?.playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+                self?.playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             }
         }
     }

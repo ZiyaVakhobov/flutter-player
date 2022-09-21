@@ -110,7 +110,6 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         super.viewDidLoad()
         view.backgroundColor = .clear
         tableView.contentInsetAdjustmentBehavior = .never
-//        self.tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0);
         if UIDevice.current.userInterfaceIdiom == .phone {
            menuHeight = 150
         }else {
@@ -125,7 +124,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
 //        topView.addSubview(cancelBtn)
         contentView.addSubview(tableView)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        menuView.backgroundColor = UIColor(named: "moreColor")
+        menuView.backgroundColor = .black
         tableView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
