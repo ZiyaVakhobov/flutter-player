@@ -179,32 +179,83 @@ class _MyAppState extends State<MyApp> {
     seasons.add(Season(title: '2 Сезон', movies: movies2));
     List<ProgramsInfo> programsInfoList = [];
     List<TvProgram> tvPrograms = [];
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    programsInfoList.add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    programsInfoList
+        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
     programsInfoList.add(ProgramsInfo(day: 'Today', tvPrograms: tvPrograms));
     programsInfoList.add(ProgramsInfo(day: 'Tomorrov', tvPrograms: tvPrograms));
     try {
@@ -212,7 +263,7 @@ class _MyAppState extends State<MyApp> {
               playerConfig: PlayerConfiguration(
             initialResolution: {
               'Автонастройка':
-                  'https://st1.uzdigital.tv/Discovery_Channel/video.m3u8?token=dd71667ee2d6b7a8f1d86603641b26ac919287de-6463504e434c5245757965616e78766c-1663767735-1663756935&remote=89.236.205.221'
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/a9585c2a26ae5d17d5ddc2d4e7ecf9d6/master.m3u8',
             },
             resolutions: {
               'Автонастройка':
@@ -232,13 +283,13 @@ class _MyAppState extends State<MyApp> {
             speedText: 'Скорость',
             lastPosition: 1000,
             title: 'Женщина-Халк: Адвокат',
-            isSerial: false,
+            isSerial: true,
             episodeButtonText: 'Эпизоды',
             nextButtonText: 'След.эпизод',
-            seasons: [],
-            isLive: true,
+            seasons: seasons,
+            isLive: false,
             tvProgramsText: 'Телеканалы',
-            programsInfoList: programsInfoList,
+            programsInfoList: [],
             showController: true,
             playVideoFromAsset: false,
             assetPath: 'assets/splash.mp4',

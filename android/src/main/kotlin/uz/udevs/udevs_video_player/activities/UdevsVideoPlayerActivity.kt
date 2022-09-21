@@ -31,6 +31,8 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
+import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
+import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -275,10 +277,16 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                         Player.STATE_BUFFERING -> {
                             playPause?.visibility = View.GONE
                             progressbar?.visibility = View.VISIBLE
+                            if(playerView?.isControllerFullyVisible == false) {
+                                playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
+                            }
                         }
                         Player.STATE_READY -> {
                             playPause?.visibility = View.VISIBLE
                             progressbar?.visibility = View.GONE
+                            if(playerView?.isControllerFullyVisible == false) {
+                                playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
+                            }
                         }
                         Player.STATE_ENDED -> {
                             playPause?.setImageResource(R.drawable.ic_play)
@@ -546,8 +554,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         }
         val quality = bottomSheetDialog.findViewById<LinearLayout>(R.id.quality)
         val speed = bottomSheetDialog.findViewById<LinearLayout>(R.id.speed)
-        bottomSheetDialog.findViewById<TextView>(R.id.quality_settings_text)?.text = playerConfiguration!!.qualityText
-        bottomSheetDialog.findViewById<TextView>(R.id.speed_settings_text)?.text = playerConfiguration!!.speedText
+        bottomSheetDialog.findViewById<TextView>(R.id.quality_settings_text)?.text =
+            playerConfiguration!!.qualityText
+        bottomSheetDialog.findViewById<TextView>(R.id.speed_settings_text)?.text =
+            playerConfiguration!!.speedText
         qualityText = bottomSheetDialog.findViewById(R.id.quality_settings_value_text)
         speedText = bottomSheetDialog.findViewById(R.id.speed_settings_value_text)
         qualityText?.text = currentQuality
@@ -589,7 +599,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         backButtonQualitySpeedBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
-        bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text = playerConfiguration!!.qualityText
+        bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
+            playerConfiguration!!.qualityText
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         val adapter = QualitySpeedAdapter(
             initialValue,
@@ -628,12 +639,42 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         }
     }
 
-    override fun onDown(p0: MotionEvent?): Boolean = false
-    override fun onShowPress(p0: MotionEvent?) = Unit
-    override fun onSingleTapUp(p0: MotionEvent?): Boolean {
-        playerView?.showController()
+    override fun onDown(p0: MotionEvent?): Boolean {
+        println("gesture: on down")
         return false
     }
+
+    override fun onShowPress(p0: MotionEvent?) {
+        println("gesture: on show press")
+    }
+
+    private var doubleClickTimeLimitMills: Long = 500
+    private var lastClicked: Long = -1L
+
+    override fun onSingleTapUp(event: MotionEvent?): Boolean {
+        lastClicked = when {
+            lastClicked == -1L -> {
+                System.currentTimeMillis()
+            }
+            isDoubleClicked() -> {
+                if (event!!.x < sWidth / 2) {
+                    player?.seekTo(player!!.currentPosition - 10000)
+                } else {
+                    player?.seekTo(player!!.currentPosition + 10000)
+                }
+                -1L
+            }
+            else -> {
+                playerView?.showController()
+                System.currentTimeMillis()
+            }
+        }
+        return false
+    }
+
+    private fun isDoubleClicked(): Boolean = getTimeDiff(lastClicked, System.currentTimeMillis()) <= doubleClickTimeLimitMills
+
+    private fun getTimeDiff(from: Long, to: Long): Long = to - from
 
     override fun onLongPress(p0: MotionEvent?) = Unit
     override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
