@@ -91,7 +91,6 @@ class _MyAppState extends State<MyApp> {
             qualityText: 'Quality',
             speedText: 'Speed',
             lastPosition: 1000,
-            duration: 1669,
             title: 'Женщина-Халк: Адвокат',
             isSerial: false,
             episodeButtonText: 'Episodes',
@@ -105,8 +104,6 @@ class _MyAppState extends State<MyApp> {
             assetPath: 'assets/splash.mp4',
             seasonIndex: 0,
             episodeIndex: 0,
-            locale: "en",
-
           )) ??
           'nothing';
       if (kDebugMode) {

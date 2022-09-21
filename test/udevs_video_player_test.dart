@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:udevs_video_player/models/player_configuration.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'package:udevs_video_player/udevs_video_player_platform_interface.dart';
 import 'package:udevs_video_player/udevs_video_player_method_channel.dart';
@@ -31,7 +30,6 @@ void main() {
     expect(
         await udevsVideoPlayerPlugin.playVideo(
             playerConfig: PlayerConfiguration(
-              duration: 0,
               initialResolution: {},
               resolutions: {},
               qualityText: '',
@@ -50,7 +48,6 @@ void main() {
               assetPath: '',
               seasonIndex: 0,
               episodeIndex: 0,
-              locale: "en"
             )),
         '42');
   });
