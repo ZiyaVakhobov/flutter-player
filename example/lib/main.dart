@@ -106,6 +106,7 @@ class _MyAppState extends State<MyApp> {
             seasonIndex: 0,
             episodeIndex: 0,
             locale: "en",
+
           )) ??
           'nothing';
       if (kDebugMode) {
