@@ -17,12 +17,11 @@ class BottomSheetCell : UITableViewCell{
         }
     }
     
-   
-    
     lazy var checkIcon: UIImageView = {
         let imageView = UIImageView()
-        let image = UIImage(named: "ic_done")
+        let image = UIImage(named: "ic_done",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
         imageView.image = image
+        imageView.size(CGSize(width: 32, height: 32))
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .white.withAlphaComponent(0.5)
         imageView.translatesAutoresizingMaskIntoConstraints = false

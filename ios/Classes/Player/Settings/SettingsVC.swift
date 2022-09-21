@@ -71,7 +71,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
     }()
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
-        cancelBtn.setImage(UIImage(named: "cancelIcon"), for: .normal)
+        cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
@@ -87,7 +87,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
     let menuView :UIView = {
         let view = UIView()
         view.layer.cornerRadius = 24
-        view.backgroundColor = .clear
+        view.backgroundColor = .black
         return view
     }()
     var menuHeight = UIScreen.main.bounds.height
@@ -145,11 +145,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.top.equalTo(menuView)
             make.edges.equalTo(menuView)
         }
-    
-//        topView.snp.makeConstraints { make in
-//            make.width.equalTo(mainStack)
-//            make.height.equalTo(mainStack).multipliedBy(0)
-//        }
+
         contentView.snp.makeConstraints { make in
             make.width.equalTo(mainStack)
             make.height.equalTo(mainStack).multipliedBy(1)
@@ -161,23 +157,12 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.height.equalTo(125)
         }
        
-//        tableView.estimatedRowHeight = 100
-        
-//        cancelBtn.snp.makeConstraints { make in
-//            make.right.equalTo(view.safeAreaLayoutGuide)
-//            make.width.height.equalTo(50)
-//            make.bottom.equalTo(topView).offset(0)
-//
-//        }
         
         menuView.snp.makeConstraints { make in
             make.height.equalTo(menuHeight)
             make.bottom.equalToSuperview()
             make.right.left.equalToSuperview().inset(0)
         }
-//        cancelBtn.snp.makeConstraints { make in
-//            make.width.height.equalTo(24)
-//        }
         
     }
     

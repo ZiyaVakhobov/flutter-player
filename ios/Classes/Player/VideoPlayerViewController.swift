@@ -129,9 +129,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var landscapeButton: UIButton = {
         let button = UIButton()
         if(UIDevice.current.orientation.isLandscape){
-            button.setImage(UIImage(named: "horizontal"), for: .normal)
+            button.setImage(UIImage(named: "ic_horizontal",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         } else {
-            button.setImage(UIImage(named: "portrait"), for: .normal)
+            button.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         }
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
        return button
@@ -319,7 +319,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     private  var episodesButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "ic_serial"), for: .normal)
+        button.setImage(UIImage(named: "ic_serial",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.setTitle("Серии", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -852,10 +852,10 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     @objc func changeOrientation(_ sender: UIButton){
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
-        landscapeButton.setImage(UIImage(named: "horizontal"), for: .normal)
+        landscapeButton.setImage(UIImage(named: "ic_horizontal",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
-           value = UIInterfaceOrientation.portrait.rawValue
-            landscapeButton.setImage(UIImage(named: "portrait"), for: .normal)
+            value = UIInterfaceOrientation.portrait.rawValue
+            landscapeButton.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             videoView.backgroundColor = .black
         }
         UIDevice.current.setValue(value, forKey: "orientation")
@@ -916,8 +916,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         vc.delegete = self
         vc.speedDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon: "qualityIcon", title: qualityLabelText, configureLabel: qualityText),
-            SettingModel(leftIcon: "ic_play", title: speedLabelText, configureLabel:  selectedSpeedText)
+            SettingModel(leftIcon: "ic_settings", title: qualityLabelText, configureLabel: qualityText),
+            SettingModel(leftIcon: "ic_speed", title: speedLabelText, configureLabel:  selectedSpeedText)
         ]
         self.present(vc, animated: true, completion: nil)
     }
@@ -1410,8 +1410,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         bottomSheetVC.cellDelegate = self
         bottomSheetVC.bottomSheetType = .speed
          bottomSheetVC.selectedIndex = speedList.firstIndex(of: "\(self.playerRate)") ?? 0
-//         print("BottomSheetVC Selected \(bottomSheetVC.selectedIndex)")
-//         print("Actual Selected \(speedList.firstIndex(of: selectedSpeedText) ?? 0)")
         speedButton.setTitle("Скорость (\(selectedSpeedText))", for: .normal)
         speedButton.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {

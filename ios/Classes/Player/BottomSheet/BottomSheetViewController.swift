@@ -55,7 +55,8 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
-        cancelBtn.setImage(UIImage(named: "ic_back"), for: .normal)
+        cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
+        cancelBtn.size(CGSize(width: 32, height: 32))
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
@@ -79,9 +80,8 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "moreColor")
+        view.backgroundColor = .black
         view.layer.cornerRadius = 24
-//        view.roundCorners(corners: [.topLeft,.topRight], radius: 24)
         view.clipsToBounds = true
         view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         return view
@@ -89,7 +89,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var horizontalStack : UIStackView = {
         let stack = UIStackView(arrangedSubviews: [cancelBtn,labelView])
-//        stack.distribution = .equalSpacing
         stack.axis = .horizontal
         stack.backgroundColor = .clear
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -132,15 +131,12 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         contentTableView.delegate = self
         contentTableView.dataSource = self
         contentTableView.separatorStyle = UITableViewCell.SeparatorStyle.none
-        containerView.backgroundColor = UIColor(named: "moreColor")
+        containerView.backgroundColor = .black
         contentTableView.register(BottomSheetCell.self, forCellReuseIdentifier: "BottomSheetCell")
         setupView()
         setupConstraints()
-        // tap gesture on dimmed view to dismiss
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleCloseAction))
         dimmedView.addGestureRecognizer(tapGesture)
-        
-//        setupPanGesture()
     }
     
     @objc func handleCloseAction() {
@@ -338,6 +334,3 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
 }
-
-
-
