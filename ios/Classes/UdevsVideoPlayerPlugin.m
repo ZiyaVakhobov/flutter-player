@@ -10,6 +10,6 @@
 
 @implementation UdevsVideoPlayerPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  [SwiftUdevsVideoPlayerPlugin registerWithRegistrar:registrar];
+  [UdevsVideoPlayerPlugin registerWithRegistrar:registrar];
 }
 @end

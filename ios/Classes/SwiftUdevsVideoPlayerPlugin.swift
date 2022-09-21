@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 
-public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
+public class UdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
 
     public static var viewController = FlutterViewController()
     public var flutterResult: FlutterResult?
@@ -11,7 +11,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
      viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
      let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
      methodChannel = channel;
-     let instance = SwiftUdevsVideoPlayerPlugin()
+     let instance = UdevsVideoPlayerPlugin()
      registrar.addMethodCallDelegate(instance, channel: channel)
   }
 
@@ -52,8 +52,8 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 vc.isSerial = isSerial
                 vc.titleText = title
                 vc.seasons  = Seasons.fromDictinary(map: seasons)
-                vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
-                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+                vc.binaryMessenger = UdevsVideoPlayerPlugin.viewController.binaryMessenger
+                UdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
          } else {
              result("Parse error");
          }

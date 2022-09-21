@@ -13,7 +13,7 @@ class SettingCell: UITableViewCell {
     
     var model: SettingModel?  {
         didSet{
-        leftIcon.image = UIImage(named: model!.leftIcon, in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
+        leftIcon.image = UIImage(named: model!.leftIcon, in: Bundle(for: UdevsVideoPlayerPlugin.self),compatibleWith: nil)
         leftTitle.text = model?.title ?? ""
         configureLabel.text = model?.configureLabel ?? ""
         }
