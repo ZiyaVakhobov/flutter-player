@@ -11,7 +11,7 @@ class ProgramCell: UITableViewCell {
     
     var programModel : Programms?{
         didSet{
-            timeLB.text = programModel?.startTime
+            timeLB.text = programModel?.scheduledTime
             channelNamesLB.text = programModel?.programTitle
         }
     }
@@ -51,7 +51,7 @@ class ProgramCell: UITableViewCell {
     
    lazy var timeLB: UILabel = {
         let label = UILabel()
-        label.text = programModel?.startTime
+        label.text = programModel?.scheduledTime
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .darkGray
     

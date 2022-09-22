@@ -59,7 +59,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var playerItemContext = 0
     weak var delegate: VideoPlayerDelegate?
     var urlString: String?
-    var locale: String = "ru"
     var qualityLabelText = ""
     var speedLabelText = ""
     var showsBtnText = ""
@@ -68,7 +67,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     var channelData: [Dictionary<String, Any>]?
     var programs : [ProgramModel] = [ProgramModel]()
     var titleText: String?
-    var channels : [Channels] = [Channels]()
     var isRegular: Bool = false
     var resolutions: [String:String]?
     var isSerial = false
@@ -473,37 +471,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var backwardTouches = 0
     private var forwardTouches = 0
     
-    func handle(call: FlutterMethodCall, result: FlutterResult) -> Void {
-        switch(call.method){
-        case "nextVideoResult":
-            let arguments = call.arguments as? [String:Any]
-            if let args = arguments {
-                let res = NextVideoResult.fromMap(map: args)
-                print(res)
-                if res.has {
-                    hasNextVideo = res.hasNextVideo
-                    if !hasNextVideo {
-                        nextEpisodeButton.isHidden = true
-                    }
-                    resolutions = res.resolutions
-                    setupDataSource(title: res.title, urlString: res.url,startAt: nil)
-                    runPlayer(startAt: res.startAt)
-                }
-            }
-            result(nil)
-            break
-        case "getLocale":
-            let arguments = call.arguments as? [String:Any]
-            if let args = arguments{
-                locale = args["locale"] as? String ?? "ru"
-                print("Locale: \(locale)")
-            }
-            result(nil)
-            break
-        default:
-            break
-        }
-    }
     
     func setupDataSource(title:String?, urlString: String?, startAt  : Int64?){
         guard let urlString = urlString, let url = URL(string: urlString) else {
@@ -559,31 +526,14 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if locale == "en"{
             qualityLabelText = "Quality"
             speedLabelText = "Speed"
             qualityText = "Auto"
             showsBtnText = "TV programs"
             liveLabelText = "Live"
-        } else if locale == "ru" {
-            qualityLabelText = "Качество"
-            speedLabelText = "Скорость"
-            qualityText = "Авто"
-            showsBtnText="Телепередачи"
-            liveLabelText = "Прямой эфир"
-        } else {
-            qualityLabelText = "Video sifati"
-            speedLabelText = "Tezlik"
-            qualityText = "Avto"
-            showsBtnText = "TV dasturlar"
-            liveLabelText = "Jonli efir"
-        }
         
         liveTextLabel.text = liveLabelText
         showsBtn.setTitle(showsBtnText, for: .normal)
-        
-        videoPlayerChannel = FlutterMethodChannel(name: "uz.sharqtv/video_player_channel", binaryMessenger: binaryMessenger!)
-        self.videoPlayerChannel?.setMethodCallHandler(handle)
         view.backgroundColor = .black
         if #available(iOS 13.0, *) {
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
@@ -936,7 +886,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     @objc func action() {
         let vc = ProgramViewController()
         vc.modalPresentationStyle = .custom
-        vc.locale = locale
         vc.programInfo = self.programs
         vc.menuHeight = self.programs.isEmpty ? 250 : UIScreen.main.bounds.height * 0.75
         if !(vc.programInfo.isEmpty) {
@@ -946,7 +895,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     @objc func channelTapped() {
         let vc = CollectionViewController()
         vc.modalPresentationStyle = .custom
-        vc.channels = self.channels
+        vc.channels = []
         vc.delegate = self
         self.present(vc, animated: true, completion: nil)
     }
@@ -1452,8 +1401,8 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
 }
 extension TVVideoPlayerViewController:  ChannelTappedDelegate, TVQualityDelegate, TVSpeedDelegate {
     func onChannelTapped(channelIndex: Int) {
-        let startAt :Int64 = 0
-        self.setupDataSource(title: "", urlString: channels[channelIndex].url, startAt: startAt)
-        print("Channel URL -> \(channels[channelIndex].url) Index \(channelIndex)")
+//        let startAt :Int64 = 0
+//        self.setupDataSource(title: "", urlString: channels[channelIndex].url, startAt: startAt)
+//        print("Channel URL -> \(channels[channelIndex].url) Index \(channelIndex)")
     }
 }
