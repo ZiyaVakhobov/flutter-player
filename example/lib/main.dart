@@ -163,7 +163,7 @@ class _MyAppState extends State<MyApp> {
     seasons.add(Season(title: '1 Season', movies: movies1));
     List<ProgramsInfo> programsInfoList = [];
     try {
-      var s = await _udevsVideoPlayerPlugin.playTV(
+      var s = await _udevsVideoPlayerPlugin.playVideo(
           playerConfig: PlayerConfiguration(
             initialResolution: {
               'Auto':
@@ -191,7 +191,7 @@ class _MyAppState extends State<MyApp> {
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
             seasons: seasons,
-            isLive: false,
+            isLive: true,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
             showController: true,

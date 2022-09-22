@@ -167,10 +167,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private lazy var showsBtnStackView: UIStackView = {
         let liveView = UIStackView(arrangedSubviews: [showsBtn])
-//        liveView.height(20)
-//        liveView.width(60)
         liveView.axis = .horizontal
-//        liveView.distribution = .equalSpacing
         return liveView
     }()
     
@@ -200,7 +197,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private var blockBottomView: UIView = {
         let view = UIView()
-//                view.backgroundColor = .darkGray
         return view
     }()
     
@@ -288,8 +284,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private var timeSlider: UISlider = {
         let slider = UISlider()
-//        slider.minimumValue = 0
-//        slider.maximumValue = 0
         slider.value = 1
         slider.tintColor = UIColor(named: "mainColor")
         slider.maximumTrackTintColor = .lightGray
@@ -298,23 +292,20 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }()
     private var exitButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "exitIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
-        button.size(CGSize(width: 50, height: 50))
+        button.size(CGSize(width: 32, height: 32))
         button.backgroundColor = .clear
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.imageView?.contentMode = .scaleAspectFit
-//        button.imageEdgeInsets = UIEdgeInsets(top: Constants.topButtonInset, left: Constants.topButtonInset, bottom: Constants.topButtonInset, right: Constants.topButtonInset)
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var playButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "playIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 5
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.imageView?.contentMode = .scaleAspectFit
         button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
         button.size(CGSize(width: 48, height: 48))
@@ -323,7 +314,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }()
     private  var channelBtn: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "channelLogo"), for: .normal)
         button.setTitle("Телеканалы", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -339,7 +329,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }()
     private  var showsBtn: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "programmes"), for: .normal)
         button.setTitle("Телепередачи", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -356,20 +345,17 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private var skipForwardButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "skpForwardIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_skip_forward",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 3
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.imageView?.contentMode = .scaleAspectFit
         button.size(CGSize(width: 48, height: 48))
-//        button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
         button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     var qualitySelectionButton: UIButton = {
      let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
      button.setImage(UIImage(named: "qualityIcon"), for: .normal)
      button.setTitle("Качество", for: .normal)
      button.setTitleColor(.white, for: .normal)
@@ -386,7 +372,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
  
  private  var speedButton: UIButton = {
      let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
      button.setImage(UIImage(named: "speedIcon"), for: .normal)
      button.setTitle("Скорость (1х)", for: .normal)
      button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -402,7 +387,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private var skipBackwardButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "skipBackwardIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_replay",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 3
         button.size(CGSize(width: 48, height: 48))
@@ -462,7 +447,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private  var blockButton: UIButton = {
         let button = UIButton()
-//        button.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         button.setImage(UIImage(named: "ic_lock"), for: .normal)
         button.setTitle("Блокировка", for: .normal)
         button.layer.zPosition = 3
@@ -478,7 +462,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private var activityIndicatorView: NVActivityIndicatorView = {
         let activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: .white)
-        //        activityView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: Constants.alphaValue)
         return activityView
     }()
     
@@ -531,26 +514,18 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         let playerItem = AVPlayerItem(asset: urlAsset)
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: playerItem)
-//        player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
+
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-    
         addTimeObserver(titleLabel: titleLabel, title: titleText ?? "")
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
         selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
         selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-        
-//        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-//        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
         player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
         player.automaticallyWaitsToMinimizeStalling = true;
         player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt ?? 0)),preferredTimescale: 1000))
         player.play()
-//        if let startDuration = startAt {
-//            player.seek(to: CMTimeMake(value: startDuration, timescale: 1))
-//        }
         if let titleText = title {
             titleLabel.text = titleText
         }
@@ -568,28 +543,21 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     @objc func changeOrientation(_ sender: UIButton){
         print("CHANGE ORIENTATION")
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
-        landscapeButton.setImage(UIImage(named: "horizontal"), for: .normal)
+        landscapeButton.setImage(UIImage(named: "ic_horizontal",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
            value = UIInterfaceOrientation.portrait.rawValue
-            landscapeButton.setImage(UIImage(named: "portrait"), for: .normal)
+            landscapeButton.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         }
         UIDevice.current.setValue(value, forKey: "orientation")
         UIViewController.attemptRotationToDeviceOrientation()
-//        if (UIDevice.current.orientation.isLandscape){
-//            let value = UIInterfaceOrientationMask.portrait.rawValue
-//            UIDevice.current.setValue(value, forKey: "orientation")
-//        } else {
-//            let value = UIInterfaceOrientationMask.landscapeLeft.rawValue
-//            UIDevice.current.setValue(value, forKey: "orientation")
-//        }
     }
     
     private var landscapeButton: UIButton = {
         let button = UIButton()
         if(UIDevice.current.orientation.isLandscape){
-            button.setImage(UIImage(named: "horizontal"), for: .normal)
+            button.setImage(UIImage(named: "ic_horizontal",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         } else {
-            button.setImage(UIImage(named: "portrait"), for: .normal)
+            button.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         }
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
        return button
@@ -623,9 +591,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         videoPlayerChannel = FlutterMethodChannel(name: "uz.sharqtv/video_player_channel", binaryMessenger: binaryMessenger!)
         self.videoPlayerChannel?.setMethodCallHandler(handle)
         view.backgroundColor = .black
-//        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         if #available(iOS 13.0, *) {
-//            appDelegate.restrictRotation = .landscape
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
         } else {
@@ -672,8 +638,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         delegate?.getDuration(duration: player.currentTime().seconds)
         let value = UIInterfaceOrientationMask.portrait.rawValue
         UIDevice.current.setValue(value, forKey: "orientation")
-//        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-//        appDelegate.restrictRotation = .portrait
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -861,8 +825,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private  var settingsButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "more"), for: .normal)
-//        button.setTitle("Настройки", for: .normal)
+        button.setImage(UIImage(named: "ic_more",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -881,8 +844,8 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         vc.delegete = self
         vc.speedDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon: "qualityIcon", title: qualityLabelText, configureLabel: qualityText),
-            SettingModel(leftIcon: "ic_play", title: speedLabelText, configureLabel:  selectedSpeedText)
+            SettingModel(leftIcon: "ic_speed", title: qualityLabelText, configureLabel: qualityText),
+            SettingModel(leftIcon: "ic_settings", title: speedLabelText, configureLabel:  selectedSpeedText)
         ]
         self.present(vc, animated: true, completion: nil)
     }
@@ -956,12 +919,12 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     @objc func playButtonPressed(_ sender: UIButton){
         if !player.isPlaying {
             player.play()
-            playButton.setImage(UIImage(named: "pauseIcon"), for: .normal)
+            playButton.setImage(UIImage(named: "ic_pause",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
             self.player.rate = Float(self.playerRate)
             resetTimer()
         } else {
-            playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+            playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             player.pause()
             timer?.invalidate()
             showControls()
@@ -1083,13 +1046,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 DispatchQueue.main.async {[weak self] in
                     if newStatus == .playing{
                         print("PLAYING")
-                        self?.playButton.setImage(UIImage(named: "pauseIcon"), for: .normal)
+                        self?.playButton.setImage(UIImage(named: "ic_pause",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
                     } else if newStatus == .paused {
                         print("PAUSE")
-                        self?.playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+                        self?.playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
