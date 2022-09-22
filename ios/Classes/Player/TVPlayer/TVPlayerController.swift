@@ -75,9 +75,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     var qualityText = "Auto"
     var hasNextVideo = false
     var isAskPermission = false
-
+    
     var videoPlayerChannel: FlutterMethodChannel?
-
+    
     var binaryMessenger : FlutterBinaryMessenger?
     var binaryMessengerMainChannel : FlutterBinaryMessenger?
     private var swipeGesture: UIPanGestureRecognizer!
@@ -142,7 +142,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var liveTextLabel: UILabel = {
         let label = UILabel()
         label.text = "LIVE"
-//        label.sizeToFit()
+        //        label.sizeToFit()
         label.textColor = .red
         return label;
     }()
@@ -213,13 +213,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }()
     
     //MARK: - BottomActionsStackView
-        private lazy var bottomActionsStackView: UIStackView = {
-            let spacer = UIView()
-            let stackView = UIStackView(arrangedSubviews: [blockButton,channelBtn,showsBtn])
-            stackView.axis = .horizontal
-            stackView.distribution = .equalSpacing
-            return stackView
-        }()
+    private lazy var bottomActionsStackView: UIStackView = {
+        let spacer = UIView()
+        let stackView = UIStackView(arrangedSubviews: [blockButton,channelBtn,showsBtn])
+        stackView.axis = .horizontal
+        stackView.distribution = .equalSpacing
+        return stackView
+    }()
     
     private lazy var bottomBlockStackView: UIStackView = {
         let spacer = UIView()
@@ -239,39 +239,39 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     func showQualityBottomSheet(){
-       let resList = resolutions ?? ["480p" : urlString!]
+        let resList = resolutions ?? ["480p" : urlString!]
         debugPrint("RESLIST \(resList)")
         let array = Array(resList.keys)
         debugPrint("ARRAY \(array)")
-       let bottomSheetVC = BottomSheetViewController()
-       bottomSheetVC.modalPresentationStyle = .overCurrentContext
+        let bottomSheetVC = BottomSheetViewController()
+        bottomSheetVC.modalPresentationStyle = .overCurrentContext
         bottomSheetVC.items = array.sorted().reversed()
-       bottomSheetVC.labelText = qualityLabelText
-       bottomSheetVC.cellDelegate = self
-       bottomSheetVC.bottomSheetType = .quality
-       bottomSheetVC.selectedIndex = array.firstIndex(of: qualityText) ?? 0
+        bottomSheetVC.labelText = qualityLabelText
+        bottomSheetVC.cellDelegate = self
+        bottomSheetVC.bottomSheetType = .quality
+        bottomSheetVC.selectedIndex = array.firstIndex(of: qualityText) ?? 0
         debugPrint("SELECTED INDEX \( bottomSheetVC.selectedIndex)")
-       DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-           self.present(bottomSheetVC, animated: false, completion:nil)
-       }
-   }
-   
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.present(bottomSheetVC, animated: false, completion:nil)
+        }
+    }
+    
     func showSpeedBottomSheet(){
-       let bottomSheetVC = BottomSheetViewController()
-       bottomSheetVC.modalPresentationStyle = .custom
+        let bottomSheetVC = BottomSheetViewController()
+        bottomSheetVC.modalPresentationStyle = .custom
         bottomSheetVC.items = speedList
-       bottomSheetVC.labelText = speedLabelText
-       bottomSheetVC.cellDelegate = self
-       bottomSheetVC.bottomSheetType = .speed
+        bottomSheetVC.labelText = speedLabelText
+        bottomSheetVC.cellDelegate = self
+        bottomSheetVC.bottomSheetType = .speed
         bottomSheetVC.selectedIndex = speedList.firstIndex(of: "\(self.playerRate)") ?? 0
-//         print("BottomSheetVC Selected \(bottomSheetVC.selectedIndex)")
-//         print("Actual Selected \(speedList.firstIndex(of: selectedSpeedText) ?? 0)")
-       speedButton.setTitle("Скорость (\(selectedSpeedText))", for: .normal)
-       speedButton.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-       DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-           self.present(bottomSheetVC, animated: false, completion:nil)
-       }
-   }
+        //         print("BottomSheetVC Selected \(bottomSheetVC.selectedIndex)")
+        //         print("Actual Selected \(speedList.firstIndex(of: selectedSpeedText) ?? 0)")
+        speedButton.setTitle("Скорость (\(selectedSpeedText))", for: .normal)
+        speedButton.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.present(bottomSheetVC, animated: false, completion:nil)
+        }
+    }
     //MARK: - *************Time Stack View ***************
     private lazy var timeStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [timeSlider])
@@ -324,12 +324,12 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(channelTapped), for: .touchUpInside)
         button.isHidden = false
-      
+        
         return button
     }()
     private  var showsBtn: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "programmes"), for: .normal)
+        button.setImage(UIImage(named: "ic_programmes", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.setTitle("Телепередачи", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -339,7 +339,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(action), for: .touchUpInside)
         button.isHidden = false
-      
+        
         return button
     }()
     
@@ -355,35 +355,35 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }()
     
     var qualitySelectionButton: UIButton = {
-     let button = UIButton()
-     button.setImage(UIImage(named: "qualityIcon"), for: .normal)
-     button.setTitle("Качество", for: .normal)
-     button.setTitleColor(.white, for: .normal)
-     button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-     button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-     button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-     button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
-     button.imageView?.contentMode = .scaleAspectFit
-     button.addTarget(self, action: #selector(qualitySelectionButtonPressed(_:)), for: .touchUpInside)
-     button.isHidden = false
-   
-     return button
- }()
- 
- private  var speedButton: UIButton = {
-     let button = UIButton()
-     button.setImage(UIImage(named: "speedIcon"), for: .normal)
-     button.setTitle("Скорость (1х)", for: .normal)
-     button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-     button.setTitleColor(.white, for: .normal)
-     button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-     button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-     button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
-     button.imageView?.contentMode = .scaleAspectFit
-     button.addTarget(self, action: #selector(speedButtonPressed(_:)), for: .touchUpInside)
-     button.isHidden = false
-     return button
- }()
+        let button = UIButton()
+        button.setImage(UIImage(named: "qualityIcon"), for: .normal)
+        button.setTitle("Качество", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
+        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
+        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(self, action: #selector(qualitySelectionButtonPressed(_:)), for: .touchUpInside)
+        button.isHidden = false
+        
+        return button
+    }()
+    
+    private  var speedButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "speedIcon"), for: .normal)
+        button.setTitle("Скорость (1х)", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.setTitleColor(.white, for: .normal)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
+        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
+        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(self, action: #selector(speedButtonPressed(_:)), for: .touchUpInside)
+        button.isHidden = false
+        return button
+    }()
     
     private var skipBackwardButton: UIButton = {
         let button = UIButton()
@@ -409,9 +409,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private  var unblockButtonWithInfo: UIButton = {
         let button = UIButton()
-       
+        
         button.setImage(UIImage(named: "blockIcon"), for: .normal)
-    
+        
         button.tintColor = UIColor(named: "baseTextColor")
         button.titleLabel?.backgroundColor = .clear
         button.imageView?.backgroundColor = .clear
@@ -427,7 +427,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.addTarget(self, action: #selector(blockButtonWithInfoPressed(_:)), for: .touchUpInside)
         return button
     }()
- 
+    
     private  var nextEpisodeButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "nextEpisodeIcon"), for: .normal)
@@ -504,7 +504,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             break
         }
     }
-
+    
     func setupDataSource(title:String?, urlString: String?, startAt  : Int64?){
         guard let urlString = urlString, let url = URL(string: urlString) else {
             return
@@ -514,7 +514,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         let playerItem = AVPlayerItem(asset: urlAsset)
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: playerItem)
-
+        
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         addTimeObserver(titleLabel: titleLabel, title: titleText ?? "")
         playerLayer = AVPlayerLayer(player: player)
@@ -532,12 +532,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     func runPlayer(startAt: Int){
-//        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-//        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-//        player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
-//        player.automaticallyWaitsToMinimizeStalling = true;
-//        player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
-//        player.play()
     }
     
     @objc func changeOrientation(_ sender: UIButton){
@@ -545,7 +539,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
         landscapeButton.setImage(UIImage(named: "ic_horizontal",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
-           value = UIInterfaceOrientation.portrait.rawValue
+            value = UIInterfaceOrientation.portrait.rawValue
             landscapeButton.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         }
         UIDevice.current.setValue(value, forKey: "orientation")
@@ -560,7 +554,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             button.setImage(UIImage(named: "ic_portrait",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         }
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
-       return button
+        return button
     }()
     
     override func viewDidLoad() {
@@ -570,7 +564,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             speedLabelText = "Speed"
             qualityText = "Auto"
             showsBtnText = "TV programs"
-             liveLabelText = "Live"
+            liveLabelText = "Live"
         } else if locale == "ru" {
             qualityLabelText = "Качество"
             speedLabelText = "Скорость"
@@ -595,13 +589,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
         } else {
-//            appDelegate.restrictRotation = .all
+            //            appDelegate.restrictRotation = .all
         }
         
         if #available(iOS 13.0, *) {
-            setSliderThumbTintColor(UIColor(named: "mainColor") ?? .white)
+            setSliderThumbTintColor(Colors.mainColor)
         } else {
-            timeSlider.thumbTintColor = UIColor(named: "mainColor")
+            timeSlider.thumbTintColor = Colors.mainColor
         }
         
         addSubviews()
@@ -665,17 +659,17 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         view.addSubview(overlayView)
         overlayView.addSubview(topView)
         overlayView.addSubview(playButton)
-//        overlayView.addSubview(skipForwardButton)
-//        view.addSubview(skipForwardButton)
-//        overlayView.addSubview(skipBackwardButton)
-//        view.addSubview(skipBackwardButton)
-//        overlayView.addSubview(activityIndicatorView)
+        //        overlayView.addSubview(skipForwardButton)
+        //        view.addSubview(skipForwardButton)
+        //        overlayView.addSubview(skipBackwardButton)
+        //        view.addSubview(skipBackwardButton)
+        //        overlayView.addSubview(activityIndicatorView)
         view.addSubview(activityIndicatorView)
         overlayView.addSubview(bottomView)
         overlayView.addSubview(landscapeButton)
-//        overlayView.addSubview(blockBottomView)
-//        overlayView.addSubview(skipLabel)
-//        view.addSubview(bottomActionsView)
+        //        overlayView.addSubview(blockBottomView)
+        //        overlayView.addSubview(skipLabel)
+        //        view.addSubview(bottomActionsView)
         addTopViewSubviews()
         addBottomViewSubviews()
     }
@@ -690,11 +684,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         bottomView.addSubview(liveStackView)
         bottomView.addSubview(showsBtnStackView)
         bottomView.addSubview(timeStackView)
-//        bottomView.addSubview(bottomActionsStackView)
-//        blockBottomView.addSubview(unblockButton)
-//        blockBottomView.addSubview(unblockButtonWithInfo)
-//        blockBottomView.addSubview(blockLabel)
-//        blockBottomView.addSubview(blockLabelInfo)
+        //        bottomView.addSubview(bottomActionsStackView)
+        //        blockBottomView.addSubview(unblockButton)
+        //        blockBottomView.addSubview(unblockButtonWithInfo)
+        //        blockBottomView.addSubview(blockLabel)
+        //        blockBottomView.addSubview(blockLabelInfo)
     }
     func addTopViewSubviews() {
         topView.addSubview(exitButton)
@@ -714,16 +708,16 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         playButton.width(Constants.controlButtonSize)
         playButton.height(Constants.controlButtonSize)
         playButton.layer.cornerRadius = Constants.controlButtonSize/2
-//        skipBackwardButton.width(Constants.controlButtonSize)
-//        skipBackwardButton.height(Constants.controlButtonSize)
-//        skipBackwardButton.rightToLeft(of: playButton, offset: -60)
-//        skipBackwardButton.top(to: playButton)
-//        skipBackwardButton.layer.cornerRadius = Constants.controlButtonSize/2
-//        skipForwardButton.width(Constants.controlButtonSize)
-//        skipForwardButton.height(Constants.controlButtonSize)
-//        skipForwardButton.leftToRight(of: playButton, offset: 60)
-//        skipForwardButton.top(to: playButton)
-//        skipForwardButton.layer.cornerRadius = Constants.controlButtonSize/2
+        //        skipBackwardButton.width(Constants.controlButtonSize)
+        //        skipBackwardButton.height(Constants.controlButtonSize)
+        //        skipBackwardButton.rightToLeft(of: playButton, offset: -60)
+        //        skipBackwardButton.top(to: playButton)
+        //        skipBackwardButton.layer.cornerRadius = Constants.controlButtonSize/2
+        //        skipForwardButton.width(Constants.controlButtonSize)
+        //        skipForwardButton.height(Constants.controlButtonSize)
+        //        skipForwardButton.leftToRight(of: playButton, offset: 60)
+        //        skipForwardButton.top(to: playButton)
+        //        skipForwardButton.layer.cornerRadius = Constants.controlButtonSize/2
         activityIndicatorView.center(in: view)
         activityIndicatorView.layer.cornerRadius = 20
     }
@@ -741,29 +735,29 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         bottomView.bottom(to: view.safeAreaLayoutGuide, offset: 10)
         bottomView.height(70)
         
-//        blockBottomView.leading(to: view.safeAreaLayoutGuide)
-//        blockBottomView.trailing(to: view.safeAreaLayoutGuide)
-//        blockBottomView.bottom(to: view.safeAreaLayoutGuide, offset: 10)
-//        blockBottomView.height(90)
-//        blockBottomView.alpha = 0
-//
-//        unblockButton.top(to: blockBottomView)
-//        unblockButton.centerX(to: blockBottomView)
-//        unblockButton.width(Constants.unblockButtonSize)
-//        unblockButton.height(Constants.unblockButtonSize)
-//        unblockButton.layer.cornerRadius = 8
-//
-//        unblockButtonWithInfo.top(to: blockBottomView)
-//        unblockButtonWithInfo.centerX(to: blockBottomView)
-//        unblockButtonWithInfo.width(221)
-//        unblockButtonWithInfo.height(Constants.unblockButtonSize)
-//        unblockButtonWithInfo.layer.cornerRadius = 8
-//
-//        blockLabel.centerX(to: blockBottomView)
-//        blockLabel.topToBottom(of: unblockButton,offset: 8)
-//
-//        blockLabelInfo.centerX(to: blockBottomView)
-//        blockLabelInfo.topToBottom(of: blockLabel,offset: 4)
+        //        blockBottomView.leading(to: view.safeAreaLayoutGuide)
+        //        blockBottomView.trailing(to: view.safeAreaLayoutGuide)
+        //        blockBottomView.bottom(to: view.safeAreaLayoutGuide, offset: 10)
+        //        blockBottomView.height(90)
+        //        blockBottomView.alpha = 0
+        //
+        //        unblockButton.top(to: blockBottomView)
+        //        unblockButton.centerX(to: blockBottomView)
+        //        unblockButton.width(Constants.unblockButtonSize)
+        //        unblockButton.height(Constants.unblockButtonSize)
+        //        unblockButton.layer.cornerRadius = 8
+        //
+        //        unblockButtonWithInfo.top(to: blockBottomView)
+        //        unblockButtonWithInfo.centerX(to: blockBottomView)
+        //        unblockButtonWithInfo.width(221)
+        //        unblockButtonWithInfo.height(Constants.unblockButtonSize)
+        //        unblockButtonWithInfo.layer.cornerRadius = 8
+        //
+        //        blockLabel.centerX(to: blockBottomView)
+        //        blockLabel.topToBottom(of: unblockButton,offset: 8)
+        //
+        //        blockLabelInfo.centerX(to: blockBottomView)
+        //        blockLabelInfo.topToBottom(of: blockLabel,offset: 4)
         
         liveStackView.bottomToTop(of: timeStackView, offset: -1)
         liveStackView.spacing = 24
@@ -779,26 +773,26 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             make.edges.equalToSuperview()
         }
         
-//        if(isSerial) {
-//        bottomActionsStackView.snp.makeConstraints { make in
-//            make.left.equalToSuperview().offset(10)
-//            make.right.equalToSuperview().offset(-10)
-//            make.bottom.equalTo(bottomView).offset(-16)
-//        }
-//        }else {
-//            bottomActionsStackView.snp.makeConstraints { make in
-//                make.left.equalToSuperview().offset(80)
-//                make.right.equalToSuperview().offset(-80)
-//                make.bottom.equalTo(bottomView).offset(-16)
-//            }
-//        }
-
-//        blockButton.width(136)
-//        blockButton.height(Constants.bottomViewButtonSize)
-//        blockButton.layer.cornerRadius = 8
+        //        if(isSerial) {
+        //        bottomActionsStackView.snp.makeConstraints { make in
+        //            make.left.equalToSuperview().offset(10)
+        //            make.right.equalToSuperview().offset(-10)
+        //            make.bottom.equalTo(bottomView).offset(-16)
+        //        }
+        //        }else {
+        //            bottomActionsStackView.snp.makeConstraints { make in
+        //                make.left.equalToSuperview().offset(80)
+        //                make.right.equalToSuperview().offset(-80)
+        //                make.bottom.equalTo(bottomView).offset(-16)
+        //            }
+        //        }
+        
+        //        blockButton.width(136)
+        //        blockButton.height(Constants.bottomViewButtonSize)
+        //        blockButton.layer.cornerRadius = 8
         
         showsBtn.width(140)
-//        showsBtn.height(30)
+        //        showsBtn.height(30)
         showsBtn.snp.makeConstraints{ make in
             make.right.equalTo(landscapeButton).offset(-24)
         }
@@ -810,9 +804,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         landscapeButton.snp.makeConstraints { make in
             make.right.equalTo(bottomView).offset(-16)
         }
-//        channelBtn.width(150)
-//        channelBtn.height(Constants.bottomViewButtonSize)
-//        channelBtn.layer.cornerRadius = 8
+        //        channelBtn.width(150)
+        //        channelBtn.height(Constants.bottomViewButtonSize)
+        //        channelBtn.layer.cornerRadius = 8
         
         nextEpisodeButton.width(136)
         nextEpisodeButton.height(Constants.bottomViewButtonSize)
@@ -863,7 +857,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         exitButton.left(to: topView)
         exitButton.centerY(to: topView)
         exitButton.layer.cornerRadius = Constants.topButtonSize/2
-   
+        
         settingsButton.width(50)
         settingsButton.height(Constants.bottomViewButtonSize)
         settingsButton.layer.cornerRadius = 8
@@ -940,26 +934,26 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     @objc func action() {
-           let vc = ProgramViewController()
-           vc.modalPresentationStyle = .custom
-           vc.locale = locale
-           vc.programInfo = self.programs
-            vc.menuHeight = self.programs.isEmpty ? 250 : UIScreen.main.bounds.height * 0.75
+        let vc = ProgramViewController()
+        vc.modalPresentationStyle = .custom
+        vc.locale = locale
+        vc.programInfo = self.programs
+        vc.menuHeight = self.programs.isEmpty ? 250 : UIScreen.main.bounds.height * 0.75
         if !(vc.programInfo.isEmpty) {
             self.present(vc, animated: true, completion: nil)
-            }
-       }
-       @objc func channelTapped() {
-           let vc = CollectionViewController()
-           vc.modalPresentationStyle = .custom
-           vc.channels = self.channels
-           vc.delegate = self
-           self.present(vc, animated: true, completion: nil)
-       }
+        }
+    }
+    @objc func channelTapped() {
+        let vc = CollectionViewController()
+        vc.modalPresentationStyle = .custom
+        vc.channels = self.channels
+        vc.delegate = self
+        self.present(vc, animated: true, completion: nil)
+    }
     @objc func exitButtonPressed(_ sender: UIButton){
         self.dismiss(animated: true, completion: nil)
     }
-
+    
     @objc func skipBackButtonPressed(_ sender: UIButton){
         self.backwardTouches += 1
         self.seekBackwardTo(10.0 * Double(self.backwardTouches))
@@ -971,7 +965,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     @objc func skipForwardButtonPressed(_ sender: UIButton){
-        
         self.forwardTouches += 1
         self.seekForwardTo(10.0 * Double(self.forwardTouches))
         self.forwardGestureTimer?.invalidate()
@@ -980,21 +973,21 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         }
         resetTimer()
     }
-
+    
     @objc func nextEpisodeButtonPressed(_ sender: UIButton){
         DispatchQueue.main.async {
             self.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self.player.currentTime().seconds)
         }
     }
-  
+    
     @objc func blockButtonWithInfoPressed(_ sender: UIButton){
         isBlock = false
         hideBlockControls()
         showControls()
     }
-
+    
     @objc func blockButtonPressed(_ sender: UIButton){
-      
+        
         if isBlock {
             isAskPermission = true
             unblockButton.isHidden = true
@@ -1008,7 +1001,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             showBlockControls()
         }
     }
-
+    
     fileprivate func seekForwardTo(_ seekPosition: Double) {
         guard let duration = player.currentItem?.duration else {return}
         let currentTime = CMTimeGetSeconds(player.currentTime())
@@ -1031,7 +1024,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     @objc func sliderValueChanged(_ sender: UISlider) {
         sender.value=1;
-//        player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -1077,7 +1069,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 }
             } else {
                 self?.player.seek(to: CMTime.zero)
-                self?.playButton.setImage(UIImage(named: "playIcon"), for: .normal)
+                self?.playButton.setImage(UIImage(named: "ic_play",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
             }
         }
     }
@@ -1109,7 +1101,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             self?.timeSlider.maximumValue = Float(newDurationSeconds)
             self?.timeSlider.minimumValue = 0
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-            print("Hello workdl")
             if(UIDevice.current.orientation.isLandscape){
                 titleLabel.text = title
             } else {
@@ -1187,7 +1178,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             }, completion: nil)
         }
     }
-
+    
     func showSeekForwardButton(){
         skipForwardButton.alpha = 1.0
         print("=======FORWARD SHOW")
@@ -1225,7 +1216,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 playButton.alpha = alpha
             }
             bottomView.alpha = alpha
-//            maximizeButton.alpha = alpha
+            //            maximizeButton.alpha = alpha
         }, completion: nil)
     }
     
@@ -1358,7 +1349,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             UIScreen.main.brightness -= value / 10000
         }
     }
-
+    
     // settings bottom sheet tapped
     func onSettingsBottomSheetCellTapped(index: Int) {
         switch index {
@@ -1415,7 +1406,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 selectedSubtitle = selectedSubtitleLabel
             }
             break
-        
+            
         case .audio:
             let audios = player.currentItem?.tracks(type: .audio) ?? ["None"]
             let selectedAudio = audios[index]

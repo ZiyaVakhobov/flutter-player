@@ -19,7 +19,7 @@ class ProgramViewController: UIViewController {
         let table = UITableView(frame: .zero, style: .grouped)
         table.translatesAutoresizingMaskIntoConstraints = false
         table.tableFooterView = UIView(frame: .zero)
-        table.backgroundColor = UIColor(named: "mainBackground")
+        table.backgroundColor = Colors.mainBackground
         table.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         table.register(ProgramCell.self,forCellReuseIdentifier: "cell")
         table.dataSource = self
@@ -45,7 +45,7 @@ class ProgramViewController: UIViewController {
         stackView.alignment = .leading
         stackView.spacing = 21
         stackView.distribution = .fill
-        stackView.backgroundColor = UIColor(named: "channel_background")
+        stackView.backgroundColor = Colors.backgroudColor
         return stackView
     }()
     
@@ -71,7 +71,7 @@ class ProgramViewController: UIViewController {
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
         cancelBtn.backgroundColor = .clear
-        cancelBtn.setImage(UIImage(named: "cancelIcon"), for: .normal)
+        cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
 
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
@@ -140,7 +140,7 @@ class ProgramViewController: UIViewController {
     
     lazy var menuView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "mainBackground")
+        view.backgroundColor = Colors.mainBackground
         return view
     }()
     var menuHeight =  UIScreen.main.bounds.height * 0.80
@@ -223,10 +223,6 @@ class ProgramViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-//        mainVerticalView.snp.makeConstraints { make in
-//            make.size.equalTo(menuView)
-//
-//        }
         if UIDevice.current.userInterfaceIdiom == .phone {
         tableView.snp.makeConstraints { make in
             make.left.equalTo(menuView)
@@ -362,7 +358,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
         label.textColor = .white
         
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "cancelIcon"), for: .normal)
+        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.imageView?.contentMode = .scaleAspectFill
         button.tintColor = .white
         
