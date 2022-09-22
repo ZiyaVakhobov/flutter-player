@@ -150,7 +150,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         label.text = "00:00"
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        
+
         return label
     }()
     
@@ -265,7 +265,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         button.setImage(UIImage(named: "ic_skip_forward",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.tintColor = .white
         button.layer.zPosition = 3
-        
+
         button.imageView?.contentMode = .scaleAspectFit
         button.size(CGSize(width: 48, height: 48))
         button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
@@ -278,12 +278,12 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         button.tintColor = .white
         button.layer.zPosition = 3
         button.size(CGSize(width: 48, height: 48))
-        
+
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
-    
+
     private  var unblockButton: UIButton = {
         let button = UIButton()
         button.setTitle("blockIcon", for: .normal)
@@ -376,7 +376,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(qualitySelectionButtonPressed(_:)), for: .touchUpInside)
         button.isHidden = false
-        
+
         return button
     }()
     
@@ -449,7 +449,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             break
         }
     }
-    
+
     
     func setupDataSource(title:String?, urlString: String?, startAt  : Int64?){
         guard let urlString = urlString, let url = URL(string: urlString) else {
@@ -462,7 +462,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-        
+
         addTimeObserver(titleLabel: titleLabel, title: titleText ?? "")
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
@@ -510,9 +510,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-        
+
         //        self.videoPlayerChannel?.setMethodCallHandler(handle)
-        
+
         view.backgroundColor = UIColor(named: "moreColor")
         if #available(iOS 13.0, *) {
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
@@ -746,7 +746,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         blockButton.height(Constants.bottomViewButtonSize)
         blockButton.layer.cornerRadius = 8
         
-        
+
         episodesButton.width(136)
         episodesButton.height(Constants.bottomViewButtonSize)
         episodesButton.layer.cornerRadius = 8
@@ -882,11 +882,11 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
         resetTimer()
     }
-    
+
     func updateSeasonNum(index:Int) {
         selectedSeason = index
     }
-    
+
     //MARK: - ****** SEASONS *******
     @objc func episodesButtonPressed(_ sender: UIButton){
         let episodeVC = EpisodeCollectionUI()
@@ -922,7 +922,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         self.present(vc, animated: true, completion: nil)
     }
     @objc func blockButtonPressed(_ sender: UIButton){
-        
+
         if isBlock {
             isAskPermission = true
             unblockButton.isHidden = true
@@ -1119,7 +1119,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             }, completion: nil)
         }
     }
-    
+
     func showSeekForwardButton(){
         skipForwardButton.alpha = 1.0
         print("=======FORWARD SHOW")
@@ -1176,7 +1176,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 if enableGesture {
                     playButton.alpha = alpha
                 }
-                
+
                 bottomView.alpha = alpha
                 //                maximizeButton.alpha = alpha
             }
@@ -1364,7 +1364,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 selectedSubtitle = selectedSubtitleLabel
             }
             break
-            
+
         case .audio:
             let audios = player.currentItem?.tracks(type: .audio) ?? ["None"]
             let selectedAudio = audios[index]
@@ -1416,7 +1416,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
     }
-    
+
     private func showAudioTrackBottomSheet(){
         var audios = player.currentItem?.tracks(type: .audio) ?? ["None"]
         if audios.isEmpty {
@@ -1462,7 +1462,10 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
                 resolutions[key] = value
                 startAt = 0
         }
-        
+
+        //        selectedSeason = seasonIndex + 1
+        //        selectedSeason = seasonIndex + 1
+
         self.resolutions = resolutions
         
         let isFinded = resolutions.contains(where: { (key, value) in

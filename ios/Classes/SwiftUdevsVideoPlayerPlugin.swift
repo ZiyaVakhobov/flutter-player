@@ -41,15 +41,15 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 }
                 let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 if(isLive){
+                    var channelData = [Dictionary<String, Any>()]
                     var programData = [Dictionary<String, Any>()]
                     
                     guard let videoURL = URL(string: url) else {
                         return
                     }
-                    print(myArgs)
-                    print("PROGRAM DATA \(myArgs["programsInfoList"] )")
-                    programData = myArgs["programsInfoList"] as! [Dictionary<String, Any>]
-                    let tvProgramsText = myArgs["tvProgramsText"] as! String
+                    //                channelData = myArgs["channels"] as! [Dictionary<String, Any>]
+                    //                programData = myArgs["programs"] as! [Dictionary<String, Any>]
+                    
                     let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen

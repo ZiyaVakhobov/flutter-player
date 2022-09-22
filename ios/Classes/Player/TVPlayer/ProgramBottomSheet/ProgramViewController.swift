@@ -62,7 +62,7 @@ class ProgramViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
         return label
     }()
-    
+
     lazy var cancelView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -73,7 +73,6 @@ class ProgramViewController: UIViewController {
         cancelBtn.backgroundColor = .clear
         cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
-        
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
     }()
@@ -238,13 +237,13 @@ class ProgramViewController: UIViewController {
                 make.height.equalTo(menuView).multipliedBy(0.7)
             }
         }
-        
+
         menuView.snp.makeConstraints { make in
             make.height.equalTo(menuHeight)
             make.bottom.equalToSuperview().inset(0)
             make.right.left.equalToSuperview()
         }
-        
+
         //        divider.snp.makeConstraints { make in
         //            make.right.left.equalTo(mainVerticalView)
         //            make.height.equalTo(1)
@@ -296,7 +295,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return programInfo[section].programsList.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ProgramCell
@@ -305,7 +304,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
             cell.timeLB.text = programInfo[indexPath.section].programsList[indexPath.row].scheduledTime
                 cell.timeLB.textColor = .white
                 cell.timeLB.font = UIFont.boldSystemFont(ofSize: 16)
-            
+
             cell.channelNamesLB.textColor = .white
             cell.circleView.backgroundColor = .green
             cell.channelNamesLB.text = programInfo[indexPath.section].programsList[indexPath.row].programTitle
@@ -330,7 +329,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
             if section == 0 && !(programInfo[0].day.isEmpty){
                 let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
                 headerView.backgroundColor = .clear
-                
+
                 let label = UILabel()
                 label.font = UIFont.boldSystemFont(ofSize: 17)
                 if(locale == "ru"){
@@ -341,23 +340,23 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
                     label.text = programInfo[0].day
                 }
                 label.textColor = .white
-                
+
                 let button = UIButton(type: .custom)
                 button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
                 button.imageView?.contentMode = .scaleAspectFill
                 button.tintColor = .white
-                
+
                 let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
                 button.addGestureRecognizer(tap)
-                
+
                 headerView.addSubview(label)
                 headerView.addSubview(button)
-                
+
                 label.snp.makeConstraints { make in
                     make.left.equalToSuperview().inset(56)
                     make.centerY.equalToSuperview()
                 }
-                
+
                 button.snp.makeConstraints { make in
                     make.right.equalToSuperview().inset(50)
                     make.centerY.equalToSuperview()
@@ -367,7 +366,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
             }else if section == 1  && !programInfo[0].day.isEmpty {
                 let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
                 headerView.backgroundColor =  .clear
-                
+
                 let label = UILabel()
                 label.font = UIFont.boldSystemFont(ofSize: 17)
                 if(locale == "ru"){
@@ -387,7 +386,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
             }else if section == 2 && !programInfo[0].day.isEmpty {
                 let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
                 headerView.backgroundColor =  .clear
-                
+
                 let label = UILabel()
                 label.font = UIFont.boldSystemFont(ofSize: 17)
                 if(locale == "ru"){
