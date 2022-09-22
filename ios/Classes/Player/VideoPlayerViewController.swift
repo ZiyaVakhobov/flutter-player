@@ -1463,9 +1463,6 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
                 startAt = 0
         }
 
-        //        selectedSeason = seasonIndex + 1
-        //        selectedSeason = seasonIndex + 1
-
         self.resolutions = resolutions
         
         let isFinded = resolutions.contains(where: { (key, value) in

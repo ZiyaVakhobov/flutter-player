@@ -15,8 +15,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         flutterResult = result;
-        print("TTTT")
-        print(call.method)
         if (call.method == "closePlayer" ) {
             let vc = VideoPlayerViewController()
             vc.dismiss(animated: true, completion: nil)
@@ -41,15 +39,13 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 }
                 let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 if(isLive){
-                    var channelData = [Dictionary<String, Any>()]
                     var programData = [Dictionary<String, Any>()]
                     
                     guard let videoURL = URL(string: url) else {
                         return
                     }
-                    //                channelData = myArgs["channels"] as! [Dictionary<String, Any>]
-                    //                programData = myArgs["programs"] as! [Dictionary<String, Any>]
-                    
+                    programData = myArgs["programsInfoList"] as! [Dictionary<String, Any>]
+                    let tvProgramsText = myArgs["tvProgramsText"] as! String
                     let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
@@ -62,7 +58,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.titleText = title
                     vc.showsBtnText = tvProgramsText
                     vc.programs = ProgramModel.fromDictinaryProgramms(map: programData)
-                    print("PROGRAM DATA \(programData)")
                     vc.binaryMessengerMainChannel = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
