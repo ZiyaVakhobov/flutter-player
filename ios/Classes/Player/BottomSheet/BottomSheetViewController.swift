@@ -2,7 +2,7 @@
 //  BottomSheetViewController.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import Foundation
@@ -24,7 +24,7 @@ extension String {
             return self
         }
     }
-
+    
     mutating func capitalizeFirstLetter() {
         self = self.capitalizingFirstLetter()
     }
@@ -80,7 +80,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .black
+        view.backgroundColor = Colors.black
         view.layer.cornerRadius = 24
         view.clipsToBounds = true
         view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
@@ -131,7 +131,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         contentTableView.delegate = self
         contentTableView.dataSource = self
         contentTableView.separatorStyle = UITableViewCell.SeparatorStyle.none
-        containerView.backgroundColor = .black
+        containerView.backgroundColor = Colors.moreColor
         contentTableView.register(BottomSheetCell.self, forCellReuseIdentifier: "BottomSheetCell")
         setupView()
         setupConstraints()
@@ -205,8 +205,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
             mainVerticalStack.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             mainVerticalStack.leadingAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.leadingAnchor,constant: 16),
             mainVerticalStack.trailingAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.trailingAnchor,constant: -16),
-//            horizontalStack.leadingAnchor.constraint(equalTo: mainVerticalStack.leftAnchor,constant: 0),
-//            horizontalStack.topAnchor.constraint(equalTo: mainVerticalStack.topAnchor,constant: 16),
             labelView.heightAnchor.constraint(equalToConstant: 32)
             
         ])
@@ -224,7 +222,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         cancelBtn.snp.makeConstraints { make in
             make.left.equalTo(horizontalStack)
             make.width.equalTo(50)
-        
+            
         }
         containerViewHeightConstraint = containerView.heightAnchor.constraint(equalToConstant: defaultHeight)
         containerViewBottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: defaultHeight)
@@ -242,18 +240,18 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     }
     
     // MARK: Pan gesture handler
-//        @objc func handlePanGesture(gesture: UIPanGestureRecognizer) {}
+    //        @objc func handlePanGesture(gesture: UIPanGestureRecognizer) {}
     @objc func handlePanGesture(gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: view)
         // Drag to top will be minus value and vice versa
         print("Pan gesture y offset: \(translation.y)")
-
+        
         // Get drag direction
         let isDraggingDown = translation.y > 0
-
+        
         // New height is based on value of dragging plus current container height
         let newHeight = currentContainerHeight - translation.y
-
+        
         // Handle based on gesture state
         switch gesture.state {
         case .changed:
@@ -267,7 +265,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         case .ended:
             // This happens when user stop drag,
             // so we will get the last height of container
-
+            
             // Condition 1: If new height is below min, dismiss controller
             if newHeight < dismissibleHeight {
                 self.animateDismissView()
@@ -276,14 +274,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
                 // Condition 2: If new height is below default, animate back to default
                 animateContainerHeight(defaultHeight)
             }
-            //            else if newHeight < maximumContainerHeight && isDraggingDown {
-            //                // Condition 3: If new height is below max and going down, set to default height
-            //                animateContainerHeight(defaultHeight)
-            //            }
-            //            else if newHeight > defaultHeight && !isDraggingDown {
-            //                // Condition 4: If new height is below max and going up, set to max height at top
-            //                animateContainerHeight(maximumContainerHeight)
-            //            }
         default:
             break
         }

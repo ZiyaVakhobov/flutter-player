@@ -2,7 +2,7 @@
 //  CustomModalViewController.swift
 //  HalfScreenPresentation
 //
-//  Created by Hafiz on 06/06/2021.
+//  Created by Sunnatillo Shavkatov on 06/06/2021.
 //
 
 import UIKit

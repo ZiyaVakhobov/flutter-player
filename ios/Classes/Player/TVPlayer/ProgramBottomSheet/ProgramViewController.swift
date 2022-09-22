@@ -2,7 +2,7 @@
 //  ProgramViewController.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import UIKit
@@ -50,19 +50,19 @@ class ProgramViewController: UIViewController {
     }()
     
     lazy var divider : UIView = {
-         let div = UIView()
+        let div = UIView()
         div.backgroundColor = .gray.withAlphaComponent(0.6)
-         return div
-     }()
-     var cancelLabel : UILabel = {
-         let label = UILabel()
-         label.text = "Отменить"
-         label.textColor = .white
-         label.isUserInteractionEnabled = true
-         label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
+        return div
+    }()
+    var cancelLabel : UILabel = {
+        let label = UILabel()
+        label.text = "Отменить"
+        label.textColor = .white
+        label.isUserInteractionEnabled = true
+        label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
         return label
-     }()
-
+    }()
+    
     lazy var cancelView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -73,7 +73,7 @@ class ProgramViewController: UIViewController {
         cancelBtn.backgroundColor = .clear
         cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
-
+        
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
     }()
@@ -156,7 +156,7 @@ class ProgramViewController: UIViewController {
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-            super.viewWillTransition(to: size, with: coordinator)
+        super.viewWillTransition(to: size, with: coordinator)
         if UIDevice.current.userInterfaceIdiom == .phone {
             if(UIDevice.current.orientation.isLandscape){
                 menuHeight =  300
@@ -171,13 +171,13 @@ class ProgramViewController: UIViewController {
                 menuHeight = 210
             }
         }
-        }
+    }
     
     override func viewDidLoad() {
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             if programInfo.isEmpty {
-           menuHeight =  UIScreen.main.bounds.height * 0.75
+                menuHeight =  UIScreen.main.bounds.height * 0.75
             }else {
                 if(UIDevice.current.orientation.isLandscape){
                     menuHeight =  300
@@ -197,14 +197,14 @@ class ProgramViewController: UIViewController {
         view.backgroundColor = .clear
         view.addSubview(backdropView)
         view.addSubview(menuView)
-//        menuView.addSubview(mainVerticalView)
+        //        menuView.addSubview(mainVerticalView)
         menuView.addSubview(tableView)
-//        menuView.addSubview(cancelView)
-//        tableView.tableFooterView = cancelView
-//        cancelView.addSubview(verticalStackView)
-//        let tap = UITapGestureRecognizer(target: self, action: #selector(ProgramViewController.tapFunction))
-//        cancelLabel.addGestureRecognizer(tap)
-//        cancelLabel.isUserInteractionEnabled = true
+        //        menuView.addSubview(cancelView)
+        //        tableView.tableFooterView = cancelView
+        //        cancelView.addSubview(verticalStackView)
+        //        let tap = UITapGestureRecognizer(target: self, action: #selector(ProgramViewController.tapFunction))
+        //        cancelLabel.addGestureRecognizer(tap)
+        //        cancelLabel.isUserInteractionEnabled = true
         menuView.backgroundColor = .white
         tableView.sectionFooterHeight = 0
         tableView.contentInsetAdjustmentBehavior = .never
@@ -224,12 +224,12 @@ class ProgramViewController: UIViewController {
         super.viewDidLayoutSubviews()
         
         if UIDevice.current.userInterfaceIdiom == .phone {
-        tableView.snp.makeConstraints { make in
-            make.left.equalTo(menuView)
-            make.right.equalTo(menuView)
-            make.top.equalTo(menuView).offset(0)
-            make.height.equalTo(menuView)
-        }
+            tableView.snp.makeConstraints { make in
+                make.left.equalTo(menuView)
+                make.right.equalTo(menuView)
+                make.top.equalTo(menuView).offset(0)
+                make.height.equalTo(menuView)
+            }
         }else {
             tableView.snp.makeConstraints { make in
                 make.left.equalTo(menuView).offset(0)
@@ -238,44 +238,44 @@ class ProgramViewController: UIViewController {
                 make.height.equalTo(menuView).multipliedBy(0.7)
             }
         }
-
+        
         menuView.snp.makeConstraints { make in
             make.height.equalTo(menuHeight)
             make.bottom.equalToSuperview().inset(0)
             make.right.left.equalToSuperview()
         }
-       
-//        divider.snp.makeConstraints { make in
-//            make.right.left.equalTo(mainVerticalView)
-//            make.height.equalTo(1)
-//            make.topMargin.equalTo(0)
-//
-//        }
-//        if UIDevice.current.userInterfaceIdiom == .phone {
-//            cancelView.snp.makeConstraints { make in
-//                make.left.right.equalTo(mainVerticalView)
-//                make.bottom.equalTo(mainVerticalView).offset(-20)
-//                make.height.equalTo(mainVerticalView).multipliedBy(0.3)
-//                make.topMargin.equalTo(0)
-//            }
-//        }else {
-//            cancelView.snp.makeConstraints { make in
-//                make.left.right.equalTo(mainVerticalView)
-//                make.bottom.equalTo(mainVerticalView).offset(-20)
-//                make.height.equalTo(mainVerticalView).multipliedBy(0.3)
-//                make.topMargin.equalTo(0)
-//            }
-//        }
         
-//        verticalStackView.snp.makeConstraints { make in
-//            make.right.equalToSuperview()
-//            make.top.equalTo(cancelView).offset(0)
-//            make.left.equalTo(cancelView).offset(50)
-//        }
-//        horizontalStackView.snp.makeConstraints { make in
-//            make.left.equalTo(verticalStackView).offset(0)
-//            make.right.equalToSuperview()
-//        }
+        //        divider.snp.makeConstraints { make in
+        //            make.right.left.equalTo(mainVerticalView)
+        //            make.height.equalTo(1)
+        //            make.topMargin.equalTo(0)
+        //
+        //        }
+        //        if UIDevice.current.userInterfaceIdiom == .phone {
+        //            cancelView.snp.makeConstraints { make in
+        //                make.left.right.equalTo(mainVerticalView)
+        //                make.bottom.equalTo(mainVerticalView).offset(-20)
+        //                make.height.equalTo(mainVerticalView).multipliedBy(0.3)
+        //                make.topMargin.equalTo(0)
+        //            }
+        //        }else {
+        //            cancelView.snp.makeConstraints { make in
+        //                make.left.right.equalTo(mainVerticalView)
+        //                make.bottom.equalTo(mainVerticalView).offset(-20)
+        //                make.height.equalTo(mainVerticalView).multipliedBy(0.3)
+        //                make.topMargin.equalTo(0)
+        //            }
+        //        }
+        
+        //        verticalStackView.snp.makeConstraints { make in
+        //            make.right.equalToSuperview()
+        //            make.top.equalTo(cancelView).offset(0)
+        //            make.left.equalTo(cancelView).offset(50)
+        //        }
+        //        horizontalStackView.snp.makeConstraints { make in
+        //            make.left.equalTo(verticalStackView).offset(0)
+        //            make.right.equalToSuperview()
+        //        }
         cancelBtn.snp.makeConstraints { make in
             make.width.height.equalTo(24)
         }
@@ -296,7 +296,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return programInfo[section].programsList.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ProgramCell
@@ -315,13 +315,13 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
             }
             cell.channelNamesLB.textColor = .white
             cell.circleView.backgroundColor = .green
-//            if(programInfo[indexPath.section].programsList[indexPath.row].isAvailable) {
-//                cell.channelNamesLB.textColor = .white
-//                cell.circleView.backgroundColor = .green
-//            }else {
-//                cell.channelNamesLB.textColor = .gray
-//                cell.circleView.backgroundColor = .gray
-//            }
+            //            if(programInfo[indexPath.section].programsList[indexPath.row].isAvailable) {
+            //                cell.channelNamesLB.textColor = .white
+            //                cell.circleView.backgroundColor = .green
+            //            }else {
+            //                cell.channelNamesLB.textColor = .gray
+            //                cell.circleView.backgroundColor = .gray
+            //            }
             cell.channelNamesLB.text = programInfo[indexPath.section].programsList[indexPath.row].programTitle
             
         }
@@ -342,84 +342,84 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
         if !(programInfo.isEmpty)  {
-        if section == 0 && !(programInfo[0].day.isEmpty){
-        let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
-            headerView.backgroundColor = .clear
-        
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 17)
-            if(locale == "ru"){
-                label.text = "Вчера"
-            } else if(locale == "uz"){
-                label.text = "Kecha"
-            } else {
-                label.text = programInfo[0].day
+            if section == 0 && !(programInfo[0].day.isEmpty){
+                let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
+                headerView.backgroundColor = .clear
+                
+                let label = UILabel()
+                label.font = UIFont.boldSystemFont(ofSize: 17)
+                if(locale == "ru"){
+                    label.text = "Вчера"
+                } else if(locale == "uz"){
+                    label.text = "Kecha"
+                } else {
+                    label.text = programInfo[0].day
+                }
+                label.textColor = .white
+                
+                let button = UIButton(type: .custom)
+                button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
+                button.imageView?.contentMode = .scaleAspectFill
+                button.tintColor = .white
+                
+                let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+                button.addGestureRecognizer(tap)
+                
+                headerView.addSubview(label)
+                headerView.addSubview(button)
+                
+                label.snp.makeConstraints { make in
+                    make.left.equalToSuperview().inset(56)
+                    make.centerY.equalToSuperview()
+                }
+                
+                button.snp.makeConstraints { make in
+                    make.right.equalToSuperview().inset(50)
+                    make.centerY.equalToSuperview()
+                    make.width.equalTo(30)
+                }
+                return headerView
+            }else if section == 1  && !programInfo[0].day.isEmpty {
+                let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
+                headerView.backgroundColor =  .clear
+                
+                let label = UILabel()
+                label.font = UIFont.boldSystemFont(ofSize: 17)
+                if(locale == "ru"){
+                    label.text = "Сегодня"
+                } else if(locale == "uz"){
+                    label.text = "Bugun"
+                } else {
+                    label.text =  programInfo[1].day
+                }
+                label.textColor = .white
+                headerView.addSubview(label)
+                label.snp.makeConstraints { make in
+                    make.left.equalToSuperview().inset(56)
+                    make.centerY.equalToSuperview()
+                }
+                return headerView
+            }else if section == 2 && !programInfo[0].day.isEmpty {
+                let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
+                headerView.backgroundColor =  .clear
+                
+                let label = UILabel()
+                label.font = UIFont.boldSystemFont(ofSize: 17)
+                if(locale == "ru"){
+                    label.text = "Завтра"
+                } else if(locale == "uz"){
+                    label.text = "Ertaga"
+                } else {
+                    label.text = programInfo[2].day
+                }
+                label.textColor = .white
+                headerView.addSubview(label)
+                label.snp.makeConstraints { make in
+                    make.left.equalToSuperview().inset(56)
+                    make.centerY.equalToSuperview()
+                }
+                return headerView
             }
-        label.textColor = .white
-        
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
-        button.imageView?.contentMode = .scaleAspectFill
-        button.tintColor = .white
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        button.addGestureRecognizer(tap)
-        
-        headerView.addSubview(label)
-        headerView.addSubview(button)
-        
-        label.snp.makeConstraints { make in
-            make.left.equalToSuperview().inset(56)
-            make.centerY.equalToSuperview()
-        }
-        
-        button.snp.makeConstraints { make in
-            make.right.equalToSuperview().inset(50)
-            make.centerY.equalToSuperview()
-            make.width.equalTo(30)
-        }
-        return headerView
-        }else if section == 1  && !programInfo[0].day.isEmpty {
-            let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
-            headerView.backgroundColor =  .clear
-
-            let label = UILabel()
-            label.font = UIFont.boldSystemFont(ofSize: 17)
-            if(locale == "ru"){
-                label.text = "Сегодня"
-            } else if(locale == "uz"){
-                label.text = "Bugun"
-            } else {
-                label.text =  programInfo[1].day
-            }
-            label.textColor = .white
-            headerView.addSubview(label)
-            label.snp.makeConstraints { make in
-                make.left.equalToSuperview().inset(56)
-                make.centerY.equalToSuperview()
-            }
-            return headerView
-        }else if section == 2 && !programInfo[0].day.isEmpty {
-            let headerView = UIView.init(frame: CGRect.init(x: 16, y: 0, width: tableView.frame.width, height: 80))
-            headerView.backgroundColor =  .clear
-
-            let label = UILabel()
-            label.font = UIFont.boldSystemFont(ofSize: 17)
-            if(locale == "ru"){
-                label.text = "Завтра"
-            } else if(locale == "uz"){
-                label.text = "Ertaga"
-            } else {
-                label.text = programInfo[2].day
-            }
-            label.textColor = .white
-            headerView.addSubview(label)
-            label.snp.makeConstraints { make in
-                make.left.equalToSuperview().inset(56)
-                make.centerY.equalToSuperview()
-            }
-            return headerView
-         }
         }
         return UIView()
     }

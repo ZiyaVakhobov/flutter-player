@@ -2,7 +2,7 @@
 //  SettingsVC.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import UIKit
@@ -31,7 +31,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         table.delegate = self
         table.allowsSelection = true
         table.separatorColor = .clear
-        table.backgroundColor =  UIColor(named: "moreColor")
+        table.backgroundColor =  Colors.moreColor
         table.isScrollEnabled = false
         table.contentInsetAdjustmentBehavior = .never
         let inset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -39,7 +39,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         return table
     }()
     
-
+    
     lazy var topView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -51,7 +51,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         return view
     }()
-
+    
     lazy var mainStack: UIStackView = {
         let stackView = UIStackView()
         stackView.addArrangedSubviews(contentView)
@@ -83,7 +83,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         bdView.backgroundColor = .clear
         return bdView
     }()
-   
+    
     let menuView :UIView = {
         let view = UIView()
         view.layer.cornerRadius = 24
@@ -101,7 +101,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-   
+    
     @objc func cancelTapped() {
         self.dismiss(animated: true, completion: nil)
     }
@@ -111,20 +111,18 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         tableView.contentInsetAdjustmentBehavior = .never
         if UIDevice.current.userInterfaceIdiom == .phone {
-           menuHeight = 150
+            menuHeight = 150
         }else {
             menuHeight = 180
         }
-              
+        
         view.addSubview(backdropView)
         view.addSubview(menuView)
         menuView.addSubview(backView)
-//        menuView.addSubview(cancelBtn)
         backView.addSubview(mainStack)
-//        topView.addSubview(cancelBtn)
         contentView.addSubview(tableView)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        menuView.backgroundColor = .black
+        menuView.backgroundColor = Colors.moreColor
         tableView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -145,7 +143,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.top.equalTo(menuView)
             make.edges.equalTo(menuView)
         }
-
+        
         contentView.snp.makeConstraints { make in
             make.width.equalTo(mainStack)
             make.height.equalTo(mainStack).multipliedBy(1)
@@ -156,7 +154,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.width.equalTo(contentView).offset(50)
             make.height.equalTo(125)
         }
-       
+        
         
         menuView.snp.makeConstraints { make in
             make.height.equalTo(menuHeight)
@@ -194,7 +192,7 @@ extension SettingVC: UITableViewDataSource, UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if (indexPath.row == 0) {
-           
+            
             self.dismiss(animated: true) {
                 self.delegete?.qualityBottomSheet()
             }

@@ -2,7 +2,7 @@
 //  BufferSlider.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import Foundation
@@ -57,15 +57,15 @@ public enum VerticalPosition:Int{
     
     
     @IBInspectable var bufferValue : Float = 0 {
-    didSet {
-        if(bufferValue < 0 ) {
-            bufferValue = 0
-        } else if (bufferValue > maximumValue) {
-            bufferValue = maximumValue
+        didSet {
+            if(bufferValue < 0 ) {
+                bufferValue = 0
+            } else if (bufferValue > maximumValue) {
+                bufferValue = maximumValue
+            }
+            self.setNeedsDisplay()
         }
-        self.setNeedsDisplay()
     }
-}
     
     ///baseColor property. @IBInspectable
     @IBInspectable open var baseColor:UIColor = UIColor.lightGray
@@ -75,7 +75,7 @@ public enum VerticalPosition:Int{
     
     ///bufferColor property. @IBInspectable
     @IBInspectable open var bufferColor:UIColor? = nil
-
+    
     ///BorderWidth property. @IBInspectable
     @IBInspectable open var borderWidth: Double = 0.5{
         didSet{
@@ -134,8 +134,8 @@ public enum VerticalPosition:Int{
     
     ///Custom Drawing. Subclass and and override to suit you needs.
     open override func draw(_ rect: CGRect) {
-//        UIColor.redColor().colorWithAlphaComponent(0.3).set()
-//        UIRectFrame(rect)
+        //        UIColor.redColor().colorWithAlphaComponent(0.3).set()
+        //        UIRectFrame(rect)
         baseColor.set()
         let rect = self.bounds.insetBy(dx: CGFloat(borderWidth)+padding, dy: CGFloat(borderWidth))
         let height = sliderHeight.CGFloatValue
@@ -149,7 +149,7 @@ public enum VerticalPosition:Int{
         default:
             break
         }
-
+        
         let path = UIBezierPath()
         if roundedSlider {
             path.addArc(withCenter: CGPoint(x: sliderRect.minX + radius, y: sliderRect.minY+radius), radius: radius, startAngle: CGFloat(M_PI)/2, endAngle: -CGFloat(M_PI)/2, clockwise: true)
@@ -163,7 +163,7 @@ public enum VerticalPosition:Int{
             path.addLine(to: CGPoint(x: sliderRect.maxX, y: sliderRect.minY+height))
             path.addLine(to: CGPoint(x: sliderRect.minX, y: sliderRect.minY+height))
         }
-
+        
         baseColor.setStroke()
         path.lineWidth = borderWidth.CGFloatValue
         path.stroke()
@@ -197,7 +197,7 @@ public enum VerticalPosition:Int{
             UIBezierPath(rect: fillRect).fill()
         }
     }
-
+    
 }
 
 
