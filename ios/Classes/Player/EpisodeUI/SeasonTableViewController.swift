@@ -2,7 +2,7 @@
 //  SeasonTableViewController.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import Foundation
@@ -27,7 +27,6 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
     lazy var labelView : UIView = {
         let view = UIView()
         view.backgroundColor = .clear
-//        view.addSubview(titleLabel)
         return view
     }()
     
@@ -38,25 +37,25 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
     }()
     
     lazy var divider : UIView = {
-         let div = UIView()
+        let div = UIView()
         div.backgroundColor = .gray.withAlphaComponent(0.6)
-         return div
-     }()
-     var cancelLabel : UILabel = {
-         let label = UILabel()
-         label.text = "Отменить"
-         label.textColor = .white
-         label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
+        return div
+    }()
+    var cancelLabel : UILabel = {
+        let label = UILabel()
+        label.text = "Отменить"
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
         return label
-     }()
+    }()
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
-        cancelBtn.setImage(UIImage(named: "exitIcon"), for: .normal)
+        cancelBtn.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.imageEdgeInsets = UIEdgeInsets(top: 24, left: 24, bottom: 24, right: 24)
         cancelBtn.size(CGSize(width: 24, height: 24))
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
-       
+        
         return cancelBtn
     }()
     lazy var horizontalStackView: UIStackView = {
@@ -89,11 +88,11 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "moreColor")
-//        view.layer.cornerRadius = 24
-//        view.roundCorners(corners: [.topLeft,.topRight], radius: 24)
+        view.backgroundColor = Colors.moreColor
+        //        view.layer.cornerRadius = 24
+        //        view.roundCorners(corners: [.topLeft,.topRight], radius: 24)
         view.clipsToBounds = true
-//        view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
+        //        view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         return view
     }()
     
@@ -141,7 +140,7 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
         // tap gesture on dimmed view to dismiss
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleCloseAction))
         dimmedView.addGestureRecognizer(tapGesture)
-//        setupPanGesture()
+        //        setupPanGesture()
     }
     
     @objc func handleCloseAction() {
@@ -204,7 +203,7 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
             dimmedView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             dimmedView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             dimmedView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
- 
+            
             
         ])
         containerView.snp.makeConstraints({ make in
@@ -245,7 +244,7 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
         containerViewBottomConstraint?.isActive = true
     }
     
-  
+    
     //MARK: - BottomSheet Animation Part
     func setupPanGesture() {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePanGesture(gesture:)))
@@ -287,7 +286,7 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
                 // Condition 2: If new height is below default, animate back to default
                 animateContainerHeight(defaultHeight)
             }
-   
+            
         default:
             break
         }

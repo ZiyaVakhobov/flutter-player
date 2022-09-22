@@ -15,6 +15,7 @@ class Colors{
     static let moreColor = UIColor(red:16, green: 14, blue: 25)
     static let mainColor = UIColor(red:80, green: 134, blue: 236)
     static let mainBackground = UIColor(red: 17, green: 14, blue: 25)
+    static let seasonColor = UIColor(red: 46, green: 46, blue: 48)
     static let black = UIColor(red:0, green: 0, blue: 0)
     static let white = UIColor(red:1, green: 1, blue: 1)
 }

@@ -2,7 +2,7 @@
 //  VGPlayerUtils.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 
@@ -24,18 +24,18 @@ class VGPlayerUtils: NSObject {
         return Bundle(for: AVPlayer.self)
     }
     
-   static public func fileResource(_ fileName: String, fileType: String) -> String? {
+    static public func fileResource(_ fileName: String, fileType: String) -> String? {
         let bundle = playerBundle()
         let path = bundle.path(forResource: fileName, ofType: fileType)
         return path
     }
     
-   static public func imageResource(_ name: String) -> UIImage? {
+    static public func imageResource(_ name: String) -> UIImage? {
         let bundle = playerBundle()
         return UIImage(named: name, in: bundle, compatibleWith: nil)
     }
     
-   static func imageSize(image: UIImage, scaledToSize newSize: CGSize) -> UIImage? {
+    static func imageSize(image: UIImage, scaledToSize newSize: CGSize) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
         image.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -45,7 +45,7 @@ class VGPlayerUtils: NSObject {
     
     static func decoderVideoFormat(_ URL: URL?) -> VGPlayerMediaFormat {
         if URL == nil {
-           return .error
+            return .error
         }
         if let path = URL?.absoluteString{
             if path.contains(".mp4") {

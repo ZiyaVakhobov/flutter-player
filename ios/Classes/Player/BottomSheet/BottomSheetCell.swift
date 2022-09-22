@@ -1,10 +1,8 @@
-
 import Foundation
 import UIKit
 
-
 class BottomSheetCell : UITableViewCell{
-
+    
     var title : String?{
         didSet{
             headerTitle.text = title
@@ -71,17 +69,10 @@ class BottomSheetCell : UITableViewCell{
         self.setupView()
     }
     
-    
     override var intrinsicContentSize: CGSize {
         let height = CGFloat(21)
         return CGSize(width: 200, height: height)
     }
-    
-//    required init(model:BottomSheetModel) {
-//        super.init(frame: CGRect.zero)
-//        self.model = model
-//        setupView()
-//    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

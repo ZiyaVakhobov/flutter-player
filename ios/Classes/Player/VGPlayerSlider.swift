@@ -2,7 +2,7 @@
 //  VGPlayerSlider.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 // https://developer.apple.com/reference/uikit/uislider
 

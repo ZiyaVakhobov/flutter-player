@@ -2,7 +2,7 @@
 //  EpisodeCollectionUI.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Sunnatillo Shavkatov on 21/04/22.
 //
 
 import UIKit
@@ -46,7 +46,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     
     let menuView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "moreColor")
+        view.backgroundColor = Colors.moreColor
         return view
     }()
     
@@ -129,19 +129,15 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
             print("running on iPad")
         }
         
-        view.backgroundColor = .black
-//        view.addSubview(collectionView)
+        view.backgroundColor = .clear
         view.addSubview(backdropView)
         view.addSubview(menuView)
         menuView.addSubview(verticalStack)
         verticalStack.addArrangedSubviews(topView,backView)
-//        view.addSubview(backView)
         backView.addSubview(collectionView)
-//        menuView.addSubview(headerView)
-//        menuView.addSubview(topView)
         topView.addSubview(headerView)
         headerView.addSubview(seasonSelectBtn)
-        seasonSelectBtn.backgroundColor = UIColor(named: "seasonColor")
+        seasonSelectBtn.backgroundColor = Colors.seasonColor
         headerView.addSubview(cancelBtn)
         menuView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear

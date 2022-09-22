@@ -157,7 +157,7 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.width.equalTo(contentView).offset(50)
             make.height.equalTo(125)
         }
-  
+        
         menuView.snp.makeConstraints { make in
             make.height.equalTo(menuHeight)
             make.bottom.equalToSuperview()

@@ -2,7 +2,7 @@
 //  CancelCell.swift
 //  Runner
 //
-//  Created by Nuriddin Jumayev on 21/04/22.
+//  Created by Shavkatov Sunnatillo on 21/04/22.
 //
 
 import UIKit
@@ -17,17 +17,17 @@ class CancelCell: UITableViewCell {
     }()
     
     lazy var divider : UIView = {
-         let div = UIView()
+        let div = UIView()
         div.backgroundColor = .gray.withAlphaComponent(0.6)
-         return div
-     }()
-     var cancelLabel : UILabel = {
-         let label = UILabel()
-         label.text = "Отменить"
-         label.textColor = .white
-         label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
+        return div
+    }()
+    var cancelLabel : UILabel = {
+        let label = UILabel()
+        label.text = "Отменить"
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
         return label
-     }()
+    }()
     lazy var cancelBtn: UIImageView = {
         let imageView = UIImageView()
         let image = UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
@@ -82,7 +82,7 @@ class CancelCell: UITableViewCell {
     }
     
     func setupConstraints() {
-    
+        
         // Add subviews
         cancelView.addSubview(verticalStackView)
         divider.snp.makeConstraints { make in
@@ -108,5 +108,5 @@ class CancelCell: UITableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
     }
-
+    
 }
