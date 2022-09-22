@@ -18,4 +18,13 @@ class UdevsVideoPlayer {
       playerConfigJsonString: jsonStringConfig,
     );
   }
+
+  Future<String?> playTV({
+    required PlayerConfiguration playerConfig,
+  }) {
+    String jsonStringConfig = jsonEncode(playerConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance.playVideo(
+      playerConfigJsonString: jsonStringConfig,
+    );
+  }
 }
