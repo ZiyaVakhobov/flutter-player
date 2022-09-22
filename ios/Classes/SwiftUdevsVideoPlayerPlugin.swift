@@ -47,9 +47,10 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     guard let videoURL = URL(string: url) else {
                         return
                     }
-                    //                channelData = myArgs["channels"] as! [Dictionary<String, Any>]
-                    //                programData = myArgs["programs"] as! [Dictionary<String, Any>]
-                    
+                    print(myArgs)
+                    print("PROGRAM DATA \(myArgs["programsInfoList"] )")
+                    programData = myArgs["programsInfoList"] as! [Dictionary<String, Any>]
+                    let tvProgramsText = myArgs["tvProgramsText"] as! String
                     let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
@@ -60,9 +61,8 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.resolutions = sortedResolutions
                     vc.isSerial = isSerial
                     vc.titleText = title
-                    vc.locale = "en"
+                    vc.showsBtnText = tvProgramsText
                     vc.programs = ProgramModel.fromDictinaryProgramms(map: programData)
-                    vc.channels = Channels.fromDictinaryChannel(map: channelData)
                     print("ChannelData = \(channelData)")
                     print("PROGRAM DATA \(programData)")
                     vc.binaryMessengerMainChannel = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger

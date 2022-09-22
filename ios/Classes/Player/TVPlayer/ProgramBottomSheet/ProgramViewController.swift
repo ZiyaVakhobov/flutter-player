@@ -304,7 +304,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
         if !(programInfo[indexPath.section].day.isEmpty) {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            if let data = formatter.date(from: programInfo[indexPath.section].programsList[indexPath.row].startTime) {
+            if let data = formatter.date(from: programInfo[indexPath.section].programsList[indexPath.row].scheduledTime) {
                 let displayFormatter = DateFormatter()
                 displayFormatter.dateFormat = "HH:mm"
                 displayFormatter.string(from: data)

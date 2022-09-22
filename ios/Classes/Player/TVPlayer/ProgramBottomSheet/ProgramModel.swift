@@ -16,18 +16,16 @@ struct ProgramModel {
         self.programsList = programsList
     }
     
-    
     static func fromDictinaryProgramms(map: [Dictionary<String, Any>])-> [ProgramModel]{
         var programInfoMain: [ProgramModel] = []
         map.forEach({programInfo in
             var programList :[Programms] = []
             var programMap: [Dictionary<String, Any>]?
             
-            programMap  = programInfo["programme"] as! [Dictionary<String, Any>]?
+            programMap  = programInfo["tvPrograms"] as! [Dictionary<String, Any>]?
             
             programMap?.forEach({ data in
-                
-                let programs = Programms(description: data["description"] as? String ?? "", endTime: data["end_time"] as? String ?? "", startTime: data["start_time"] as? String ?? "", id: data["id"] as? Int ?? 0, isAvailable: data["is_available"] as? Bool ?? false, programTitle: data["title"] as? String ?? "", xmlTitle: data["xml_title"] as? String ?? "")
+                let programs = Programms(scheduledTime: data["scheduledTime"] as? String ?? "", programTitle: data["programTitle"] as? String ?? "")
                 programList.append(programs)
             })
             let programInfos = ProgramModel(day: programInfo["day"] as? String ?? "", programsList: programList)
@@ -39,18 +37,10 @@ struct ProgramModel {
 }
 
 struct Programms{
+    var scheduledTime,programTitle:String
     
-    var description,endTime,startTime,programTitle,xmlTitle: String
-    var isAvailable: Bool
-    var id:Int
-    
-    init(description:String, endTime: String,startTime: String, id: Int,isAvailable:Bool, programTitle:String,xmlTitle:String){
-        self.id = id
-        self.description = description
-        self.startTime = startTime
-        self.endTime = endTime
-        self.isAvailable = isAvailable
+    init(scheduledTime:String, programTitle: String){
+        self.scheduledTime = scheduledTime
         self.programTitle = programTitle
-        self.xmlTitle = xmlTitle
     }
 }
