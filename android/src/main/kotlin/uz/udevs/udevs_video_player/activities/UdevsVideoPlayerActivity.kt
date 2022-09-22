@@ -12,6 +12,8 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.*
 import android.widget.*
 import androidx.core.view.ViewCompat
@@ -47,7 +49,6 @@ import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import kotlin.math.abs
-
 
 class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
@@ -282,14 +283,14 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                         Player.STATE_BUFFERING -> {
                             playPause?.visibility = View.GONE
                             progressbar?.visibility = View.VISIBLE
-                            if(playerView?.isControllerFullyVisible == false) {
+                            if (playerView?.isControllerFullyVisible == false) {
                                 playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
                             }
                         }
                         Player.STATE_READY -> {
                             playPause?.visibility = View.VISIBLE
                             progressbar?.visibility = View.GONE
-                            if(playerView?.isControllerFullyVisible == false) {
+                            if (playerView?.isControllerFullyVisible == false) {
                                 playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
                             }
                         }
@@ -303,10 +304,34 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         player?.playWhenReady = true
     }
 
-    @SuppressLint("SetTextI18n")
+    private var lastClicked1: Long = -1L
+
+    @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     private fun initializeClickListeners() {
-        customPlayback?.setOnClickListener {
-            playerView?.hideController()
+        customPlayback?.setOnTouchListener { _, motionEvent ->
+            if (motionEvent.pointerCount == 1 && motionEvent.action == MotionEvent.ACTION_UP) {
+                lastClicked1 = if (lastClicked1 == -1L) {
+                    System.currentTimeMillis()
+                } else {
+                    if (isDoubleClicked(lastClicked1)) {
+                        if (motionEvent!!.x < sWidth / 2) {
+                            player?.seekTo(player!!.currentPosition - 10000)
+                        } else {
+                            player?.seekTo(player!!.currentPosition + 10000)
+                        }
+                    } else {
+                        playerView?.hideController()
+                    }
+                    -1L
+                }
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (lastClicked1 != -1L) {
+                        playerView?.hideController()
+                        lastClicked1 = -1L
+                    }
+                }, 300)
+            }
+            return@setOnTouchListener true
         }
         close?.setOnClickListener {
             if (player?.isPlaying == true) {
@@ -379,11 +404,15 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 } else {
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
+            it.postDelayed({
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            }, 3000)
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        println("newConfig.orientation: ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             zoom?.visibility = View.VISIBLE
@@ -452,6 +481,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
         bottomSheetDialog.setContentView(R.layout.tv_programs_sheet)
@@ -465,6 +495,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_programs_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_programs_view_pager)
         viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration!!.programsInfoList)
+        viewPager?.currentItem = 1
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.programsInfoList[position].day
         }.attach()
@@ -589,6 +620,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ) {
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
         backButtonQualitySpeedBottomSheet =
@@ -643,13 +675,12 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     override fun onDown(p0: MotionEvent?): Boolean = false
     override fun onShowPress(p0: MotionEvent?) = Unit
 
-    private var doubleClickTimeLimitMills: Long = 500
     private var lastClicked: Long = -1L
     override fun onSingleTapUp(event: MotionEvent?): Boolean {
-        lastClicked = if(lastClicked == -1L) {
+        lastClicked = if (lastClicked == -1L) {
             System.currentTimeMillis()
         } else {
-            if(isDoubleClicked()) {
+            if (isDoubleClicked(lastClicked)) {
                 if (event!!.x < sWidth / 2) {
                     player?.seekTo(player!!.currentPosition - 10000)
                 } else {
@@ -660,10 +691,17 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             }
             -1L
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (lastClicked != -1L) {
+                playerView?.showController()
+                lastClicked = -1L
+            }
+        }, 300)
         return false
     }
-    private fun isDoubleClicked(): Boolean = getTimeDiff(lastClicked, System.currentTimeMillis()) <= doubleClickTimeLimitMills
-    private fun getTimeDiff(from: Long, to: Long): Long = to - from
+
+    private fun isDoubleClicked(lastClicked: Long): Boolean =
+        lastClicked - System.currentTimeMillis() <= 300
 
     override fun onLongPress(p0: MotionEvent?) = Unit
     override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
