@@ -69,11 +69,12 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             let json = (args as! [String:Any])["playerConfigJsonString"]
             if let myArgs = json as? [String: Any],let url = (myArgs["initialResolution"] as! [String:String]).values.first,let title = myArgs["title"] as? String, let duration = myArgs["lastPosition"] as? Int, let isSerial = myArgs["isSerial"] as? Bool, let resolutions = myArgs["resolutions"] as? [String:String] {
                 print("QUALITY MAP: \(resolutions)")
+                print("QUALITY MAP: \(url)")
                 guard let videoURL = URL(string: url) else {
                     return
                 }
-                channelData = myArgs["channels"] as! [Dictionary<String, Any>]
-                programData = myArgs["programs"] as! [Dictionary<String, Any>]
+//                channelData = myArgs["channels"] as! [Dictionary<String, Any>]
+//                programData = myArgs["programs"] as! [Dictionary<String, Any>]
                 
                 let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 let vc = TVVideoPlayerViewController()
