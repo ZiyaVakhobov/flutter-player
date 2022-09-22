@@ -95,7 +95,12 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
         actionBar?.hide()
-        hideSystemBars(window)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val window = window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = Color.BLACK
+            window.navigationBarColor = Color.BLACK
+        }
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         seasonIndex = playerConfiguration!!.seasonIndex
         episodeIndex = playerConfiguration!!.episodeIndex
@@ -419,7 +424,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun setFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).let { controller ->
-            controller.hide(WindowInsetsCompat.Type.statusBars())
+            controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
@@ -428,7 +433,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun cutFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
-            WindowInsetsCompat.Type.statusBars()
+            WindowInsetsCompat.Type.systemBars()
         )
     }
 
@@ -437,9 +442,9 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             ViewCompat.getWindowInsetsController(window.decorView) ?: return
         // Configure the behavior of the hidden system bars
         windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
         // Hide both the status bar and the navigation bar
-        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     private var currentBottomSheet = BottomSheet.NONE
@@ -463,7 +468,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.programsInfoList[position].day
         }.attach()
-        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
@@ -523,7 +527,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.seasons[position].title
         }.attach()
-        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
@@ -573,7 +576,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
-        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
         }
@@ -632,48 +634,35 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             })
         )
         listView.adapter = adapter
-        hideSystemBars(bottomSheetDialog.window!!)
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.SETTINGS
         }
     }
 
-    override fun onDown(p0: MotionEvent?): Boolean {
-        println("gesture: on down")
-        return false
-    }
-
-    override fun onShowPress(p0: MotionEvent?) {
-        println("gesture: on show press")
-    }
+    override fun onDown(p0: MotionEvent?): Boolean = false
+    override fun onShowPress(p0: MotionEvent?) = Unit
 
     private var doubleClickTimeLimitMills: Long = 500
     private var lastClicked: Long = -1L
-
     override fun onSingleTapUp(event: MotionEvent?): Boolean {
-        lastClicked = when {
-            lastClicked == -1L -> {
-                System.currentTimeMillis()
-            }
-            isDoubleClicked() -> {
+        lastClicked = if(lastClicked == -1L) {
+            System.currentTimeMillis()
+        } else {
+            if(isDoubleClicked()) {
                 if (event!!.x < sWidth / 2) {
                     player?.seekTo(player!!.currentPosition - 10000)
                 } else {
                     player?.seekTo(player!!.currentPosition + 10000)
                 }
-                -1L
-            }
-            else -> {
+            } else {
                 playerView?.showController()
-                System.currentTimeMillis()
             }
+            -1L
         }
         return false
     }
-
     private fun isDoubleClicked(): Boolean = getTimeDiff(lastClicked, System.currentTimeMillis()) <= doubleClickTimeLimitMills
-
     private fun getTimeDiff(from: Long, to: Long): Long = to - from
 
     override fun onLongPress(p0: MotionEvent?) = Unit
