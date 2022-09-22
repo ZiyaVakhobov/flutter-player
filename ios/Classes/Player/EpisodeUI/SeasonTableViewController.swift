@@ -165,7 +165,7 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
         if bottomSheetType == .speed{
             cell.title = "\(items[indexPath.row])x"
         } else {
-            cell.title = "Season \(items[indexPath.row].seasonNumber)"
+            cell.title = "Season \(items[indexPath.row].title)"
         }
         cell.backgroundColor = .clear
         cell.selectionStyle = .none

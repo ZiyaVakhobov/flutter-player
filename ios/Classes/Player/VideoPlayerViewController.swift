@@ -1457,13 +1457,11 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
         
         var resolutions: [String:String] = [:]
         var startAt :Int64?
-        seasons[seasonIndex].episodeList[episodeIndex].videos.forEach { video in
-            print("quality: \(video.quality)\n fileName: \(video.fileName)")
-            resolutions[video.quality] = video.fileName
-            startAt = Int64(video.duration)
+        seasons[seasonIndex].episodeList[episodeIndex].resolutions.map { (key: String, value: String) in
+                print("quality: \(key)\n fileName: \(value)")
+                resolutions[key] = value
+                startAt = 0
         }
-        //        selectedSeason = seasonIndex + 1
-        //        selectedSeason = seasonIndex + 1
         
         self.resolutions = resolutions
         

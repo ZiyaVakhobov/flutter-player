@@ -325,7 +325,7 @@ extension EpisodeCollectionUI: UICollectionViewDelegateFlowLayout, UICollectionV
         cell.backgroundColor = .clear
         cell.layer.cornerRadius = 8
         cell.episodes = seasons[selectedSeasonIndex].episodeList[indexPath.row]
-        let url = URL(string: seasons[selectedSeasonIndex].episodeList[indexPath.row].logoImage)
+        let url = URL(string: seasons[selectedSeasonIndex].episodeList[indexPath.row].image)
         cell.episodeImage.sd_setImage(with: url, completed: nil)
         return cell
     }

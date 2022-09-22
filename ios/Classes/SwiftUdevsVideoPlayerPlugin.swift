@@ -41,7 +41,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 }
                 let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 if(isLive){
-                    var channelData = [Dictionary<String, Any>()]
                     var programData = [Dictionary<String, Any>()]
                     
                     guard let videoURL = URL(string: url) else {
@@ -63,7 +62,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.titleText = title
                     vc.showsBtnText = tvProgramsText
                     vc.programs = ProgramModel.fromDictinaryProgramms(map: programData)
-                    print("ChannelData = \(channelData)")
                     print("PROGRAM DATA \(programData)")
                     vc.binaryMessengerMainChannel = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger

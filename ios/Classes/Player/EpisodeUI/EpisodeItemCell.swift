@@ -13,7 +13,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
         didSet{
             titleLbl.text = episodes?.title ?? ""
             descriptionLabel.text = episodes?.description
-            durationLbl.text = episodes?.fileDuation
+            durationLbl.text = "\(episodes?.duration)"
         }
     }
     
@@ -67,7 +67,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
    lazy var durationLbl: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = episodes?.fileDuation
+        label.text = "\(episodes?.duration)"
         label.textColor = UIColor(rgb: 0xFF9D9D9D)
        label.backgroundColor = .clear
         label.font = UIFont.systemFont(ofSize: 11,weight: .medium)

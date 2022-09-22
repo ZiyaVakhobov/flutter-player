@@ -302,28 +302,13 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ProgramCell
         cell.selectionStyle = .none
         if !(programInfo[indexPath.section].day.isEmpty) {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            if let data = formatter.date(from: programInfo[indexPath.section].programsList[indexPath.row].scheduledTime) {
-                let displayFormatter = DateFormatter()
-                displayFormatter.dateFormat = "HH:mm"
-                displayFormatter.string(from: data)
-                print("TIIIIIIMEEEE\(data)")
-                cell.timeLB.text = "\(displayFormatter.string(from: data))"
+            cell.timeLB.text = programInfo[indexPath.section].programsList[indexPath.row].scheduledTime
                 cell.timeLB.textColor = .white
                 cell.timeLB.font = UIFont.boldSystemFont(ofSize: 16)
-            }
+            
             cell.channelNamesLB.textColor = .white
             cell.circleView.backgroundColor = .green
-            //            if(programInfo[indexPath.section].programsList[indexPath.row].isAvailable) {
-            //                cell.channelNamesLB.textColor = .white
-            //                cell.circleView.backgroundColor = .green
-            //            }else {
-            //                cell.channelNamesLB.textColor = .gray
-            //                cell.circleView.backgroundColor = .gray
-            //            }
             cell.channelNamesLB.text = programInfo[indexPath.section].programsList[indexPath.row].programTitle
-            
         }
         return cell
     }
