@@ -404,11 +404,15 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 } else {
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
+            it.postDelayed({
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+            }, 3000)
         }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        println("newConfig.orientation: ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             zoom?.visibility = View.VISIBLE
@@ -477,6 +481,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
         bottomSheetDialog.setContentView(R.layout.tv_programs_sheet)
@@ -490,6 +495,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_programs_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_programs_view_pager)
         viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration!!.programsInfoList)
+        viewPager?.currentItem = 1
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
             tab.text = playerConfiguration!!.programsInfoList[position].day
         }.attach()
@@ -614,6 +620,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ) {
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
         backButtonQualitySpeedBottomSheet =
