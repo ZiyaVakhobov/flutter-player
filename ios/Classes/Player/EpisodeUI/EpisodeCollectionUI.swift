@@ -82,10 +82,10 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     
     lazy var seasonSelectBtn: UIButton = {
         let button = UIButton(type: .custom)
-        button.imageView?.contentMode = .scaleAspectFill
+        button.imageView?.contentMode = .scaleAspectFit
         button.tintColor = .white
         button.setTitle("\(videoPlayer.selectedSeason + 1) сезон", for: .normal)
-        button.setImage(UIImage(named: "down.png"), for: .normal)
+        button.setImage(UIImage(named: "ic_down.png",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 16)
         button.semanticContentAttribute = .forceRightToLeft
@@ -99,6 +99,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     lazy var cancelBtn: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
+        button.size(CGSize(width: 32, height: 32))
         button.imageView?.contentMode = .scaleAspectFill
         button.tintColor = .white
         button.addTarget(self, action: #selector(tap), for: .touchUpInside)
@@ -150,7 +151,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
                 make.width.equalTo(110)
                 make.left.equalTo(headerView)
             }
-        }else if UIDevice.current.userInterfaceIdiom == .pad {
+        } else if UIDevice.current.userInterfaceIdiom == .pad {
             seasonSelectBtn.snp.makeConstraints { make in
                 make.height.equalTo(40)
                 make.width.equalTo(110)
