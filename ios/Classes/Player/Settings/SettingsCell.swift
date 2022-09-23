@@ -13,7 +13,7 @@ class SettingCell: UITableViewCell {
     
     var model: SettingModel?  {
         didSet{
-            leftIcon.image = UIImage(named: model!.leftIcon, in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil)
+            leftIcon.image = model?.leftIcon
             leftTitle.text = model?.title ?? ""
             configureLabel.text = model?.configureLabel ?? ""
         }
@@ -51,11 +51,12 @@ class SettingCell: UITableViewCell {
         st.translatesAutoresizingMaskIntoConstraints = false
         return st
     }()
+    
     lazy var leftIcon: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
-        image.image = UIImage(named: model?.leftIcon ?? "")
+        image.image = model?.leftIcon
         return image
     }()
     
@@ -66,11 +67,12 @@ class SettingCell: UITableViewCell {
         label.font = UIFont.systemFont(ofSize: 15,weight: .regular)
         return label
     }()
+    
     lazy var rightIcon: UIImageView = {
         let image = UIImageView()
         image.backgroundColor = .clear
         image.sizeToFit()
-        image.image = UIImage(named: "rightIcon")
+        image.image = Svg.right.uiImage
         return image
     }()
     

@@ -69,9 +69,10 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         return view
     }()
+    
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
-        cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
+        cancelBtn.setImage(Svg.back.uiImage, for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
@@ -90,6 +91,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .black
         return view
     }()
+    
     var menuHeight = UIScreen.main.bounds.height
     var isPresenting = false
     

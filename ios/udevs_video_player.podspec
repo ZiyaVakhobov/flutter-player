@@ -18,9 +18,10 @@ A new Flutter plugin project.
   s.dependency 'TinyConstraints'
   s.dependency 'NVActivityIndicatorView'
   s.dependency 'XLActionController'
+  s.dependency 'SVGKit'
   s.dependency 'SnapKit', '~> 4.0'
   s.dependency 'SDWebImage', '~> 5.0'
-  s.resources = 'Assets/*.png'
+  s.resources = 'Assets/*'
 
   s.platform = :ios, '11.0'
   # Flutter.framework does not contain a i386 slice.

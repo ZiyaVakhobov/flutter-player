@@ -66,7 +66,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     let vc = VideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
-                    vc.locale = "en"
                     vc.urlString = url
                     vc.startPosition = 0
                     vc.qualityLabelText = qualityText

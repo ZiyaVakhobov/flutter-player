@@ -9,9 +9,10 @@
 import UIKit
 
 struct SettingModel {
-    var leftIcon,title,configureLabel: String
+    var title,configureLabel: String
+    var leftIcon : UIImage
     
-    init(leftIcon: String,title: String, configureLabel: String){
+    init(leftIcon: UIImage,title: String, configureLabel: String){
         self.leftIcon = leftIcon
         self.title = title
         self.configureLabel = configureLabel

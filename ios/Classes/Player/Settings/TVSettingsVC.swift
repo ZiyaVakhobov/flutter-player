@@ -46,6 +46,7 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         return view
     }()
+    
     lazy var contentView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 24
@@ -71,9 +72,10 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         return view
     }()
+    
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
-        cancelBtn.setImage(UIImage(named: "ic_back",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
+        cancelBtn.setImage(Svg.exit.uiImage, for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
