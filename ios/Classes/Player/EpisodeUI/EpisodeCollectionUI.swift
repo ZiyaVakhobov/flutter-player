@@ -98,8 +98,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     
     lazy var cancelBtn: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
-        button.size(CGSize(width: 32, height: 32))
+        button.setImage(Svg.exit.uiImage, for: .normal)
         button.imageView?.contentMode = .scaleAspectFill
         button.tintColor = .white
         button.addTarget(self, action: #selector(tap), for: .touchUpInside)

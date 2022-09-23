@@ -75,6 +75,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     var resolutions: [String:String]?
     var sortedResolutions: [String] = []
     var isSerial = false
+    var serialLabelText = ""
     var hasNextVideo = false
     var sesonNum: Int?
     var isAskPermission = false
@@ -320,7 +321,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private  var episodesButton: UIButton = {
         let button = UIButton()
         button.setImage(Svg.serial.uiImage, for: .normal)
-        button.setTitle("Серии", for: .normal)
+        button.setTitle("", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -491,13 +492,13 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         super.viewDidLoad()
         let resList = resolutions ?? ["480p":urlString!]
         sortedResolutions = Array(resList.keys).sorted().reversed()
+        episodesButton.setTitle(serialLabelText, for: .normal)
         Array(resList.keys).sorted().reversed().forEach { quality in
             if quality == "1080p"{
                 sortedResolutions.removeLast()
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-
         view.backgroundColor = Colors.moreColor
         if #available(iOS 13.0, *) {
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
@@ -704,7 +705,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             bottomActionsStackView.snp.makeConstraints { make in
                 make.right.equalToSuperview().offset(-10)
             }
-        }else {
+        } else {
             bottomActionsStackView.snp.makeConstraints { make in
                 make.left.equalToSuperview().offset(80)
                 make.right.equalToSuperview().offset(-80)
@@ -731,7 +732,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         blockButton.layer.cornerRadius = 8
         
 
-        episodesButton.width(136)
+        episodesButton.width(150)
         episodesButton.height(Constants.bottomViewButtonSize)
         episodesButton.layer.cornerRadius = 8
         

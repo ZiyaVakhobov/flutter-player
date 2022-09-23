@@ -196,14 +196,12 @@ extension TVSettingVC: UITableViewDataSource, UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if (indexPath.row == 0) {
-            
-            self.dismiss(animated: true) {
-                self.delegete?.qualityBottomSheet()
-            }
-            print("TAPPED 0")
-        }else {
             self.dismiss(animated: true) {
                 self.speedDelegate?.speedBottomSheet()
+            }
+        } else {
+            self.dismiss(animated: true) {
+                self.delegete?.qualityBottomSheet()
             }
         }
     }

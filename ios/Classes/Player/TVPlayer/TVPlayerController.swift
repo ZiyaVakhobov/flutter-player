@@ -140,8 +140,8 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var liveTextLabel: UILabel = {
         let label = UILabel()
         label.text = "LIVE"
-        //        label.sizeToFit()
         label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
         return label;
     }()
     
@@ -262,10 +262,8 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         bottomSheetVC.cellDelegate = self
         bottomSheetVC.bottomSheetType = .speed
         bottomSheetVC.selectedIndex = speedList.firstIndex(of: "\(self.playerRate)") ?? 0
-        //         print("BottomSheetVC Selected \(bottomSheetVC.selectedIndex)")
-        //         print("Actual Selected \(speedList.firstIndex(of: selectedSpeedText) ?? 0)")
         speedButton.setTitle("Скорость (\(selectedSpeedText))", for: .normal)
-        speedButton.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        speedButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
@@ -283,11 +281,12 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var timeSlider: UISlider = {
         let slider = UISlider()
         slider.value = 1
-        slider.tintColor = UIColor(named: "mainColor")
+        slider.tintColor = Colors.mainColor
         slider.maximumTrackTintColor = .lightGray
         slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
         return slider
     }()
+    
     private var exitButton: UIButton = {
         let button = UIButton()
         button.setImage(Svg.exit.uiImage, for: .normal)
@@ -407,9 +406,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     private  var unblockButtonWithInfo: UIButton = {
         let button = UIButton()
-        
+
         button.setImage(UIImage(named: "blockIcon"), for: .normal)
-        
+
         button.tintColor = UIColor(named: "baseTextColor")
         button.titleLabel?.backgroundColor = .clear
         button.imageView?.backgroundColor = .clear
@@ -425,7 +424,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.addTarget(self, action: #selector(blockButtonWithInfoPressed(_:)), for: .touchUpInside)
         return button
     }()
-    
+//
     private  var nextEpisodeButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "nextEpisodeIcon"), for: .normal)
@@ -526,13 +525,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        qualityLabelText = "Quality"
-        speedLabelText = "Speed"
-        qualityText = "Auto"
-        showsBtnText = "TV programs"
-        liveLabelText = "Live"
-        
-        liveTextLabel.text = liveLabelText
         showsBtn.setTitle(showsBtnText, for: .normal)
         view.backgroundColor = .black
         if #available(iOS 13.0, *) {
@@ -598,12 +590,10 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     func addGestures(){
         swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(swipePan))
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureControls))
-        //        tapHideGesture = UITapGestureRecognizer(target: self, action: #selector(toggleControls))
-        
         view.addGestureRecognizer(swipeGesture)
         view.addGestureRecognizer(tapGesture)
-        //        view.addGestureRecognizer(tapHideGesture)
     }
+    
     func addSubviews() {
         view.addSubview(videoView)
         view.addSubview(overlayView)
@@ -788,8 +778,8 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         vc.delegete = self
         vc.speedDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon:Svg.playSpeed.uiImage, title: qualityLabelText, configureLabel: qualityText),
-            SettingModel(leftIcon: Svg.settings.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText)
+            SettingModel(leftIcon: Svg.settings.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText),
+            SettingModel(leftIcon:Svg.playSpeed.uiImage, title: qualityLabelText, configureLabel: qualityText)
         ]
         self.present(vc, animated: true, completion: nil)
     }
@@ -1050,11 +1040,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             self?.timeSlider.maximumValue = Float(newDurationSeconds)
             self?.timeSlider.minimumValue = 0
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-            if(UIDevice.current.orientation.isLandscape){
-                titleLabel.text = title
-            } else {
-                titleLabel.text = ""
-            }
+//            if(UIDevice.current.orientation.isLandscape){
+//                titleLabel.text = title
+//            } else {
+//                titleLabel.text = ""
+//            }
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
             self?.leftTimeLabel.text = "-\(self?.getTimeString(from: time) ?? "00:00")"

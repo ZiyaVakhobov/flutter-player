@@ -27,8 +27,10 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             let json = (args as! [String:Any])["playerConfigJsonString"]
             if let myArgs = json as? [String: Any],let url = (myArgs["initialResolution"] as! [String:String]).values.first,
                let title = myArgs["title"] as? String,
+               let tvProgramsText = myArgs["tvProgramsText"] as? String,
                let qualityText = myArgs["qualityText"] as? String,
                let speedText = myArgs["speedText"] as? String,
+               let episodeButtonText = myArgs["episodeButtonText"] as? String,
                let duration = myArgs["lastPosition"] as? Int,
                let seasons = myArgs["seasons"] as? [Dictionary<String, Any>],
                let isSerial = myArgs["isSerial"] as? Bool,
@@ -45,7 +47,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                         return
                     }
                     programData = myArgs["programsInfoList"] as! [Dictionary<String, Any>]
-                    let tvProgramsText = myArgs["tvProgramsText"] as! String
+                    
                     let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
@@ -56,6 +58,8 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.resolutions = sortedResolutions
                     vc.isSerial = isSerial
                     vc.titleText = title
+                    vc.speedLabelText = speedText
+                    vc.qualityLabelText = qualityText
                     vc.showsBtnText = tvProgramsText
                     vc.programs = ProgramModel.fromDictinaryProgramms(map: programData)
                     vc.binaryMessengerMainChannel = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
@@ -74,6 +78,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.resolutions = sortedResolutions
                     vc.isSerial = isSerial
                     vc.titleText = title
+                    vc.serialLabelText = episodeButtonText
                     vc.seasons  = Seasons.fromDictinary(map: seasons)
                     vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)}
