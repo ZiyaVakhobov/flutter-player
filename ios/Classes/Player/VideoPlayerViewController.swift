@@ -470,13 +470,13 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         videoView.layer.addSublayer(playerLayer)
         selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
         selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-        if let titleText = title {
-            if(UIDevice.current.orientation.isLandscape){
-                titleLabel.text = titleText
-            } else {
-                titleLabel.text = ""
-            }
-        }
+//        if let titleText = title {
+//            if(UIDevice.current.orientation.isLandscape){
+//                titleLabel.text = titleText
+//            } else {
+//                titleLabel.text = ""
+//            }
+//        }
     }
     
     func runPlayer(startAt: Int){
@@ -1027,13 +1027,12 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
-            //            self?.leftTimeLabel.text = "-\(self?.getTimeString(from: time) ?? "00:00")"
             self?.currentTimeLabel.text = self?.getTimeString(from: currentItem.currentTime())
-            if(UIDevice.current.orientation.isLandscape){
-                titleLabel.text = title
-            } else {
-                titleLabel.text = ""
-            }
+//            if(UIDevice.current.orientation.isLandscape){
+//                titleLabel.text = title
+//            } else {
+//                titleLabel.text = ""
+//            }
         })
     }
     
