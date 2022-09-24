@@ -501,15 +501,25 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     @objc func changeOrientation(_ sender: UIButton){
-        print("CHANGE ORIENTATION")
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
-        landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
             value = UIInterfaceOrientation.portrait.rawValue
             landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
         }
-        UIDevice.current.setValue(value, forKey: "orientation")
-        UIViewController.attemptRotationToDeviceOrientation()
+        if #available(iOS 16.0, *) {
+           guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return
+            }
+            self.setNeedsUpdateOfSupportedInterfaceOrientations()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight) ? .portrait : .landscapeRight)){
+                    error in
+                    print(error)
+                    print(windowScene.effectiveGeometry)
+                }
+            })
+        } else{
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
     }
     
     private var landscapeButton: UIButton = {
@@ -578,11 +588,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        if UIDevice.current.orientation.isLandscape {
-            print("Landscape")
+        if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
+            print("Landscape 1")
+            landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
             addVideosLandscapeConstraints()
         } else {
-            print("Portrait")
+            print("Portrait 1")
+            landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
             addVideoPortaitConstraints()
         }
     }

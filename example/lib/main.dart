@@ -24,84 +24,84 @@ class _MyAppState extends State<MyApp> {
     movies1.add(Movie(
       title: 'Женщина-Халк: Адвокат',
       description:
-      'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
+          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
       image:
-      'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
+          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 2122,
       resolutions: {
         'Auto':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
         '1080p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
         '720p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
         '480p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
         '360p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
         '240p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
       },
     ));
     movies1.add(Movie(
       title: 'Женщина-Халк: Адвокат',
       description:
-      'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
+          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
       image:
-      'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
+          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 1669,
       resolutions: {
         'Auto':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
         '1080p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
         '720p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
         '480p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
         '360p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
         '240p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
       },
     ));
     seasons.add(Season(title: '1 Season', movies: movies1));
     List<ProgramsInfo> programsInfoList = [];
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
-          playerConfig: PlayerConfiguration(
+              playerConfig: PlayerConfiguration(
             initialResolution: {
-              'Auto':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
+              "Автонастройка":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8"
             },
             resolutions: {
-              'Auto':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
-              '1080p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-              '720p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
-              '480p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
-              '360p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
-              '240p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+              "Автонастройка":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8",
+              "1080p":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8",
+              "720p":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8",
+              "480p":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8",
+              "360p":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8",
+              "240p":
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
             },
-            qualityText: 'Quality',
-            speedText: 'Speed',
-            lastPosition: 1000,
-            title: 'Женщина-Халк: Адвокат',
+            qualityText: 'Качество',
+            speedText: 'Скорость',
+            lastPosition: 0,
+            title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
             isSerial: true,
-            episodeButtonText: 'Episodes',
-            nextButtonText: 'Next',
+            episodeButtonText: 'Эпизоды',
+            nextButtonText: 'След.эпизод',
             seasons: seasons,
             isLive: false,
-            tvProgramsText: 'Programs',
+            tvProgramsText: 'Телеканалы',
             programsInfoList: programsInfoList,
             showController: true,
             playVideoFromAsset: false,
-            assetPath: 'assets/splash.mp4',
+            assetPath: '',
             seasonIndex: 0,
             episodeIndex: 0,
           )) ??
@@ -113,82 +113,57 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Failed to get platform version.');
     }
   }
+
   playTV() async {
     List<Season> seasons = [];
     List<Movie> movies1 = [];
     movies1.add(Movie(
       title: 'Женщина-Халк: Адвокат',
       description:
-      'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
+          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
       image:
-      'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
+          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 2122,
       resolutions: {
         'Auto':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
         '1080p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
         '720p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
         '480p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
         '360p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
         '240p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
       },
     ));
     movies1.add(Movie(
       title: 'Женщина-Халк: Адвокат',
       description:
-      'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
+          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
       image:
-      'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
+          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 1669,
       resolutions: {
         'Auto':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
         '1080p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
         '720p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
         '480p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
         '360p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
         '240p':
-        'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
       },
     ));
     seasons.add(Season(title: '1 Season', movies: movies1));
     List<ProgramsInfo> programsInfoList = [];
     List<TvProgram> tvPrograms = [];
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00', programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    programsInfoList.add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
     tvPrograms.add(TvProgram(
         scheduledTime: '09:00',
         programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
@@ -210,7 +185,85 @@ class _MyAppState extends State<MyApp> {
     tvPrograms.add(TvProgram(
         scheduledTime: '09:00',
         programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(scheduledTime: '09:00',
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    programsInfoList
+        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
+        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
+    tvPrograms.add(TvProgram(
+        scheduledTime: '09:00',
         programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
     tvPrograms.add(TvProgram(
         scheduledTime: '09:00',
@@ -269,24 +322,24 @@ class _MyAppState extends State<MyApp> {
     programsInfoList.add(ProgramsInfo(day: 'Tomorrov', tvPrograms: tvPrograms));
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
-          playerConfig: PlayerConfiguration(
+              playerConfig: PlayerConfiguration(
             initialResolution: {
               'Auto':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
             },
             resolutions: {
               'Auto':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
               '1080p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
               '720p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
               '480p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
               '360p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
               '240p':
-              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
             },
             qualityText: 'Quality',
             speedText: 'Speed',
