@@ -39,50 +39,45 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 guard URL(string: url) != nil else {
                     return
                 }
-                let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                 if(isLive){
                     var programData = [Dictionary<String, Any>()]
-                    
                     guard let videoURL = URL(string: url) else {
                         return
                     }
                     programData = myArgs["programsInfoList"] as! [Dictionary<String, Any>]
-                    
                     let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     vc.urlString = url
                     vc.startPosition = duration
-                    vc.hasNextVideo = false
                     vc.resolutions = sortedResolutions
-                    vc.isSerial = isSerial
                     vc.titleText = title
                     vc.speedLabelText = speedText
                     vc.qualityLabelText = qualityText
                     vc.showsBtnText = tvProgramsText
                     vc.programs = ProgramModel.fromDictinaryProgramms(map: programData)
-                    vc.binaryMessengerMainChannel = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
-                    vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-                    
                 } else {
+                    guard URL(string: url) != nil else {
+                        return
+                    }
+                    let sortedResolutions = SortFunctions.sortWithKeys(resolutions)
                     let vc = VideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     vc.urlString = url
-                    vc.startPosition = 0
+                    vc.startPosition = duration
                     vc.qualityLabelText = qualityText
                     vc.speedLabelText = speedText
                     vc.hasNextVideo = false
-                    vc.resolutions = sortedResolutions
+                    vc.resolutions = resolutions
                     vc.isSerial = isSerial
                     vc.titleText = title
                     vc.serialLabelText = episodeButtonText
                     vc.seasons  = Seasons.fromDictinary(map: seasons)
                     vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)}
-                
             } else {
                 result("Parse error");
             }

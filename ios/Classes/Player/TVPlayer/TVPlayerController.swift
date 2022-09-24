@@ -21,7 +21,6 @@ protocol TVSpeedDelegate {
 }
 
 struct TVSortFunctions{
-    
     static func sortWithKeys(_ dict: [String: String]) -> [String: String] {
         let sorted = dict.sorted(by: >)
         var newDict: [String: String] = [:]
@@ -64,20 +63,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     var showsBtnText = ""
     var liveLabelText = ""
     var startPosition: Int?
-    var channelData: [Dictionary<String, Any>]?
     var programs : [ProgramModel] = [ProgramModel]()
     var titleText: String?
     var isRegular: Bool = false
     var resolutions: [String:String]?
-    var isSerial = false
     var qualityText = "Auto"
-    var hasNextVideo = false
-    var isAskPermission = false
-    
-    var videoPlayerChannel: FlutterMethodChannel?
-    
-    var binaryMessenger : FlutterBinaryMessenger?
-    var binaryMessengerMainChannel : FlutterBinaryMessenger?
     private var swipeGesture: UIPanGestureRecognizer!
     private var tapGesture: UITapGestureRecognizer!
     private var tapHideGesture: UITapGestureRecognizer!
@@ -91,7 +81,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     private var playerRate = 1.0
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
-    private var isBlock = false
     
     private var videoView: UIView = {
         let view = UIView()
@@ -177,26 +166,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         return label
     }()
     
-    private var blockLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Экран заблокирован"
-        label.textColor = .white
-        label.font = label.font.withSize(15)
-        return label
-    }()
-    
-    private var blockLabelInfo: UILabel = {
-        let label = UILabel()
-        label.text = "Коснитесь, чтобы разблокировать"
-        label.textColor = UIColor(named: "baseTextColor")
-        label.font = label.font.withSize(13)
-        return label
-    }()
-    
-    private var blockBottomView: UIView = {
-        let view = UIView()
-        return view
-    }()
     
     private var bottomView: UIView = {
         let view = UIView()
@@ -213,17 +182,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     //MARK: - BottomActionsStackView
     private lazy var bottomActionsStackView: UIStackView = {
         let spacer = UIView()
-        let stackView = UIStackView(arrangedSubviews: [blockButton,channelBtn,showsBtn])
+        let stackView = UIStackView(arrangedSubviews: [channelBtn,showsBtn])
         stackView.axis = .horizontal
         stackView.distribution = .equalSpacing
-        return stackView
-    }()
-    
-    private lazy var bottomBlockStackView: UIStackView = {
-        let spacer = UIView()
-        let stackView = UIStackView(arrangedSubviews: isAskPermission ?  [unblockButtonWithInfo,blockLabel,blockLabelInfo] : [unblockButton,blockLabel,blockLabelInfo])
-        stackView.axis = .vertical
-        stackView.distribution = .equalCentering
         return stackView
     }()
     
@@ -238,9 +199,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     
     func showQualityBottomSheet(){
         let resList = resolutions ?? ["480p" : urlString!]
-        debugPrint("RESLIST \(resList)")
         let array = Array(resList.keys)
-        debugPrint("ARRAY \(array)")
         let bottomSheetVC = BottomSheetViewController()
         bottomSheetVC.modalPresentationStyle = .overCurrentContext
         bottomSheetVC.items = array.sorted().reversed()
@@ -340,16 +299,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         return button
     }()
     
-    private var skipForwardButton: UIButton = {
-        let button = UIButton()
-        button.setImage(Svg.forward.uiImage, for: .normal)
-        button.tintColor = .white
-        button.layer.zPosition = 3
-        button.imageView?.contentMode = .scaleAspectFit
-        button.size(CGSize(width: 48, height: 48))
-        button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
     
     var qualitySelectionButton: UIButton = {
         let button = UIButton()
@@ -392,71 +341,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
-    private  var unblockButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "blockIcon"), for: .normal)
-        button.tintColor = UIColor(named: "baseTextColor")
-        button.backgroundColor = .white
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.unblockButtonInset, left: Constants.unblockButtonInset, bottom: Constants.unblockButtonInset, right: Constants.unblockButtonInset)
-        button.addTarget(self, action: #selector(blockButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    
-    private  var unblockButtonWithInfo: UIButton = {
-        let button = UIButton()
 
-        button.setImage(UIImage(named: "blockIcon"), for: .normal)
-
-        button.tintColor = UIColor(named: "baseTextColor")
-        button.titleLabel?.backgroundColor = .clear
-        button.imageView?.backgroundColor = .clear
-        button.setTitle("Разблокировать экран?", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.contentHorizontalAlignment = .center
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        button.backgroundColor = .white
-        button.isHidden = true
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right:6)
-        button.addTarget(self, action: #selector(blockButtonWithInfoPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-//
-    private  var nextEpisodeButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "nextEpisodeIcon"), for: .normal)
-        button.setTitle("След. эпизод", for: .normal)
-        button.layer.zPosition = 3
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-        button.setTitleColor(.white, for: .normal)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(nextEpisodeButtonPressed(_:)), for: .touchUpInside)
-        button.isHidden = false
-        return button
-    }()
-    
-    
-    private  var blockButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "ic_lock"), for: .normal)
-        button.setTitle("Блокировка", for: .normal)
-        button.layer.zPosition = 3
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-        button.setTitleColor(.white, for: .normal)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(blockButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
     private var activityIndicatorView: NVActivityIndicatorView = {
         let activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: .white)
         return activityView
@@ -541,7 +426,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
         } else {
-            //            appDelegate.restrictRotation = .all
         }
         
         if #available(iOS 13.0, *) {
@@ -611,17 +495,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         view.addSubview(overlayView)
         overlayView.addSubview(topView)
         overlayView.addSubview(playButton)
-        //        overlayView.addSubview(skipForwardButton)
-        //        view.addSubview(skipForwardButton)
-        //        overlayView.addSubview(skipBackwardButton)
-        //        view.addSubview(skipBackwardButton)
-        //        overlayView.addSubview(activityIndicatorView)
         view.addSubview(activityIndicatorView)
         overlayView.addSubview(bottomView)
         overlayView.addSubview(landscapeButton)
-        //        overlayView.addSubview(blockBottomView)
-        //        overlayView.addSubview(skipLabel)
-        //        view.addSubview(bottomActionsView)
         addTopViewSubviews()
         addBottomViewSubviews()
     }
@@ -636,11 +512,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         bottomView.addSubview(liveStackView)
         bottomView.addSubview(showsBtnStackView)
         bottomView.addSubview(timeStackView)
-        //        bottomView.addSubview(bottomActionsStackView)
-        //        blockBottomView.addSubview(unblockButton)
-        //        blockBottomView.addSubview(unblockButtonWithInfo)
-        //        blockBottomView.addSubview(blockLabel)
-        //        blockBottomView.addSubview(blockLabelInfo)
     }
     func addTopViewSubviews() {
         topView.addSubview(exitButton)
@@ -660,16 +531,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         playButton.width(Constants.controlButtonSize)
         playButton.height(Constants.controlButtonSize)
         playButton.layer.cornerRadius = Constants.controlButtonSize/2
-        //        skipBackwardButton.width(Constants.controlButtonSize)
-        //        skipBackwardButton.height(Constants.controlButtonSize)
-        //        skipBackwardButton.rightToLeft(of: playButton, offset: -60)
-        //        skipBackwardButton.top(to: playButton)
-        //        skipBackwardButton.layer.cornerRadius = Constants.controlButtonSize/2
-        //        skipForwardButton.width(Constants.controlButtonSize)
-        //        skipForwardButton.height(Constants.controlButtonSize)
-        //        skipForwardButton.leftToRight(of: playButton, offset: 60)
-        //        skipForwardButton.top(to: playButton)
-        //        skipForwardButton.layer.cornerRadius = Constants.controlButtonSize/2
         activityIndicatorView.center(in: view)
         activityIndicatorView.layer.cornerRadius = 20
     }
@@ -687,30 +548,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         bottomView.bottom(to: view.safeAreaLayoutGuide, offset: 10)
         bottomView.height(70)
         
-        //        blockBottomView.leading(to: view.safeAreaLayoutGuide)
-        //        blockBottomView.trailing(to: view.safeAreaLayoutGuide)
-        //        blockBottomView.bottom(to: view.safeAreaLayoutGuide, offset: 10)
-        //        blockBottomView.height(90)
-        //        blockBottomView.alpha = 0
-        //
-        //        unblockButton.top(to: blockBottomView)
-        //        unblockButton.centerX(to: blockBottomView)
-        //        unblockButton.width(Constants.unblockButtonSize)
-        //        unblockButton.height(Constants.unblockButtonSize)
-        //        unblockButton.layer.cornerRadius = 8
-        //
-        //        unblockButtonWithInfo.top(to: blockBottomView)
-        //        unblockButtonWithInfo.centerX(to: blockBottomView)
-        //        unblockButtonWithInfo.width(221)
-        //        unblockButtonWithInfo.height(Constants.unblockButtonSize)
-        //        unblockButtonWithInfo.layer.cornerRadius = 8
-        //
-        //        blockLabel.centerX(to: blockBottomView)
-        //        blockLabel.topToBottom(of: unblockButton,offset: 8)
-        //
-        //        blockLabelInfo.centerX(to: blockBottomView)
-        //        blockLabelInfo.topToBottom(of: blockLabel,offset: 4)
-        
         liveStackView.bottomToTop(of: timeStackView, offset: -1)
         liveStackView.spacing = 24
         liveStackView.leftToSuperview(offset: 8)
@@ -720,35 +557,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             make.left.equalToSuperview().offset(14)
             make.right.equalToSuperview().offset(-14)
         }
-        
         overlayView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
-        //        if(isSerial) {
-        //        bottomActionsStackView.snp.makeConstraints { make in
-        //            make.left.equalToSuperview().offset(10)
-        //            make.right.equalToSuperview().offset(-10)
-        //            make.bottom.equalTo(bottomView).offset(-16)
-        //        }
-        //        }else {
-        //            bottomActionsStackView.snp.makeConstraints { make in
-        //                make.left.equalToSuperview().offset(80)
-        //                make.right.equalToSuperview().offset(-80)
-        //                make.bottom.equalTo(bottomView).offset(-16)
-        //            }
-        //        }
-        
-        //        blockButton.width(136)
-        //        blockButton.height(Constants.bottomViewButtonSize)
-        //        blockButton.layer.cornerRadius = 8
-        
         showsBtn.width(140)
-        //        showsBtn.height(30)
         showsBtn.snp.makeConstraints{ make in
             make.right.equalTo(landscapeButton).offset(-24)
         }
-        
         showsBtnStackView.bottomToTop(of: timeSlider, offset: 8)
         showsBtn.layer.cornerRadius = 8
         
@@ -756,20 +571,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         landscapeButton.snp.makeConstraints { make in
             make.right.equalTo(bottomView).offset(-16)
         }
-        //        channelBtn.width(150)
-        //        channelBtn.height(Constants.bottomViewButtonSize)
-        //        channelBtn.layer.cornerRadius = 8
-        
-        nextEpisodeButton.width(136)
-        nextEpisodeButton.height(Constants.bottomViewButtonSize)
-        nextEpisodeButton.layer.cornerRadius = 8
-        
-        if !isSerial {
-            nextEpisodeButton.isHidden = true
-        }
     }
     
-    private  var settingsButton: UIButton = {
+    private var settingsButton: UIButton = {
         let button = UIButton()
         button.setImage(Svg.more.uiImage, for: .normal)
         button.layer.zPosition = 3
@@ -915,44 +719,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         resetTimer()
     }
     
-    @objc func skipForwardButtonPressed(_ sender: UIButton){
-        self.forwardTouches += 1
-        self.seekForwardTo(10.0 * Double(self.forwardTouches))
-        self.forwardGestureTimer?.invalidate()
-        self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            self.forwardTouches = 0
-        }
-        resetTimer()
-    }
-    
-    @objc func nextEpisodeButtonPressed(_ sender: UIButton){
-        DispatchQueue.main.async {
-            self.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self.player.currentTime().seconds)
-        }
-    }
-    
-    @objc func blockButtonWithInfoPressed(_ sender: UIButton){
-        isBlock = false
-        hideBlockControls()
-        showControls()
-    }
-    
-    @objc func blockButtonPressed(_ sender: UIButton){
-        
-        if isBlock {
-            isAskPermission = true
-            unblockButton.isHidden = true
-            unblockButtonWithInfo.isHidden = false
-        } else {
-            isBlock = true
-            isAskPermission = false
-            unblockButton.isHidden = false
-            unblockButtonWithInfo.isHidden = true
-            hideControls()
-            showBlockControls()
-        }
-    }
-    
     fileprivate func seekForwardTo(_ seekPosition: Double) {
         guard let duration = player.currentItem?.duration else {return}
         let currentTime = CMTimeGetSeconds(player.currentTime())
@@ -985,16 +751,13 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             let oldStatus = AVPlayer.TimeControlStatus(rawValue: oldValue)
             let newStatus = AVPlayer.TimeControlStatus(rawValue: newValue)
             if newStatus != oldStatus {
-                
                 DispatchQueue.main.async {[weak self] in
                     if newStatus == .playing{
-                        print("PLAYING")
                         self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
                     } else if newStatus == .paused {
-                        print("PAUSE")
                         self?.playButton.setImage(Svg.play.uiImage, for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
@@ -1002,25 +765,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                         self?.timer?.invalidate()
                         self?.showControls()
                     } else {
-                        print("LOADING")
                         self?.playButton.alpha = 0.0
                         self?.activityIndicatorView.startAnimating()
                         self?.enableGesture = false
                     }
                 }
-            }
-        }
-    }
-    
-    @objc func playerEndedPlaying(_ notification: Notification) {
-        DispatchQueue.main.async {[weak self] in
-            if self?.hasNextVideo ?? false {
-                DispatchQueue.main.async {
-                    self?.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self?.player.currentTime().seconds)
-                }
-            } else {
-                self?.player.seek(to: CMTime.zero)
-                self?.playButton.setImage(Svg.play.uiImage, for: .normal)
             }
         }
     }
@@ -1052,11 +801,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             self?.timeSlider.maximumValue = Float(newDurationSeconds)
             self?.timeSlider.minimumValue = 0
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-//            if(UIDevice.current.orientation.isLandscape){
-//                titleLabel.text = title
-//            } else {
-//                titleLabel.text = ""
-//            }
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
             self?.leftTimeLabel.text = "-\(self?.getTimeString(from: time) ?? "00:00")"
@@ -1085,7 +829,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     @objc func didpinch(_ gesture: UIPinchGestureRecognizer) {
         if gesture.state == .changed {
             let scale = gesture.scale
-            print("Scale \(scale)")
             if scale < 0.9 {
                 self.playerLayer.videoGravity = .resizeAspect
             }else {
@@ -1100,14 +843,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
             let alpha = 0.0
             topView.alpha = alpha
-            skipForwardButton.alpha = alpha
             overlayView.alpha = alpha
             if enableGesture {
                 playButton.alpha = alpha
             }
-            skipBackwardButton.alpha = alpha
             bottomView.alpha = alpha
-            blockBottomView.alpha = alpha
         }, completion: nil)
     }
     
@@ -1116,7 +856,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             let options: UIView.AnimationOptions = [.curveEaseIn]
             UIView.animate(withDuration: 0.1, delay: 0.1, options: options, animations: {[self] in
                 let alpha = 0.0
-                skipForwardButton.alpha = alpha
             }, completion: nil)
         }
     }
@@ -1130,44 +869,16 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         }
     }
     
-    func showSeekForwardButton(){
-        skipForwardButton.alpha = 1.0
-        print("=======FORWARD SHOW")
-    }
-    func showSeekBackwardButton(){
-        skipBackwardButton.alpha = 1.0
-        print("=======BACK SHOW")
-    }
-    
-    @objc func hideBlockControls() {
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 0.0
-            blockBottomView.alpha = alpha
-        }, completion: nil)
-    }
-    
-    func showBlockControls(){
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 1.0
-            blockBottomView.alpha = alpha
-            topView.alpha = alpha
-            resetTimer()
-        }, completion: nil)
-    }
     func showControls() {
         let options: UIView.AnimationOptions = [.curveEaseIn]
         UIView.animate(withDuration: 0.2, delay: 0.2, options: options, animations: {[self] in
             let alpha = 1.0
             topView.alpha = alpha
-            skipForwardButton.alpha = alpha
             skipBackwardButton.alpha = alpha
             if enableGesture {
                 playButton.alpha = alpha
             }
             bottomView.alpha = alpha
-            //            maximizeButton.alpha = alpha
         }, completion: nil)
     }
     
@@ -1177,16 +888,10 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
             let alpha = topView.alpha == 0.0 ? 1.0 : 0.0
             topView.alpha = alpha
             overlayView.alpha = alpha
-            if isBlock {
-                blockBottomView.alpha = alpha
-            }else{
-                skipForwardButton.alpha = alpha
-                skipBackwardButton.alpha = alpha
-                if enableGesture {
-                    playButton.alpha = alpha
-                }
-                bottomView.alpha = alpha
+            if enableGesture {
+                playButton.alpha = alpha
             }
+            bottomView.alpha = alpha
             if(alpha == 1.0){
                 resetTimer()
             }
@@ -1194,16 +899,11 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     }
     
     @objc func tapGestureControls() {
-        
         let location = tapGesture.location(in: view)
-        
         if location.x > view.bounds.width / 2 + 50 {
             self.fastForward()
-            print("RIGHT SIDE PREESSED")
-            
         } else if location.x <= view.bounds.width / 2 - 50 {
             self.fastBackward()
-            print("LEFT SIDE PREESSED")
         } else {
             toggleViews()
         }
@@ -1218,8 +918,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 self.toggleViews()
             }
         } else {
-            print("===========FORWARD=========")
-            self.showSeekForwardButton()
             self.seekForwardTo(10.0 * Double(self.forwardTouches))
             self.forwardGestureTimer?.invalidate()
             self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
@@ -1237,8 +935,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
                 self.toggleViews()
             }
         } else {
-            print("**********BACK**********")
-            self.showSeekBackwardButton()
             self.seekBackwardTo(10.0 * Double(self.backwardTouches))
             self.backwardGestureTimer?.invalidate()
             self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
@@ -1273,7 +969,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         case UIGestureRecognizer.State.changed:
             switch panDirection {
             case SwipeDirection.horizontal:
-                //                horizontalMoved(velocityPoint.x)
                 break
             case SwipeDirection.vertical:
                 verticalMoved(velocityPoint.y)
@@ -1325,13 +1020,9 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         switch type {
         case .quality:
             let resList = resolutions ?? ["480p":urlString!]
-            debugPrint("onBottomSheetCellTapped  *resList*  \(resList)")
             let array = Array(resList.keys)
-            debugPrint("onBottomSheetCellTapped  *array*  \(array)")
             self.qualityText = array[index]
-            debugPrint("onBottomSheetCellTapped  *qualityText*  \(qualityText)")
             let url = resList[array[index]]
-            debugPrint("onBottomSheetCellTapped  *url*  \(url ?? "")")
             guard let videoURL = URL(string: url ?? "") else {
                 return
             }

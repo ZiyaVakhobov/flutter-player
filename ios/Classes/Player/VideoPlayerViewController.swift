@@ -12,8 +12,6 @@ import MediaPlayer
 import XLActionController
 import NVActivityIndicatorView
 import SnapKit
-import SVGKit
-
 
 protocol QualityDelegate {
     func qualityBottomSheet()
@@ -78,10 +76,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     var serialLabelText = ""
     var hasNextVideo = false
     var sesonNum: Int?
-    var isAskPermission = false
     var seasons : [Seasons] = [Seasons]()
-    var seasonData: [Dictionary<String, Any>]?
-    var mainEpisodes: [Dictionary<String, Any>]?
     var videoPlayerChannel: FlutterMethodChannel?
     var shouldHideHomeIndicator = false
     var binaryMessenger : FlutterBinaryMessenger?
@@ -97,15 +92,11 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var seekForwardTimer: Timer?
     private var seekBackwardTimer: Timer?
     private var playerRate = 1.0
-    private var isMax = false
     var selectedSeason = 0
     private var selectedSpeedText = "1.0x"
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
-    var qualityText = "Auto"
-    private var isBlock = false
-    var forceLandscape: Bool = false
-
+    
     private var videoView: UIView = {
         let view = UIView()
         view.backgroundColor = .black
@@ -319,7 +310,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var backwardTouches = 0
     private var forwardTouches = 0
     
-    func setupDataSource(title:String?, urlString: String?, startAt  : Int64?){
+    func setupDataSource(title : String?, urlString : String?, startAt : Int64?){
         guard let urlString = urlString, let url = URL(string: urlString) else {
             return
         }
@@ -381,7 +372,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         addGestures()
         playButton.alpha = 0.0
         activityIndicatorView.startAnimating()
-        setupDataSource(title: titleText, urlString: urlString,startAt: nil)
+        setupDataSource(title: titleText, urlString: urlString, startAt: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -420,11 +411,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
-            print("Landscape 1")
             landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
             addVideosLandscapeConstraints()
         } else {
-            print("Portrait 1")
             landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
             addVideoPortaitConstraints()
         }
@@ -655,7 +644,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }
     
     @objc func changeOrientation(_ sender: UIButton){
-        forceLandscape = true
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
             value = UIInterfaceOrientation.portrait.rawValue
@@ -663,7 +651,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
         UIDevice.current.setValue(value, forKey: "orientation")
         if #available(iOS 16.0, *) {
-           guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return
             }
             self.setNeedsUpdateOfSupportedInterfaceOrientations()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
@@ -724,7 +712,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         vc.delegete = self
         vc.speedDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: qualityText),
+            SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: qualityLabelText),
             SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText)
         ]
         self.present(vc, animated: true, completion: nil)
@@ -759,19 +747,14 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self.durationTimeLabel.text = getTimeString(from: player.currentItem!.duration)
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
-            let oldStatus = AVPlayer.TimeControlStatus(rawValue: oldValue)
-            let newStatus = AVPlayer.TimeControlStatus(rawValue: newValue)
-            if newStatus != oldStatus {
-                
+            if newValue != oldValue {
                 DispatchQueue.main.async {[weak self] in
-                    if newStatus == .playing{
-                        print("PLAYING")
+                    if newValue == 2 {
                         self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
                         self?.enableGesture = true
-                    } else if newStatus == .paused {
-                        print("PAUSE")
+                    } else if newValue == 0 {
                         self?.playButton.setImage(Svg.play.uiImage, for: .normal)
                         self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                         self?.activityIndicatorView.stopAnimating()
@@ -779,7 +762,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                         self?.timer?.invalidate()
                         self?.showControls()
                     } else {
-                        print("LOADING")
                         self?.playButton.alpha = 0.0
                         self?.activityIndicatorView.startAnimating()
                         self?.enableGesture = false
@@ -832,11 +814,11 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
             self?.currentTimeLabel.text = self?.getTimeString(from: currentItem.currentTime())
-//            if(UIDevice.current.orientation.isLandscape){
-//                titleLabel.text = title
-//            } else {
-//                titleLabel.text = ""
-//            }
+            //            if(UIDevice.current.orientation.isLandscape){
+            //                titleLabel.text = title
+            //            } else {
+            //                titleLabel.text = ""
+            //            }
         })
     }
     
@@ -863,7 +845,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     @objc func didpinch(_ gesture: UIPinchGestureRecognizer) {
         if gesture.state == .changed {
             let scale = gesture.scale
-            print("Scale \(scale)")
             if scale < 0.9 {
                 self.playerLayer.videoGravity = .resizeAspect
             }else {
@@ -910,11 +891,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     func showSeekForwardButton(){
         skipForwardButton.alpha = 1.0
-        print("=======FORWARD SHOW")
     }
     func showSeekBackwardButton(){
         skipBackwardButton.alpha = 1.0
-        print("=======BACK SHOW")
     }
     
     @objc func hideBlockControls() {
@@ -954,18 +933,14 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             let alpha = topView.alpha == 0.0 ? 1.0 : 0.0
             topView.alpha = alpha
             overlayView.alpha = alpha
-            if isBlock {
-                //                blockBottomView.alpha = alpha
-            }else{
-                skipForwardButton.alpha = alpha
-                skipBackwardButton.alpha = alpha
-                if enableGesture {
-                    playButton.alpha = alpha
-                }
-                
-                bottomView.alpha = alpha
-                //                maximizeButton.alpha = alpha
+            skipForwardButton.alpha = alpha
+            skipBackwardButton.alpha = alpha
+            if enableGesture {
+                playButton.alpha = alpha
             }
+            
+            bottomView.alpha = alpha
+            
             if(alpha == 1.0){
                 resetTimer()
             }
@@ -978,11 +953,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         
         if location.x > view.bounds.width / 2 + 50 {
             self.fastForward()
-            print("RIGHT SIDE PREESSED")
-            
         } else if location.x <= view.bounds.width / 2 - 50 {
             self.fastBackward()
-            print("LEFT SIDE PREESSED")
         } else {
             toggleViews()
         }
@@ -997,7 +969,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 self.toggleViews()
             }
         } else {
-            print("===========FORWARD=========")
             self.showSeekForwardButton()
             self.seekForwardTo(10.0 * Double(self.forwardTouches))
             self.forwardGestureTimer?.invalidate()
@@ -1016,7 +987,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 self.toggleViews()
             }
         } else {
-            print("**********BACK**********")
             self.showSeekBackwardButton()
             self.seekBackwardTo(10.0 * Double(self.backwardTouches))
             self.backwardGestureTimer?.invalidate()
@@ -1080,18 +1050,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
-    //    @objc func settingsButtonPressed(_ sender: UIButton){
-    //        let vc = SettingsBottomSheetViewController()
-    //        vc.modalPresentationStyle = .overCurrentContext
-    //        vc.cellDelegate = self
-    //        vc.items = [
-    //            SettingsBottomSheetModel(title: "Качества", icon: "qualityIcon", currentLabel: qualityText),
-    //            //            SettingsBottomSheetModel(title: "Скорость воспроизведения", icon: "speedIcon", currentLabel: selectedSpeedText),
-    //            SettingsBottomSheetModel(title: "Субтитле", icon: "subtitleIcon", currentLabel: selectedSubtitle),
-    //            SettingsBottomSheetModel(title: "Аудио", icon: "audioIcon", currentLabel: selectedAudioTrack)]
-    //        self.present(vc, animated: false)
-    //    }
-    
     // settings bottom sheet tapped
     func onSettingsBottomSheetCellTapped(index: Int) {
         switch index {
@@ -1118,13 +1076,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         switch type {
         case .quality:
             let resList = resolutions ?? ["480p":urlString!]
-            debugPrint("onBottomSheetCellTapped  *resList*  \(resList)")
             let array = Array(resList.keys)
-            debugPrint("onBottomSheetCellTapped  *array*  \(array)")
-            self.qualityText = sortedResolutions[index]
-            debugPrint("onBottomSheetCellTapped  *qualityText*  \(qualityText)")
+            self.qualityLabelText = sortedResolutions[index]
             let url = resList[sortedResolutions[index]]
-            debugPrint("onBottomSheetCellTapped  *url*  \(url ?? "")")
             guard let videoURL = URL(string: url ?? "") else {
                 return
             }
@@ -1163,9 +1117,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     func showQualityBottomSheet(){
         let resList = resolutions ?? ["480p":urlString!]
-        debugPrint("RESLIST \(resList)")
         let array = Array(resList.keys)
-        debugPrint("ARRAY \(array)")
         var listOfQuality = [String]()
         listOfQuality = array.sorted().reversed()
         array.sorted().reversed().forEach { quality in
@@ -1180,8 +1132,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         bottomSheetVC.labelText = qualityLabelText
         bottomSheetVC.cellDelegate = self
         bottomSheetVC.bottomSheetType = .quality
-        bottomSheetVC.selectedIndex = listOfQuality.firstIndex(of: qualityText) ?? 0
-        debugPrint("SELECTED INDEX \( bottomSheetVC.selectedIndex)")
+        bottomSheetVC.selectedIndex = listOfQuality.firstIndex(of: qualityLabelText) ?? 0
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
@@ -1205,27 +1156,22 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
 extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate {
     
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
-        
         var resolutions: [String:String] = [:]
         var startAt :Int64?
         seasons[seasonIndex].episodeList[episodeIndex].resolutions.map { (key: String, value: String) in
-            print("quality: \(key)\n fileName: \(value)")
             resolutions[key] = value
             startAt = 0
         }
-        
         self.resolutions = resolutions
-        
         let isFinded = resolutions.contains(where: { (key, value) in
-            if key == self.qualityText {
+            if key == self.qualityLabelText {
                 return true
             }
             return false
         })
-        
         let title = seasons[seasonIndex].episodeList[episodeIndex].title
         if isFinded {
-            let videoUrl = resolutions[self.qualityText]
+            let videoUrl = resolutions[self.qualityLabelText]
             self.setupDataSource(title: "S\(seasonIndex + 1)" + ":" + "E\(episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
         } else if !resolutions.isEmpty {
             let videoUrl = Array(resolutions.values)[0]
