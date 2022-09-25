@@ -521,7 +521,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             make.edges.equalToSuperview()
         }
         
-        if(isSerial) {
+        if (isSerial) {
             bottomActionsStackView.snp.makeConstraints { make in
                 make.right.equalToSuperview().offset(-10)
             }
@@ -544,8 +544,11 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             make.right.equalTo(bottomView).offset(-16)
         }
         
-        episodesButton.width(164)
+        episodesButton.width(140)
         episodesButton.height(Constants.bottomViewButtonSize)
+        episodesButton.snp.makeConstraints{ make in
+            make.right.equalTo(landscapeButton).offset(-12)
+        }
         episodesButton.layer.cornerRadius = 8
         
         nextEpisodeButton.width(136)
@@ -744,7 +747,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "duration", let duration = player.currentItem?.duration.seconds, duration > 0.0 {
-            self.durationTimeLabel.text = getTimeString(from: player.currentItem!.duration)
+            self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
             if newValue != oldValue {
@@ -784,19 +787,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
-    func getTimeString(from time: CMTime) -> String {
-        let totalSeconds = CMTimeGetSeconds(time)
-        let hours = Int(totalSeconds/3600)
-        let minutes = Int(totalSeconds/60) % 60
-        
-        let seconds = Int(totalSeconds.truncatingRemainder(dividingBy: 60))
-        if hours > 0 {
-            return String(format: "%i:%02i:%02i", arguments: [hours,minutes,seconds])
-        }else {
-            return String(format: "%02i:%02i", arguments: [minutes,seconds])
-        }
-    }
-    
     //MARK: - Time logic
     func addTimeObserver(titleLabel: UILabel, title: String) {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
@@ -813,7 +803,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
-            self?.currentTimeLabel.text = self?.getTimeString(from: currentItem.currentTime())
+            self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
             //            if(UIDevice.current.orientation.isLandscape){
             //                titleLabel.text = title
             //            } else {

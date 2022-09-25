@@ -12,8 +12,8 @@ class EpisodeCollectionCell: UICollectionViewCell {
     var episodes : Episodes? {
         didSet{
             titleLbl.text = episodes?.title ?? ""
-            descriptionLabel.text = episodes?.description
-            durationLbl.text = "\(episodes?.duration)"
+            descriptionLabel.text = episodes?.description ?? ""
+            durationLbl.text = VGPlayerUtils.getTimeIntString(from: episodes?.duration ?? 0)
         }
     }
     
@@ -28,6 +28,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
         st.translatesAutoresizingMaskIntoConstraints = false
         return st
     }()
+    
     var descriptionView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -46,7 +47,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
     }()
     var playIcon: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(named: "play.png")
+        image.image = Svg.serialPlay.uiImage
         image.backgroundColor = .clear
         image.translatesAutoresizingMaskIntoConstraints = false
         image.contentMode = .scaleAspectFill
@@ -67,7 +68,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
    lazy var durationLbl: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "\(episodes?.duration)"
+        label.text = VGPlayerUtils.getTimeIntString(from: episodes?.duration ?? 0)
         label.textColor = UIColor(rgb: 0xFF9D9D9D)
         label.backgroundColor = .clear
         label.font = UIFont.systemFont(ofSize: 11,weight: .medium)
@@ -90,16 +91,14 @@ class EpisodeCollectionCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
             super.init(frame: .zero)
-        
         contentView.addSubview(containerStack)
         contentView.backgroundColor = .clear
         containerStack.addArrangedSubviewss(episodeImage,titleLbl,durationLbl,descriptionView,playIcon)
         setupUI()
         episodeImage.addSubview(playIcon)
-        }
+    }
         
     func setupUI(){
-        
         playIcon.snp.makeConstraints { make in
             make.width.height.equalTo(32)
             make.top.equalTo(episodeImage).offset(36)
@@ -126,7 +125,6 @@ class EpisodeCollectionCell: UICollectionViewCell {
         descriptionView.snp.makeConstraints { make in
             make.left.right.equalTo(containerStack)
         }
-        
         
         descriptionView.addSubview(descriptionLabel)
         

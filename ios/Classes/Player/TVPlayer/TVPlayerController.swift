@@ -283,7 +283,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         
         return button
     }()
-    private  var showsBtn: UIButton = {
+    private var showsBtn: UIButton = {
         let button = UIButton()
         button.setImage(Svg.programmes.uiImage, for: .normal)
         button.setTitle("Телепередачи", for: .normal)
@@ -562,7 +562,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         }
         showsBtn.width(140)
         showsBtn.snp.makeConstraints{ make in
-            make.right.equalTo(landscapeButton).offset(-24)
+            make.right.equalTo(landscapeButton).offset(-12)
         }
         showsBtnStackView.bottomToTop(of: timeSlider, offset: 8)
         showsBtn.layer.cornerRadius = 8

@@ -117,15 +117,6 @@ class ProgramCell: UITableViewCell {
             make.height.equalTo(0)
             make.width.equalToSuperview()
         }
-        
-//        circleView.snp.makeConstraints { make in
-//            make.size.equalTo(10)
-//        }
-        
-//        circleView.layer.cornerRadius = 5
-//        circleView.clipsToBounds = true
-        
-//        circleView.backgroundColor = .green
     }
     
     func setUp() {
