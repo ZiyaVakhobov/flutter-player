@@ -94,6 +94,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var playerRate = 1.0
     var selectedSeason = 0
     private var selectedSpeedText = "1.0x"
+    var selectedQualityText = "Auto"
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
     
@@ -715,7 +716,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         vc.delegete = self
         vc.speedDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: qualityLabelText),
+            SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: selectedQualityText),
             SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText)
         ]
         self.present(vc, animated: true, completion: nil)
@@ -804,11 +805,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
             let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
             self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
-            //            if(UIDevice.current.orientation.isLandscape){
-            //                titleLabel.text = title
-            //            } else {
-            //                titleLabel.text = ""
-            //            }
+            titleLabel.text = title
         })
     }
     
@@ -1067,7 +1064,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         case .quality:
             let resList = resolutions ?? ["480p":urlString!]
             let array = Array(resList.keys)
-            self.qualityLabelText = sortedResolutions[index]
+            self.selectedQualityText = sortedResolutions[index]
             let url = resList[sortedResolutions[index]]
             guard let videoURL = URL(string: url ?? "") else {
                 return

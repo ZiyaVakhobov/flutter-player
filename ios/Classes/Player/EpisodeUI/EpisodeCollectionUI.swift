@@ -123,7 +123,11 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             if(UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight){
-                menuHeight = UIScreen.main.bounds.height
+                if(UIDevice.current.orientation.isLandscape){
+                    menuHeight = UIScreen.main.bounds.width * 0.4
+                } else {
+                    menuHeight = UIScreen.main.bounds.height * 0.4
+                }
             } else {
                 menuHeight = UIScreen.main.bounds.height * 0.4
             }
@@ -326,7 +330,11 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         if UIDevice.current.userInterfaceIdiom == .phone {
             if(UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight){
-                menuHeight = UIScreen.main.bounds.height
+                if(UIDevice.current.orientation.isLandscape){
+                    menuHeight = UIScreen.main.bounds.width * 0.4
+                } else {
+                    menuHeight = UIScreen.main.bounds.height * 0.4
+                }
             } else {
                 menuHeight = UIScreen.main.bounds.height * 0.4
             }

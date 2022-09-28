@@ -26,6 +26,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             
             let json = (args as! [String:Any])["playerConfigJsonString"]
             if let myArgs = json as? [String: Any],let url = (myArgs["initialResolution"] as! [String:String]).values.first,
+               let selectQualityText = (myArgs["initialResolution"] as! [String:String]).keys.first,
                let title = myArgs["title"] as? String,
                let tvProgramsText = myArgs["tvProgramsText"] as? String,
                let qualityText = myArgs["qualityText"] as? String,
@@ -67,6 +68,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
                     vc.urlString = url
+                    vc.selectedQualityText = selectQualityText
                     vc.startPosition = duration
                     vc.qualityLabelText = qualityText
                     vc.speedLabelText = speedText

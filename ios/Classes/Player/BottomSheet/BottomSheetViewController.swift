@@ -126,7 +126,11 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        defaultHeight = 300
+        if bottomSheetType != .speed {
+            defaultHeight = 380
+        } else {
+            defaultHeight = 470
+        }
         dismissibleHeight = UIScreen.main.bounds.height
         contentTableView.delegate = self
         contentTableView.dataSource = self
@@ -222,7 +226,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         cancelBtn.snp.makeConstraints { make in
             make.left.equalTo(horizontalStack)
             make.width.equalTo(50)
-            
         }
         containerViewHeightConstraint = containerView.heightAnchor.constraint(equalToConstant: defaultHeight)
         containerViewBottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: defaultHeight)

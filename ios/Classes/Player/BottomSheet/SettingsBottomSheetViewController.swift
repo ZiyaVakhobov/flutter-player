@@ -125,7 +125,6 @@ class SettingsBottomSheetViewController: UIViewController, UITableViewDelegate, 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SettingsBottomSheetCell") as! SettingsBottomSheetCell
-        
         cell.model = items[indexPath.row]
         cell.backgroundColor = .clear
         cell.selectionStyle = .none
@@ -226,14 +225,6 @@ class SettingsBottomSheetViewController: UIViewController, UITableViewDelegate, 
                 // Condition 2: If new height is below default, animate back to default
                 animateContainerHeight(defaultHeight)
             }
-            //            else if newHeight < maximumContainerHeight && isDraggingDown {
-            //                // Condition 3: If new height is below max and going down, set to default height
-            //                animateContainerHeight(defaultHeight)
-            //            }
-            //            else if newHeight > defaultHeight && !isDraggingDown {
-            //                // Condition 4: If new height is below max and going up, set to max height at top
-            //                animateContainerHeight(maximumContainerHeight)
-            //            }
         default:
             break
         }
