@@ -325,21 +325,21 @@ class _MyAppState extends State<MyApp> {
               playerConfig: PlayerConfiguration(
             initialResolution: {
               'Auto':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8'
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--'
             },
             resolutions: {
               'Auto':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
               '1080p':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
               '720p':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
               '480p':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
               '360p':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
               '240p':
-                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+                  'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--',
             },
             qualityText: 'Quality',
             speedText: 'Speed',
@@ -348,7 +348,7 @@ class _MyAppState extends State<MyApp> {
             isSerial: false,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
-            seasons: seasons,
+            seasons: [],
             isLive: true,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
