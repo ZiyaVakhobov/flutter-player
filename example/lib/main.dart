@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
     List<Season> seasons = [];
     List<Movie> movies1 = [];
     movies1.add(Movie(
+      id: '16270945',
       title: 'Женщина-Халк: Адвокат',
       description:
           'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
@@ -44,6 +45,7 @@ class _MyAppState extends State<MyApp> {
       },
     ));
     movies1.add(Movie(
+      id: '16270955',
       title: 'Женщина-Халк: Адвокат',
       description:
           'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
@@ -66,7 +68,6 @@ class _MyAppState extends State<MyApp> {
       },
     ));
     seasons.add(Season(title: '1 Season', movies: movies1));
-    List<ProgramsInfo> programsInfoList = [];
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
@@ -98,12 +99,17 @@ class _MyAppState extends State<MyApp> {
             seasons: seasons,
             isLive: false,
             tvProgramsText: 'Телеканалы',
-            programsInfoList: programsInfoList,
+            programsInfoList: [],
             showController: true,
             playVideoFromAsset: false,
             assetPath: '',
             seasonIndex: 0,
             episodeIndex: 0,
+            isMegogo: true,
+            isPremier: false,
+            videoId: '16270945',
+            sessionId: '633eba31c2c2e7a4241a79a3',
+            megogoAccessToken: 'MToxMTYyNDQ1NDA2OjE2NjUwNjIxMjM6OmExMjZmZWQwZmZhYTY0OTQ1ZWIxNWY5NTMzYzhmYWQ2',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -115,53 +121,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   playTV() async {
-    List<Season> seasons = [];
-    List<Movie> movies1 = [];
-    movies1.add(Movie(
-      title: 'Женщина-Халк: Адвокат',
-      description:
-          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
-      image:
-          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
-      duration: 2122,
-      resolutions: {
-        'Auto':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
-        '1080p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-        '720p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
-        '480p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
-        '360p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
-        '240p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-      },
-    ));
-    movies1.add(Movie(
-      title: 'Женщина-Халк: Адвокат',
-      description:
-          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
-      image:
-          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
-      duration: 1669,
-      resolutions: {
-        'Auto':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
-        '1080p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
-        '720p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
-        '480p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
-        '360p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
-        '240p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
-      },
-    ));
-    seasons.add(Season(title: '1 Season', movies: movies1));
     List<ProgramsInfo> programsInfoList = [];
     List<TvProgram> tvPrograms = [];
     tvPrograms.add(TvProgram(
@@ -194,132 +153,9 @@ class _MyAppState extends State<MyApp> {
     tvPrograms.add(TvProgram(
         scheduledTime: '09:00',
         programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    programsInfoList
-        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    tvPrograms.add(TvProgram(
-        scheduledTime: '09:00',
-        programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    programsInfoList
-        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
+    programsInfoList.add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
     programsInfoList.add(ProgramsInfo(day: 'Today', tvPrograms: tvPrograms));
-    programsInfoList.add(ProgramsInfo(day: 'Tomorrov', tvPrograms: tvPrograms));
+    programsInfoList.add(ProgramsInfo(day: 'Tomorrow', tvPrograms: tvPrograms));
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
@@ -348,7 +184,7 @@ class _MyAppState extends State<MyApp> {
             isSerial: false,
             episodeButtonText: 'Episodes',
             nextButtonText: 'Next',
-            seasons: seasons,
+            seasons: [],
             isLive: true,
             tvProgramsText: 'Programs',
             programsInfoList: programsInfoList,
@@ -357,6 +193,11 @@ class _MyAppState extends State<MyApp> {
             assetPath: 'assets/splash.mp4',
             seasonIndex: 0,
             episodeIndex: 0,
+            isMegogo: false,
+            isPremier: false,
+            videoId: '',
+            sessionId: '',
+            megogoAccessToken: '',
           )) ??
           'nothing';
       if (kDebugMode) {

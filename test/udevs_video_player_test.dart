@@ -48,6 +48,11 @@ void main() {
               assetPath: '',
               seasonIndex: 0,
               episodeIndex: 0,
+              isMegogo: false,
+              isPremier: false,
+              videoId: '',
+              sessionId: '',
+              megogoAccessToken: '',
             )),
         '42');
   });
