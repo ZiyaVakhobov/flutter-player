@@ -40,4 +40,14 @@ data class PlayerConfiguration(
     val seasonIndex: Int,
     @SerializedName("episodeIndex")
     val episodeIndex: Int,
+    @SerializedName("isMegogo")
+    val isMegogo: Boolean,
+    @SerializedName("isPremier")
+    val isPremier: Boolean,
+    @SerializedName("videoId")
+    val videoId: String,
+    @SerializedName("sessionId")
+    val sessionId: String,
+    @SerializedName("megogoAccessToken")
+    val megogoAccessToken: String,
 ) : Serializable

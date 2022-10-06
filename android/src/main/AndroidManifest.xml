@@ -11,6 +11,7 @@
     <application>
         <activity
             android:name=".activities.UdevsVideoPlayerActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:theme="@style/Theme.AppCompat" />
     </application>
 </manifest>

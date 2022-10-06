@@ -16,10 +16,12 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -48,9 +50,10 @@ import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
+import uz.udevs.udevs_video_player.view_models.MyViewModel
 import kotlin.math.abs
 
-class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
+class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
 
     private var playerView: PlayerView? = null
@@ -90,6 +93,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private var sWidth: Int = 0
     private var seasonIndex: Int = 0
     private var episodeIndex: Int = 0
+    lateinit var viewModel: MyViewModel
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -235,7 +239,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         val uri =
             Uri.parse("asset:///flutter_assets/${playerConfiguration!!.assetPath}")
         val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
-        val mediaSource: MediaSource = buildMediaSource(uri, dataSourceFactory)
+        val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(uri))
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
@@ -244,13 +249,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         player?.setMediaSource(mediaSource)
         player?.prepare()
         player?.playWhenReady = true
-    }
-
-    private fun buildMediaSource(
-        uri: Uri, mediaDataSourceFactory: DataSource.Factory
-    ): MediaSource {
-        return ProgressiveMediaSource.Factory(mediaDataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(uri))
     }
 
     private fun playVideo() {
@@ -381,13 +379,19 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             title?.text =
                 "S${seasonIndex + 1} E${episodeIndex + 1} " +
                         playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title
-            val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-            val hlsMediaSource: HlsMediaSource =
-                HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
-            player?.setMediaSource(hlsMediaSource)
-            player?.prepare()
-            player?.playWhenReady
+            if (playerConfiguration!!.isMegogo && playerConfiguration!!.isSerial) {
+                getMegogoStream()
+            } else if (playerConfiguration!!.isPremier && playerConfiguration!!.isSerial) {
+                getPremierStream()
+            } else {
+                val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                val hlsMediaSource: HlsMediaSource =
+                    HlsMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                player?.setMediaSource(hlsMediaSource)
+                player?.prepare()
+                player?.playWhenReady
+            }
         }
         tvProgramsButton?.setOnClickListener {
             showTvProgramsBottomSheet()
@@ -408,6 +412,59 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
             }, 3000)
         }
+    }
+
+    private fun getMegogoStream() {
+        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+        viewModel.getMegogoStream(
+            playerConfiguration!!.sessionId,
+            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
+            playerConfiguration!!.megogoAccessToken
+        )
+            .observe(this, androidx.lifecycle.Observer { it ->
+                if (it != null) {
+                    println(it.toString())
+                    val map: HashMap<String, String> = hashMapOf()
+                    it.data?.bitrates?.forEach {
+                        map[it!!.src!!] = it.bitrate.toString()
+                    }
+                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
+                        map
+                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                    val hlsMediaSource: HlsMediaSource =
+                        HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    player?.setMediaSource(hlsMediaSource)
+                    player?.prepare()
+                    player?.playWhenReady
+                }
+            })
+    }
+
+    private fun getPremierStream() {
+        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+        viewModel.getPremierStream(
+            playerConfiguration!!.sessionId,
+            playerConfiguration!!.videoId,
+            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id
+        )
+            .observe(this, androidx.lifecycle.Observer { it ->
+                if (it != null) {
+                    val map: HashMap<String, String> = hashMapOf()
+                    it.file_info?.forEach {
+                        map[it!!.file_name!!] = it.quality!!
+                    }
+                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
+                        map
+                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                    val hlsMediaSource: HlsMediaSource =
+                        HlsMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    player?.setMediaSource(hlsMediaSource)
+                    player?.prepare()
+                    player?.playWhenReady
+                }
+            })
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -464,16 +521,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
             WindowInsetsCompat.Type.systemBars()
         )
-    }
-
-    private fun hideSystemBars(window: Window) {
-        val windowInsetsController =
-            ViewCompat.getWindowInsetsController(window.decorView) ?: return
-        // Configure the behavior of the hidden system bars
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
-        // Hide both the status bar and the navigation bar
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     private var currentBottomSheet = BottomSheet.NONE
