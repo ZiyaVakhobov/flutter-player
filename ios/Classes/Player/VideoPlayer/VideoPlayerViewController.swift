@@ -13,34 +13,6 @@ import XLActionController
 import NVActivityIndicatorView
 import SnapKit
 
-protocol QualityDelegate {
-    func qualityBottomSheet()
-}
-protocol SpeedDelegate {
-    func speedBottomSheet()
-}
-
-enum SwipeDirection: Int {
-    case horizontal = 0
-    case vertical   = 1
-}
-
-struct SortFunctions{
-    
-    static func sortWithKeys(_ dict: [String: String]) -> [String: String] {
-        let sorted = dict.sorted(by: >)
-        var newDict: [String: String] = [:]
-        for sortedDict in sorted {
-            newDict[sortedDict.key] = sortedDict.value
-        }
-        return newDict
-    }
-}
-
-protocol VideoPlayerDelegate: AnyObject {
-    func getDuration(duration: Double)
-}
-
 class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
     
     struct Constants {
@@ -77,9 +49,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     var hasNextVideo = false
     var sesonNum: Int?
     var seasons : [Seasons] = [Seasons]()
-    var videoPlayerChannel: FlutterMethodChannel?
     var shouldHideHomeIndicator = false
-    var binaryMessenger : FlutterBinaryMessenger?
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
     private var swipeGesture: UIPanGestureRecognizer!
@@ -278,22 +248,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
-        button.isHidden = false
-        return button
-    }()
-    
-    private  var nextEpisodeButton: UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "nextEpisodeIcon"), for: .normal)
-        button.setTitle("След. эпизод", for: .normal)
-        button.layer.zPosition = 3
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-        button.setTitleColor(.white, for: .normal)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(nextEpisodeButtonPressed(_:)), for: .touchUpInside)
         button.isHidden = false
         return button
     }()
@@ -552,13 +506,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
         episodesButton.layer.cornerRadius = 8
         
-        nextEpisodeButton.width(136)
-        nextEpisodeButton.height(Constants.bottomViewButtonSize)
-        nextEpisodeButton.layer.cornerRadius = 8
-        
         if !isSerial {
             episodesButton.isHidden = true
-            nextEpisodeButton.isHidden = true
         }
     }
     
@@ -704,12 +653,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         self.present(episodeVC, animated: true, completion: nil)
     }
     
-    @objc func nextEpisodeButtonPressed(_ sender: UIButton){
-        DispatchQueue.main.async {
-            self.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self.player.currentTime().seconds)
-        }
-    }
-    
     @objc func settingPressed(_ sender: UIButton) {
         let vc = SettingVC()
         vc.modalPresentationStyle = .custom
@@ -779,7 +722,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         DispatchQueue.main.async {[weak self] in
             if self?.hasNextVideo ?? false {
                 DispatchQueue.main.async {
-                    self?.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self?.player.currentTime().seconds)
+//                    self?.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self?.player.currentTime().seconds)
                 }
             } else {
                 self?.player.seek(to: CMTime.zero)
