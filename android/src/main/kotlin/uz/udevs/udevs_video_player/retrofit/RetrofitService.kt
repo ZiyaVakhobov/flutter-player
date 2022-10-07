@@ -12,6 +12,7 @@ interface RetrofitService {
 
     @GET("megogo/stream")
     fun getMegogoStream(
+        @Header("Authorization") authorization: String,
         @Header("SessionId") sessionId: String,
         @Query("video_id") videoId: String,
         @Query("access_token") megogoAccessToken: String,
@@ -19,6 +20,7 @@ interface RetrofitService {
 
     @GET("premier/videos/{video-id}/episodes/{episode-id}/stream")
     fun getPremierStream(
+        @Header("Authorization") authorization: String,
         @Header("SessionId") sessionId: String,
         @Path("video-id") videoId: String,
         @Path("episode-id") episodeId: String,

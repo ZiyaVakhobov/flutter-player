@@ -53,6 +53,8 @@ void main() {
               videoId: '',
               sessionId: '',
               megogoAccessToken: '',
+              authorization: '',
+              autoText: 'Автонастройка'
             )),
         '42');
   });

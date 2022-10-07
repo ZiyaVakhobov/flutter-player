@@ -50,4 +50,8 @@ data class PlayerConfiguration(
     val sessionId: String,
     @SerializedName("megogoAccessToken")
     val megogoAccessToken: String,
+    @SerializedName("authorization")
+    val authorization: String,
+    @SerializedName("autoText")
+    val autoText: String,
 ) : Serializable

@@ -16,12 +16,9 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -42,6 +39,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.PLAYER_ACTIVITY_FINISH
 import uz.udevs.udevs_video_player.R
@@ -49,11 +49,14 @@ import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
 import uz.udevs.udevs_video_player.models.BottomSheet
+import uz.udevs.udevs_video_player.models.MegogoStreamResponse
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
-import uz.udevs.udevs_video_player.view_models.MyViewModel
+import uz.udevs.udevs_video_player.models.PremierStreamResponse
+import uz.udevs.udevs_video_player.retrofit.Common
+import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import kotlin.math.abs
 
-class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
+class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
 
     private var playerView: PlayerView? = null
@@ -93,7 +96,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var sWidth: Int = 0
     private var seasonIndex: Int = 0
     private var episodeIndex: Int = 0
-    lateinit var viewModel: MyViewModel
+    private var retrofitService: RetrofitService? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -169,6 +172,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             customSeekBar?.visibility = View.VISIBLE
         }
 
+        retrofitService = Common.retrofitService()
         initializeClickListeners()
 
         sWidth = Resources.getSystem().displayMetrics.widthPixels
@@ -415,18 +419,22 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun getMegogoStream() {
-        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-        viewModel.getMegogoStream(
+        retrofitService?.getMegogoStream(
+            playerConfiguration!!.authorization,
             playerConfiguration!!.sessionId,
             playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
             playerConfiguration!!.megogoAccessToken
-        )
-            .observe(this, androidx.lifecycle.Observer { it ->
-                if (it != null) {
-                    println(it.toString())
+        )?.enqueue(object : Callback<MegogoStreamResponse> {
+            override fun onResponse(
+                call: Call<MegogoStreamResponse>,
+                response: Response<MegogoStreamResponse>
+            ) {
+                val body = response.body()
+                if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
-                    it.data?.bitrates?.forEach {
-                        map[it!!.src!!] = it.bitrate.toString()
+                    map[playerConfiguration!!.autoText] = body.data!!.src!!
+                    body.data.bitrates?.forEach {
+                        map["${it!!.bitrate}p"] = it.src!!
                     }
                     playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
                         map
@@ -438,20 +446,30 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     player?.prepare()
                     player?.playWhenReady
                 }
-            })
+            }
+
+            override fun onFailure(call: Call<MegogoStreamResponse>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
     }
 
     private fun getPremierStream() {
-        viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
-        viewModel.getPremierStream(
+        retrofitService?.getPremierStream(
+            playerConfiguration!!.authorization,
             playerConfiguration!!.sessionId,
-            playerConfiguration!!.videoId,
-            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id
-        )
-            .observe(this, androidx.lifecycle.Observer { it ->
-                if (it != null) {
+            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
+            playerConfiguration!!.megogoAccessToken
+        )?.enqueue(object : Callback<PremierStreamResponse> {
+            override fun onResponse(
+                call: Call<PremierStreamResponse>,
+                response: Response<PremierStreamResponse>
+            ) {
+                val body = response.body()
+                println(body.toString())
+                if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
-                    it.file_info?.forEach {
+                    body.file_info?.forEach {
                         map[it!!.file_name!!] = it.quality!!
                     }
                     playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
@@ -464,7 +482,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     player?.prepare()
                     player?.playWhenReady
                 }
-            })
+            }
+
+            override fun onFailure(call: Call<PremierStreamResponse>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
