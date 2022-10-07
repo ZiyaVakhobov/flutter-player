@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
           'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 2122,
       resolutions: {
-        'Auto':
+        'Автонастройка':
             'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
         '1080p':
             'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
           'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
       duration: 1669,
       resolutions: {
-        'Auto':
+        'Автонастройка':
             'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
         '1080p':
             'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
