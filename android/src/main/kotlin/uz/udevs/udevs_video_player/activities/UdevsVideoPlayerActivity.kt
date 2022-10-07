@@ -667,11 +667,19 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         qualityText?.text = currentQuality
         speedText?.text = currentSpeed
         quality?.setOnClickListener {
-            showQualitySpeedSheet(
-                currentQuality,
-                playerConfiguration?.resolutions?.keys?.toList() as ArrayList,
-                true,
-            )
+            if (playerConfiguration!!.isSerial) {
+                showQualitySpeedSheet(
+                    currentQuality,
+                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions.keys.toList() as ArrayList,
+                    true,
+                )
+            } else {
+                showQualitySpeedSheet(
+                    currentQuality,
+                    playerConfiguration?.resolutions?.keys?.toList() as ArrayList,
+                    true,
+                )
+            }
         }
         speed?.setOnClickListener {
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
@@ -706,10 +714,38 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
             playerConfiguration!!.qualityText
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
+        //sorting
+        val l = mutableListOf<String>()
+        var auto = ""
+        list.forEach {
+            if (it.substring(0, it.length - 1).toIntOrNull() != null) {
+                l.add(it)
+            } else {
+                auto = it
+            }
+        }
+        for (i in 0 until l.size) {
+            for (j in i until l.size) {
+                val first = l[i]
+                val second = l[j]
+                if (first.substring(0, first.length - 1).toInt() < second.substring(
+                        0,
+                        second.length - 1
+                    ).toInt()
+                ) {
+                    val a = l[i]
+                    l[i] = l[j]
+                    l[j] = a
+                }
+            }
+        }
+        if (auto.isNotEmpty()) {
+            l.add(0, auto)
+        }
         val adapter = QualitySpeedAdapter(
             initialValue,
             this,
-            list, (object : QualitySpeedAdapter.OnClickListener {
+            l as ArrayList<String>, (object : QualitySpeedAdapter.OnClickListener {
                 override fun onClick(position: Int) {
                     if (fromQuality) {
                         currentQuality = list[position]
@@ -719,9 +755,17 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                         }
                         val currentPosition = player?.currentPosition
                         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                        val hlsMediaSource: HlsMediaSource =
+                        val hlsMediaSource: HlsMediaSource = if (playerConfiguration!!.isSerial) {
+                            HlsMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(
+                                    MediaItem.fromUri(
+                                        Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])
+                                    )
+                                )
+                        } else {
                             HlsMediaSource.Factory(dataSourceFactory)
                                 .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.resolutions[currentQuality])))
+                        }
                         player?.setMediaSource(hlsMediaSource)
                         player?.seekTo(currentPosition!!)
                         player?.prepare()
