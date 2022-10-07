@@ -27,6 +27,8 @@ class PlayerConfiguration {
   String videoId;
   String sessionId;
   String megogoAccessToken;
+  String authorization;
+  String autoText;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
@@ -53,13 +55,14 @@ class PlayerConfiguration {
     map['videoId'] = videoId;
     map['sessionId'] = sessionId;
     map['megogoAccessToken'] = megogoAccessToken;
+    map['authorization'] = authorization;
+    map['autoText'] = autoText;
     return map;
   }
 
-
   @override
   String toString() {
-    return 'PlayerConfiguration{initialResolution: $initialResolution, resolutions: $resolutions, qualityText: $qualityText, speedText: $speedText, lastPosition: $lastPosition, title: $title, isSerial: $isSerial, episodeButtonText: $episodeButtonText, nextButtonText: $nextButtonText, seasons: $seasons, isLive: $isLive, tvProgramsText: $tvProgramsText, programsInfoList: $programsInfoList, showController: $showController, playVideoFromAsset: $playVideoFromAsset, assetPath: $assetPath, seasonIndex: $seasonIndex, episodeIndex: $episodeIndex, isMegogo: $isMegogo, isPremier: $isPremier, videoId: $videoId, sessionId: $sessionId, megogoAccessToken: $megogoAccessToken}';
+    return 'PlayerConfiguration{initialResolution: $initialResolution, resolutions: $resolutions, qualityText: $qualityText, speedText: $speedText, lastPosition: $lastPosition, title: $title, isSerial: $isSerial, episodeButtonText: $episodeButtonText, nextButtonText: $nextButtonText, seasons: $seasons, isLive: $isLive, tvProgramsText: $tvProgramsText, programsInfoList: $programsInfoList, showController: $showController, playVideoFromAsset: $playVideoFromAsset, assetPath: $assetPath, seasonIndex: $seasonIndex, episodeIndex: $episodeIndex, isMegogo: $isMegogo, isPremier: $isPremier, videoId: $videoId, sessionId: $sessionId, megogoAccessToken: $megogoAccessToken, authorization: $authorization, autoText: $autoText}';
   }
 
   PlayerConfiguration({
@@ -86,5 +89,7 @@ class PlayerConfiguration {
     required this.videoId,
     required this.sessionId,
     required this.megogoAccessToken,
+    required this.authorization,
+    required this.autoText,
   });
 }

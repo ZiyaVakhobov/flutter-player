@@ -108,8 +108,12 @@ class _MyAppState extends State<MyApp> {
             isMegogo: true,
             isPremier: false,
             videoId: '16270945',
-            sessionId: '633eba31c2c2e7a4241a79a3',
-            megogoAccessToken: 'MToxMTYyNDQ1NDA2OjE2NjUwNjIxMjM6OmExMjZmZWQwZmZhYTY0OTQ1ZWIxNWY5NTMzYzhmYWQ2',
+            sessionId: '633fad58c2c2e7a4241ab508',
+            megogoAccessToken:
+                'MToxMTYyNDQ1NDA2OjE2NjUxMTc1NTY6OjY3ZTI2MzVkYzY0Mzk2N2UwMjZhOGVjNWQ5MDA3OGFm',
+            authorization:
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg1MDEzNDMsImlzcyI6InVzZXIiLCJwaWQiOjEzMDcsInJvbGUiOiJjdXN0b21lciIsInN1YiI6IjYyMDQzMmZmLTc3ZWItNDc0Mi05MmFhLTZmOGU4NDcyMDI0ZCJ9.6SvUCBT0gb6tIRy1PL-C7WS7xHpJXc1PCZky6aH6HtA',
+            autoText: 'Автонастройка'
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -153,7 +157,8 @@ class _MyAppState extends State<MyApp> {
     tvPrograms.add(TvProgram(
         scheduledTime: '09:00',
         programTitle: 'Забытое и погребенное, 1 сезон, 3 эп. Суррей.'));
-    programsInfoList.add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
+    programsInfoList
+        .add(ProgramsInfo(day: 'Yesterday', tvPrograms: tvPrograms));
     programsInfoList.add(ProgramsInfo(day: 'Today', tvPrograms: tvPrograms));
     programsInfoList.add(ProgramsInfo(day: 'Tomorrow', tvPrograms: tvPrograms));
     try {
@@ -198,6 +203,8 @@ class _MyAppState extends State<MyApp> {
             videoId: '',
             sessionId: '',
             megogoAccessToken: '',
+            authorization: '',
+            autoText: 'Автонастройка'
           )) ??
           'nothing';
       if (kDebugMode) {
