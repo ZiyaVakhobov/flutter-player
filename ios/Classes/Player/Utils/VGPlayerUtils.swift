@@ -89,3 +89,36 @@ class VGPlayerUtils: NSObject {
         }
     }
 }
+
+struct SortFunctions{
+    
+    static func sortWithKeys(_ dict: [String: String]) -> [String: String] {
+        let sorted = dict.sorted(by: >)
+        var newDict: [String: String] = [:]
+        for sortedDict in sorted {
+            newDict[sortedDict.key] = sortedDict.value
+        }
+        return newDict
+    }
+}
+
+enum SwipeDirection: Int {
+    case horizontal = 0
+    case vertical   = 1
+}
+
+struct Constants {
+    static let horizontalSpacing: CGFloat = 0
+    static let controlButtonSize: CGFloat = 55.0
+    static let maxButtonSize: CGFloat = 40.0
+    static let bottomViewButtonSize: CGFloat = 16
+    static let unblockButtonSize : CGFloat = 32.0
+    static let unblockButtonInset : CGFloat = 24.0
+    static let bottomViewButtonInset: CGFloat = 24.0
+    static let topButtonSize: CGFloat = 50.0
+    static let controlButtonInset: CGFloat = 48
+    static let alphaValue: CGFloat = 0.3
+    static let topButtonInset: CGFloat = 34
+    static let nextEpisodeInset: CGFloat = 20
+    static let nextEpisodeShowTime : Float = 60
+}
