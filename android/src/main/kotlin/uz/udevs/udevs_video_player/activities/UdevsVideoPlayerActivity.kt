@@ -458,8 +458,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         retrofitService?.getPremierStream(
             playerConfiguration!!.authorization,
             playerConfiguration!!.sessionId,
+            playerConfiguration!!.videoId,
             playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
-            playerConfiguration!!.megogoAccessToken
         )?.enqueue(object : Callback<PremierStreamResponse> {
             override fun onResponse(
                 call: Call<PremierStreamResponse>,
@@ -470,7 +470,11 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
                     body.file_info?.forEach {
-                        map[it!!.file_name!!] = it.quality!!
+                        if(it!!.quality == "auto") {
+                            map[playerConfiguration!!.autoText] = it.file_name!!
+                        } else {
+                            map[it.quality!!] = it.file_name!!
+                        }
                     }
                     playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
                         map
