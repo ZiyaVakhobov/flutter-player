@@ -78,7 +78,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.titleText = title
                     vc.serialLabelText = episodeButtonText
                     vc.seasons  = Seasons.fromDictinary(map: seasons)
-                    vc.binaryMessenger = SwiftUdevsVideoPlayerPlugin.viewController.binaryMessenger
                     SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)}
             } else {
                 result("Parse error");
