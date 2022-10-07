@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
     List<Season> seasons = [];
     List<Movie> movies1 = [];
     movies1.add(Movie(
-      id: '16270945',
+      id: '22109',
       title: 'Женщина-Халк: Адвокат',
       description:
           'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
       },
     ));
     movies1.add(Movie(
-      id: '16270955',
+      id: '22110',
       title: 'Женщина-Халк: Адвокат',
       description:
           'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
@@ -105,9 +105,9 @@ class _MyAppState extends State<MyApp> {
             assetPath: '',
             seasonIndex: 0,
             episodeIndex: 0,
-            isMegogo: true,
-            isPremier: false,
-            videoId: '16270945',
+            isMegogo: false,
+            isPremier: true,
+            videoId: '5178',
             sessionId: '633fad58c2c2e7a4241ab508',
             megogoAccessToken:
                 'MToxMTYyNDQ1NDA2OjE2NjUxMTc1NTY6OjY3ZTI2MzVkYzY0Mzk2N2UwMjZhOGVjNWQ5MDA3OGFm',
