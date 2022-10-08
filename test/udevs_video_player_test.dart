@@ -54,7 +54,8 @@ void main() {
               sessionId: '',
               megogoAccessToken: '',
               authorization: '',
-              autoText: 'Автонастройка'
+              autoText: 'Автонастройка',
+              baseUrl: ''
             )),
         '42');
   });

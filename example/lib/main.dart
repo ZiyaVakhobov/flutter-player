@@ -113,7 +113,8 @@ class _MyAppState extends State<MyApp> {
                 'MToxMTYyNDQ1NDA2OjE2NjUxMTc1NTY6OjY3ZTI2MzVkYzY0Mzk2N2UwMjZhOGVjNWQ5MDA3OGFm',
             authorization:
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg1MDEzNDMsImlzcyI6InVzZXIiLCJwaWQiOjEzMDcsInJvbGUiOiJjdXN0b21lciIsInN1YiI6IjYyMDQzMmZmLTc3ZWItNDc0Mi05MmFhLTZmOGU4NDcyMDI0ZCJ9.6SvUCBT0gb6tIRy1PL-C7WS7xHpJXc1PCZky6aH6HtA',
-            autoText: 'Автонастройка'
+            autoText: 'Автонастройка',
+            baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -204,7 +205,8 @@ class _MyAppState extends State<MyApp> {
             sessionId: '',
             megogoAccessToken: '',
             authorization: '',
-            autoText: 'Автонастройка'
+            autoText: 'Автонастройка',
+            baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
           )) ??
           'nothing';
       if (kDebugMode) {

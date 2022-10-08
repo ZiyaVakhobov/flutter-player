@@ -54,4 +54,6 @@ data class PlayerConfiguration(
     val authorization: String,
     @SerializedName("autoText")
     val autoText: String,
+    @SerializedName("baseUrl")
+    val baseUrl: String,
 ) : Serializable

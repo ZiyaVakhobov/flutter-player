@@ -172,7 +172,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             customSeekBar?.visibility = View.VISIBLE
         }
 
-        retrofitService = Common.retrofitService()
+        retrofitService = Common.retrofitService(playerConfiguration!!.baseUrl)
         initializeClickListeners()
 
         sWidth = Resources.getSystem().displayMetrics.widthPixels
