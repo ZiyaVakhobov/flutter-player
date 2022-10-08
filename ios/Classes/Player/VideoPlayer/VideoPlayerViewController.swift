@@ -51,6 +51,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     var shouldHideHomeIndicator = false
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
+    var playerConfiguration: PlayerConfiguration!
     private var swipeGesture: UIPanGestureRecognizer!
     private var tapGesture: UITapGestureRecognizer!
     private var tapHideGesture: UITapGestureRecognizer!
@@ -1074,6 +1075,31 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
+    
+    func getMegogoStream(){
+        var parameters : [String:String] = ["video_id":playerConfiguration.videoId,"access_token":playerConfiguration.megogoAccessToken]
+        var _url:String = playerConfiguration.baseUrl+"megogo/stream"
+        Networking.sharedInstance.getMegogoStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId, parameters: parameters) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let success):
+                print(success)
+            }
+        }
+    }
+    
+    func getPremierStream(episodeId:String){
+        var _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
+        Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let success):
+                print(success)
+            }
+        }
+    }
 }
 
 extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate {
@@ -1081,6 +1107,17 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
         var resolutions: [String:String] = [:]
         var startAt :Int64?
+        var episodeId : String = seasons[seasonIndex].movies[episodeIndex].id ?? ""
+        if playerConfiguration.isMegogo {
+            DispatchQueue.main.async {
+                self.getMegogoStream()
+            }
+        }
+        if playerConfiguration.isPremier {
+            DispatchQueue.main.async {
+                self.getPremierStream(episodeId: episodeId)
+            }
+        }
         seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
             resolutions[key] = value
             startAt = 0
