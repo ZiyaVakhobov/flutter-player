@@ -17,7 +17,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
     
     private var portraitConstraints = Constraints()
     private var landscapeConstraints = Constraints()
-    var seasons = [Seasons]()
+    var seasons = [Season]()
     let videoPlayer = VideoPlayerViewController()
     var selectedSeasonIndex: Int = 0
     var delegate : EpisodeDelegate?
@@ -344,15 +344,15 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
 
 extension EpisodeCollectionUI: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return seasons[selectedSeasonIndex].episodeList.count
+        return seasons[selectedSeasonIndex].movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! EpisodeCollectionCell
         cell.backgroundColor = .clear
         cell.layer.cornerRadius = 8
-        cell.episodes = seasons[selectedSeasonIndex].episodeList[indexPath.row]
-        let url = URL(string: seasons[selectedSeasonIndex].episodeList[indexPath.row].image)
+        cell.episodes = seasons[selectedSeasonIndex].movies[indexPath.row]
+        let url = URL(string: seasons[selectedSeasonIndex].movies[indexPath.row].image ?? "")
         cell.episodeImage.sd_setImage(with: url, completed: nil)
         return cell
     }

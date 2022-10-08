@@ -12,7 +12,7 @@ import SnapKit
 
 class ProgramViewController: UIViewController {
     
-    var programInfo = [ProgramModel]()
+    var programInfo = [ProgramsInfo]()
     
     lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
@@ -249,19 +249,19 @@ class ProgramViewController: UIViewController {
 extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return programInfo[section].programsList.count
+        return programInfo[section].tvPrograms?.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ProgramCell
         cell.selectionStyle = .none
         if !(programInfo[indexPath.section].day.isEmpty) {
-            cell.timeLB.text = programInfo[indexPath.section].programsList[indexPath.row].scheduledTime
+            cell.timeLB.text = programInfo[indexPath.section].tvPrograms?[indexPath.row].scheduledTime ?? ""
                 cell.timeLB.textColor = .white
                 cell.timeLB.font = UIFont.boldSystemFont(ofSize: 16)
             cell.channelNamesLB.textColor = .white
             cell.circleView.backgroundColor = .green
-            cell.channelNamesLB.text = programInfo[indexPath.section].programsList[indexPath.row].programTitle
+            cell.channelNamesLB.text = programInfo[indexPath.section].tvPrograms?[indexPath.row].programTitle ?? ""
         }
         return cell
     }

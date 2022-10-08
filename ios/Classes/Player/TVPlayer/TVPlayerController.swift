@@ -38,7 +38,7 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     var showsBtnText = ""
     var liveLabelText = ""
     var startPosition: Int?
-    var programs : [ProgramModel] = [ProgramModel]()
+    var programs : [ProgramsInfo] = [ProgramsInfo]()
     var titleText: String?
     var isRegular: Bool = false
     var resolutions: [String:String]?
