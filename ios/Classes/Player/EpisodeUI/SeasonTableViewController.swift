@@ -18,7 +18,7 @@ protocol BottomSheetCellDelegateSeason{
 }
 
 class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    var items = [Seasons]()
+    var items = [Season]()
     var labelText : String?
     var selectedIndex = 0
     var cellDelegate : BottomSheetCellDelegateSeason?

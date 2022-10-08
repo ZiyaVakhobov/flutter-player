@@ -46,9 +46,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     var sortedResolutions: [String] = []
     var isSerial = false
     var serialLabelText = ""
-    var hasNextVideo = false
     var sesonNum: Int?
-    var seasons : [Seasons] = [Seasons]()
+    var seasons : [Season] = [Season]()
     var shouldHideHomeIndicator = false
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
@@ -720,14 +719,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     
     @objc func playerEndedPlaying(_ notification: Notification) {
         DispatchQueue.main.async {[weak self] in
-            if self?.hasNextVideo ?? false {
-                DispatchQueue.main.async {
-//                    self?.videoPlayerChannel?.invokeMethod("nextVideo", arguments: self?.player.currentTime().seconds)
-                }
-            } else {
-                self?.player.seek(to: CMTime.zero)
-                self?.playButton.setImage(Svg.play.uiImage, for: .normal)
-            }
+            self?.player.seek(to: CMTime.zero)
+            self?.playButton.setImage(Svg.play.uiImage, for: .normal)
         }
     }
     
@@ -1088,7 +1081,7 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
         var resolutions: [String:String] = [:]
         var startAt :Int64?
-        seasons[seasonIndex].episodeList[episodeIndex].resolutions.map { (key: String, value: String) in
+        seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
             resolutions[key] = value
             startAt = 0
         }
@@ -1099,7 +1092,7 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
             }
             return false
         })
-        let title = seasons[seasonIndex].episodeList[episodeIndex].title
+        let title = seasons[seasonIndex].movies[episodeIndex].title ?? ""
         if isFinded {
             let videoUrl = resolutions[self.qualityLabelText]
             self.setupDataSource(title: "S\(seasonIndex + 1)" + ":" + "E\(episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)

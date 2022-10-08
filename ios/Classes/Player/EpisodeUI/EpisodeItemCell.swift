@@ -9,7 +9,7 @@ import SnapKit
 
 class EpisodeCollectionCell: UICollectionViewCell {
     
-    var episodes : Episodes? {
+    var episodes : Movie? {
         didSet{
             titleLbl.text = episodes?.title ?? ""
             descriptionLabel.text = episodes?.description ?? ""
