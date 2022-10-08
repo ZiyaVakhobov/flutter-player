@@ -71,7 +71,7 @@ class _MyAppState extends State<MyApp> {
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
-                baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+            baseUrl: "https://api.spec.uzd.udevs.io/v1/",
             initialResolution: {
               "Автонастройка":
                   "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8"
@@ -115,7 +115,6 @@ class _MyAppState extends State<MyApp> {
             authorization:
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg1MDEzNDMsImlzcyI6InVzZXIiLCJwaWQiOjEzMDcsInJvbGUiOiJjdXN0b21lciIsInN1YiI6IjYyMDQzMmZmLTc3ZWItNDc0Mi05MmFhLTZmOGU4NDcyMDI0ZCJ9.6SvUCBT0gb6tIRy1PL-C7WS7xHpJXc1PCZky6aH6HtA',
             autoText: 'Автонастройка',
-            baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -166,7 +165,7 @@ class _MyAppState extends State<MyApp> {
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
-                baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+            baseUrl: "https://api.spec.uzd.udevs.io/v1/",
             initialResolution: {
               'Auto':
                   'https://flus.st.uz/3017/video.m3u8?token=da6e83609a647029700b8f7cf246e0efc5ee1692-2887490519--'
@@ -208,7 +207,6 @@ class _MyAppState extends State<MyApp> {
             megogoAccessToken: '',
             authorization: '',
             autoText: 'Автонастройка',
-            baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
           )) ??
           'nothing';
       if (kDebugMode) {
