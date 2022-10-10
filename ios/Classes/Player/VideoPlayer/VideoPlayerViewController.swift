@@ -64,9 +64,10 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var playerRate = 1.0
     var selectedSeason = 0
     private var selectedSpeedText = "1.0x"
-    var selectedQualityText = "Auto"
+    private var selectedQualityText = "Auto"
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
+    
     
     private var videoView: UIView = {
         let view = UIView()
@@ -1012,7 +1013,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self.player.replaceCurrentItem(with: playerItem)
             self.player.seek(to: currentTime)
             self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
-            self.player.automaticallyWaitsToMinimizeStalling = true;
+            self.player.automaticallyWaitsToMinimizeStalling = true
             break
         case .speed:
             self.playerRate =  Double(speedList[index])!
@@ -1056,7 +1057,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         bottomSheetVC.labelText = qualityLabelText
         bottomSheetVC.cellDelegate = self
         bottomSheetVC.bottomSheetType = .quality
-        bottomSheetVC.selectedIndex = listOfQuality.firstIndex(of: qualityLabelText) ?? 0
+        bottomSheetVC.selectedIndex = listOfQuality.firstIndex(of: selectedQualityText) ?? 0
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
