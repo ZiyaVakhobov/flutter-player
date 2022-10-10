@@ -277,7 +277,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
         
-        addTimeObserver(titleLabel: titleLabel, title: titleText ?? "")
+        addTimeObserver(titleLabel: titleLabel, title: title ?? "")
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
