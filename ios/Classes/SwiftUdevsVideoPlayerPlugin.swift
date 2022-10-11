@@ -5,7 +5,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     
     func getDuration(duration: Double) {
         flutterResult!("\(duration)")
-        print("Duration: \(duration)")
     }
     
     public static var viewController = FlutterViewController()
@@ -37,9 +36,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     }
                     
                     let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
-                    print("playerConfiguration.tvProgramsText")
-                    print(playerConfiguration.tvProgramsText)
-                    print(playerConfiguration)
                     let vc = TVVideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
@@ -61,12 +57,13 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     let vc = VideoPlayerViewController()
                     vc.modalPresentationStyle = .fullScreen
                     vc.delegate = self
+                    vc.playerConfiguration = playerConfiguration
                     vc.urlString = playerConfiguration.url
-                    vc.selectedQualityText = playerConfiguration.qualityText
                     vc.startPosition = playerConfiguration.lastPosition
                     vc.qualityLabelText = playerConfiguration.qualityText
                     vc.speedLabelText = playerConfiguration.speedText
                     vc.resolutions = sortedResolutions
+                    vc.selectedQualityText = playerConfiguration.autoText
                     vc.isSerial = playerConfiguration.isSerial
                     vc.titleText = playerConfiguration.title
                     vc.serialLabelText = playerConfiguration.episodeButtonText

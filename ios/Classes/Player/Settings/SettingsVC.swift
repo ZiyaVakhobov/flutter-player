@@ -170,7 +170,6 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         dismiss(animated: true, completion: nil)
     }
     @objc func tapFunction(sender:UITapGestureRecognizer) {
-        print("Tapped")
         self.dismiss(animated: true, completion: nil)
     }
 }
@@ -194,12 +193,10 @@ extension SettingVC: UITableViewDataSource, UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if (indexPath.row == 0) {
-            
             self.dismiss(animated: true) {
                 self.delegete?.qualityBottomSheet()
             }
-            print("TAPPED 0")
-        }else {
+        } else {
             self.dismiss(animated: true) {
                 self.speedDelegate?.speedBottomSheet()
             }
