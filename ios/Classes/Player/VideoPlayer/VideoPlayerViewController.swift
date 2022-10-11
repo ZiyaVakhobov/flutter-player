@@ -1093,17 +1093,18 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         
     }
     
-//    func getPremierStream(episodeId:String){
-//        let _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
-//        Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId) { result in
-//            switch result {
-//            case .failure(let error):
-//                print(error)
-//            case .success(let success):
-//                print(success)
-//            }
-//        }
-//    }
+    func getPremierStream(episodeId:String) -> PremierStreamResponse?{
+        let _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
+        var premierSteamResponse: PremierStreamResponse?
+        let result = Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId)
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let success):
+                premierSteamResponse = success
+            }
+        return premierSteamResponse
+    }
     
     func playSeason(_resolutions : [String:String],startAt:Int64?,_episodeIndex:Int,_seasonIndex:Int ){
         self.resolutions = SortFunctions.sortWithKeys(_resolutions)
@@ -1122,11 +1123,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             guard URL(string: videoUrl!) != nil else {
                 return
             }
-            print("Play ")
-            print("S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
-            print(videoUrl!)
             if self.urlString != videoUrl!{
-                
                 self.setupDataSource(title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
             } else {
                 print("ERROR")
@@ -1157,16 +1154,23 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
                         resolutions["\(bitrate.bitrate)p"] = bitrate.src
                     })
                     startAt = Int64(success?.data.playStartTime ?? 0)
-                    print("TTT KKKK")
-                    print(resolutions)
                     self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
                 }
-            
         }
         if playerConfiguration.isPremier {
-//            DispatchQueue.main.async {
-//                self.getPremierStream(episodeId: episodeId)
-//            }
+            var success : PremierStreamResponse?
+                success = self.getPremierStream(episodeId: episodeId)
+                if success != nil {
+                    success?.fileInfo.forEach({ file in
+                        if file.quality == "auto"{
+                            resolutions[self.playerConfiguration.autoText] = file.fileName
+                        } else {
+                            resolutions["\(file.quality)"] = file.fileName
+                        }
+                    })
+                    startAt = 0
+                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+                }
         }
         if !playerConfiguration.isMegogo && !playerConfiguration.isPremier {
             seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
@@ -1174,9 +1178,7 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
                 startAt = 0
             }
             self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
-           
         }
-        
     }
     
     func speedBottomSheet() {
