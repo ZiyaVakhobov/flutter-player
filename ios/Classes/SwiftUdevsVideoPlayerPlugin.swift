@@ -63,6 +63,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                     vc.qualityLabelText = playerConfiguration.qualityText
                     vc.speedLabelText = playerConfiguration.speedText
                     vc.resolutions = sortedResolutions
+                    vc.selectedQualityText = playerConfiguration.autoText
                     vc.isSerial = playerConfiguration.isSerial
                     vc.titleText = playerConfiguration.title
                     vc.serialLabelText = playerConfiguration.episodeButtonText

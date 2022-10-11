@@ -64,7 +64,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var playerRate = 1.0
     var selectedSeason = 0
     private var selectedSpeedText = "1.0x"
-    private var selectedQualityText = "Auto"
+    var selectedQualityText = "Auto"
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
     
@@ -277,8 +277,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-        
-        addTimeObserver(titleLabel: titleLabel, title: title ?? "")
+
+        self.titleLabel.text = title ?? ""
+        addTimeObserver()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
@@ -727,7 +728,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }
     
     //MARK: - Time logic
-    func addTimeObserver(titleLabel: UILabel, title: String) {
+    func addTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
         _ = player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
@@ -741,9 +742,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             self?.timeSlider.minimumValue = 0
             self?.timeSlider.value = Float(currentItem.currentTime().seconds)
             let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
-            let time = CMTimeMake(value: Int64(remainTime), timescale: 1)
+            _ = CMTimeMake(value: Int64(remainTime), timescale: 1)
             self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
-            titleLabel.text = title
         })
     }
     
@@ -824,7 +824,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     @objc func hideBlockControls() {
         let options: UIView.AnimationOptions = [.curveEaseIn]
         UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 0.0
+            _ = 0.0
         }, completion: nil)
     }
     
@@ -1001,7 +1001,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         switch type {
         case .quality:
             let resList = resolutions ?? ["480p":urlString!]
-            let array = Array(resList.keys)
+            _ = Array(resList.keys)
             self.selectedQualityText = sortedResolutions[index]
             let url = resList[sortedResolutions[index]]
             guard let videoURL = URL(string: url ?? "") else {
@@ -1076,29 +1076,66 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
-    
-    func getMegogoStream(){
-        var parameters : [String:String] = ["video_id":playerConfiguration.videoId,"access_token":playerConfiguration.megogoAccessToken]
-        var _url:String = playerConfiguration.baseUrl+"megogo/stream"
-        Networking.sharedInstance.getMegogoStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId, parameters: parameters) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let success):
-                print(success)
-            }
-        }
+
+    func getMegogoStream(parameters:[String:String], id:String) -> MegogoStreamResponse? {
+        var megogoResponse:MegogoStreamResponse?
+        let _url:String = playerConfiguration.baseUrl+"megogo/stream"
+         let result = Networking.sharedInstance.getMegogoStream(_url, token: self.playerConfiguration.authorization, sessionId: id, parameters: parameters)
+                switch result {
+                case .failure(let error):
+                    print(error)
+                    break
+                case .success(let success):
+                    megogoResponse = success
+                    break
+                }
+            return megogoResponse
+        
     }
     
-    func getPremierStream(episodeId:String){
-        var _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
-        Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let success):
-                print(success)
+//    func getPremierStream(episodeId:String){
+//        let _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
+//        Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId) { result in
+//            switch result {
+//            case .failure(let error):
+//                print(error)
+//            case .success(let success):
+//                print(success)
+//            }
+//        }
+//    }
+    
+    func playSeason(_resolutions : [String:String],startAt:Int64?,_episodeIndex:Int,_seasonIndex:Int ){
+        self.resolutions = SortFunctions.sortWithKeys(_resolutions)
+        let isFinded = resolutions?.contains(where: { (key, value) in
+            if key == self.selectedQualityText {
+                return true
             }
+            return false
+        }) ?? false
+        let title = seasons[_seasonIndex].movies[_episodeIndex].title ?? ""
+        if isFinded {
+            let videoUrl = self.resolutions?[selectedQualityText]
+            guard videoUrl != nil else{
+                return
+            }
+            guard URL(string: videoUrl!) != nil else {
+                return
+            }
+            print("Play ")
+            print("S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
+            print(videoUrl!)
+            if self.urlString != videoUrl!{
+                
+                self.setupDataSource(title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
+            } else {
+                print("ERROR")
+            }
+            return
+        } else if !self.resolutions!.isEmpty {
+            let videoUrl = Array(resolutions!.values)[0]
+            self.setupDataSource(title: title, urlString: videoUrl, startAt: startAt)
+            return
         }
     }
 }
@@ -1108,37 +1145,40 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
         var resolutions: [String:String] = [:]
         var startAt :Int64?
-        var episodeId : String = seasons[seasonIndex].movies[episodeIndex].id ?? ""
+        let episodeId : String = seasons[seasonIndex].movies[episodeIndex].id ?? ""
         if playerConfiguration.isMegogo {
-            DispatchQueue.main.async {
-                self.getMegogoStream()
-            }
+            let parameters : [String:String] = ["video_id":episodeId,"access_token":self.playerConfiguration.megogoAccessToken]
+            var success : MegogoStreamResponse?
+                success = self.getMegogoStream(parameters: parameters,id: episodeId)
+                if success != nil {
+                    
+                    resolutions[self.playerConfiguration.autoText] = success?.data.src
+                    success?.data.bitrates.forEach({ bitrate in
+                        resolutions["\(bitrate.bitrate)p"] = bitrate.src
+                    })
+                    startAt = Int64(success?.data.playStartTime ?? 0)
+                    print("TTT KKKK")
+                    print(resolutions)
+                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+                }
+            
         }
         if playerConfiguration.isPremier {
-            DispatchQueue.main.async {
-                self.getPremierStream(episodeId: episodeId)
+//            DispatchQueue.main.async {
+//                self.getPremierStream(episodeId: episodeId)
+//            }
+        }
+        if !playerConfiguration.isMegogo && !playerConfiguration.isPremier {
+            seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
+                resolutions[key] = value
+                startAt = 0
             }
+            self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+           
         }
-        seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
-            resolutions[key] = value
-            startAt = 0
-        }
-        self.resolutions = resolutions
-        let isFinded = resolutions.contains(where: { (key, value) in
-            if key == self.qualityLabelText {
-                return true
-            }
-            return false
-        })
-        let title = seasons[seasonIndex].movies[episodeIndex].title ?? ""
-        if isFinded {
-            let videoUrl = resolutions[self.qualityLabelText]
-            self.setupDataSource(title: "S\(seasonIndex + 1)" + ":" + "E\(episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
-        } else if !resolutions.isEmpty {
-            let videoUrl = Array(resolutions.values)[0]
-            self.setupDataSource(title: title, urlString: videoUrl, startAt: startAt)
-        }
+        
     }
+    
     func speedBottomSheet() {
         showSpeedBottomSheet()
     }
