@@ -23,53 +23,52 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             let vc = VideoPlayerViewController()
             vc.dismiss(animated: true, completion: nil)
         }
-        if(call.method == "playVideo"){
+        if (call.method == "playVideo"){
             guard let args = call.arguments else {
                 return
             }
-            let json = (args as! [String:Any])["playerConfigJsonString"]
-            let playerConfiguration = PlayerConfiguration.fromMap(map: json as! [String : Any])
-            if playerConfiguration != nil {
-                if (playerConfiguration.isLive){
-                    guard let videoURL = URL(string: playerConfiguration.url) else {
-                        return
-                    }
-                    
-                    let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
-                    let vc = TVVideoPlayerViewController()
-                    vc.modalPresentationStyle = .fullScreen
-                    vc.delegate = self
-                    vc.urlString = playerConfiguration.url
-                    vc.startPosition = playerConfiguration.lastPosition
-                    vc.resolutions = sortedResolutions
-                    vc.titleText = playerConfiguration.title
-                    vc.speedLabelText = playerConfiguration.speedText
-                    vc.qualityLabelText = playerConfiguration.qualityText
-                    vc.showsBtnText = playerConfiguration.tvProgramsText
-                    vc.programs = playerConfiguration.programsInfoList
-                    SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-                } else {
-                    guard URL(string: playerConfiguration.url) != nil else {
-                        return
-                    }
-                    let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
-                    
-                    let vc = VideoPlayerViewController()
-                    vc.modalPresentationStyle = .fullScreen
-                    vc.delegate = self
-                    vc.playerConfiguration = playerConfiguration
-                    vc.urlString = playerConfiguration.url
-                    vc.startPosition = playerConfiguration.lastPosition
-                    vc.qualityLabelText = playerConfiguration.qualityText
-                    vc.speedLabelText = playerConfiguration.speedText
-                    vc.resolutions = sortedResolutions
-                    vc.selectedQualityText = playerConfiguration.autoText
-                    vc.isSerial = playerConfiguration.isSerial
-                    vc.titleText = playerConfiguration.title
-                    vc.serialLabelText = playerConfiguration.episodeButtonText
-                    vc.seasons  = playerConfiguration.seasons
-                    SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["playerConfigJsonString"] ?? "") else {
+                return
+            }
+            let playerConfiguration : PlayerConfiguration = PlayerConfiguration.fromMap(map: json)
+            
+            if (playerConfiguration.isLive){
+                guard URL(string: playerConfiguration.url) != nil else {
+                    return
                 }
+                let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
+                let vc = TVVideoPlayerViewController()
+                vc.modalPresentationStyle = .fullScreen
+                vc.delegate = self
+                vc.urlString = playerConfiguration.url
+                vc.startPosition = playerConfiguration.lastPosition
+                vc.resolutions = sortedResolutions
+                vc.titleText = playerConfiguration.title
+                vc.speedLabelText = playerConfiguration.speedText
+                vc.qualityLabelText = playerConfiguration.qualityText
+                vc.showsBtnText = playerConfiguration.tvProgramsText
+                vc.programs = playerConfiguration.programsInfoList
+                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+            } else {
+                guard URL(string: playerConfiguration.url) != nil else {
+                    return
+                }
+                let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
+                let vc = VideoPlayerViewController()
+                vc.modalPresentationStyle = .fullScreen
+                vc.delegate = self
+                vc.playerConfiguration = playerConfiguration
+                vc.urlString = playerConfiguration.url
+                vc.startPosition = playerConfiguration.lastPosition
+                vc.qualityLabelText = playerConfiguration.qualityText
+                vc.speedLabelText = playerConfiguration.speedText
+                vc.resolutions = sortedResolutions
+                vc.selectedQualityText = playerConfiguration.autoText
+                vc.isSerial = playerConfiguration.isSerial
+                vc.titleText = playerConfiguration.title
+                vc.serialLabelText = playerConfiguration.episodeButtonText
+                vc.seasons  = playerConfiguration.seasons
+                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
             }
         } else {
             result("iOS " + UIDevice.current.systemVersion);
