@@ -401,9 +401,22 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             showTvProgramsBottomSheet()
         }
         zoom?.setOnClickListener {
-            if (playerView?.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_ZOOM)
-                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            else playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            when (playerView?.resizeMode) {
+                AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> {
+                    zoom?.setImageResource(R.drawable.ic_fit)
+                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+                AspectRatioFrameLayout.RESIZE_MODE_FILL -> {
+                    zoom?.setImageResource(R.drawable.ic_crop_fit)
+                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                }
+                AspectRatioFrameLayout.RESIZE_MODE_FIT -> {
+                    zoom?.setImageResource(R.drawable.ic_stretch)
+                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+                }
+                AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT -> {}
+                AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH -> {}
+            }
         }
         orientation?.setOnClickListener {
             requestedOrientation =
@@ -470,7 +483,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
                     body.file_info?.forEach {
-                        if(it!!.quality == "auto") {
+                        if (it!!.quality == "auto") {
                             map[playerConfiguration!!.autoText] = it.file_name!!
                         } else {
                             map[it.quality!!] = it.file_name!!
@@ -501,7 +514,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             setFullScreen()
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             when (currentBottomSheet) {
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
@@ -720,31 +732,35 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         //sorting
         val l = mutableListOf<String>()
-        var auto = ""
-        list.forEach {
-            if (it.substring(0, it.length - 1).toIntOrNull() != null) {
-                l.add(it)
-            } else {
-                auto = it
-            }
-        }
-        for (i in 0 until l.size) {
-            for (j in i until l.size) {
-                val first = l[i]
-                val second = l[j]
-                if (first.substring(0, first.length - 1).toInt() < second.substring(
-                        0,
-                        second.length - 1
-                    ).toInt()
-                ) {
-                    val a = l[i]
-                    l[i] = l[j]
-                    l[j] = a
+        if (fromQuality) {
+            var auto = ""
+            list.forEach {
+                if (it.substring(0, it.length - 1).toIntOrNull() != null) {
+                    l.add(it)
+                } else {
+                    auto = it
                 }
             }
-        }
-        if (auto.isNotEmpty()) {
-            l.add(0, auto)
+            for (i in 0 until l.size) {
+                for (j in i until l.size) {
+                    val first = l[i]
+                    val second = l[j]
+                    if (first.substring(0, first.length - 1).toInt() < second.substring(
+                            0,
+                            second.length - 1
+                        ).toInt()
+                    ) {
+                        val a = l[i]
+                        l[i] = l[j]
+                        l[j] = a
+                    }
+                }
+            }
+            if (auto.isNotEmpty()) {
+                l.add(0, auto)
+            }
+        } else {
+            l.addAll(list)
         }
         val adapter = QualitySpeedAdapter(
             initialValue,
