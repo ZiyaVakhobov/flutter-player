@@ -20,8 +20,17 @@
             android:id="@+id/video_close"
             android:layout_width="70dp"
             android:layout_height="50dp"
-            android:padding="15dp"
+            android:padding="12dp"
             android:src="@drawable/ic_close"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/video_pip"
+            android:layout_width="70dp"
+            android:layout_height="50dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_pip"
+            android:visibility="gone"
             tools:ignore="ContentDescription" />
 
         <TextView
@@ -38,11 +47,20 @@
             android:textSize="18sp" />
 
         <ImageView
+            android:id="@+id/video_cast"
+            android:layout_width="70dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:padding="2dp"
+            android:src="@drawable/ic_cast"
+            android:visibility="gone" />
+
+        <ImageView
             android:id="@+id/video_more"
             android:layout_width="70dp"
             android:layout_height="30dp"
             android:layout_gravity="center_vertical"
-            android:padding="5dp"
+            android:padding="2dp"
             android:src="@drawable/ic_more" />
 
     </LinearLayout>

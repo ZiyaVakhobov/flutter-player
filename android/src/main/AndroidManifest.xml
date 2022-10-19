@@ -12,6 +12,8 @@
         <activity
             android:name=".activities.UdevsVideoPlayerActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:theme="@style/Theme.AppCompat" />
+            android:supportsPictureInPicture="true"
+            android:theme="@style/Theme.AppCompat"
+            tools:targetApi="n" />
     </application>
 </manifest>

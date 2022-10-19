@@ -56,6 +56,7 @@ import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import kotlin.math.abs
 
+
 class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
 
@@ -63,6 +64,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private var player: ExoPlayer? = null
     private var playerConfiguration: PlayerConfiguration? = null
     private var close: ImageView? = null
+    private var pip: ImageView? = null
+    private var cast: ImageView? = null
     private var more: ImageView? = null
     private var title: TextView? = null
     private var rewind: ImageView? = null
@@ -124,6 +127,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         volumeSeekBar?.isEnabled = false
 
         close = findViewById(R.id.video_close)
+        pip = findViewById(R.id.video_pip)
+        cast = findViewById(R.id.video_cast)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title?.text = playerConfiguration?.title
@@ -348,6 +353,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             setResult(PLAYER_ACTIVITY_FINISH, intent)
             finish()
         }
+        pip?.setOnClickListener {}
+        cast?.setOnClickListener {}
         more?.setOnClickListener {
             showSettingsBottomSheet()
         }
@@ -512,6 +519,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         println("newConfig.orientation: ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
+            pip?.visibility = View.VISIBLE
+            cast?.visibility = View.VISIBLE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
@@ -528,6 +537,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             }
         } else {
             cutFullScreen()
+            pip?.visibility = View.GONE
+            cast?.visibility = View.GONE
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -548,7 +559,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     private fun setFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).let { controller ->
+        WindowInsetsControllerCompat(window, findViewById(R.id.player_activity)).let { controller ->
             controller.hide(WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -557,7 +568,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     private fun cutFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        WindowInsetsControllerCompat(window, findViewById(R.id.exo_player_view)).show(
+        WindowInsetsControllerCompat(window, findViewById(R.id.player_activity)).show(
             WindowInsetsCompat.Type.systemBars()
         )
     }
