@@ -2,6 +2,7 @@ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -10,10 +11,10 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Rational
 import android.view.*
 import android.widget.*
 import androidx.core.view.WindowCompat
@@ -68,6 +69,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private var cast: ImageView? = null
     private var more: ImageView? = null
     private var title: TextView? = null
+    private var title1: TextView? = null
     private var rewind: ImageView? = null
     private var forward: ImageView? = null
     private var playPause: ImageView? = null
@@ -106,12 +108,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
         actionBar?.hide()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val window = window
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = Color.BLACK
-            window.navigationBarColor = Color.BLACK
-        }
+        val window = window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = Color.BLACK
+        window.navigationBarColor = Color.BLACK
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         seasonIndex = playerConfiguration!!.seasonIndex
         episodeIndex = playerConfiguration!!.episodeIndex
@@ -131,7 +131,9 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         cast = findViewById(R.id.video_cast)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
+        title1 = findViewById(R.id.video_title1)
         title?.text = playerConfiguration?.title
+        title1?.text = playerConfiguration?.title
 
         rewind = findViewById(R.id.video_rewind)
         forward = findViewById(R.id.video_forward)
@@ -231,6 +233,9 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
+        if (isInPictureInPictureMode) {
+            player?.playWhenReady = true
+        }
     }
 
     override fun onResume() {
@@ -242,6 +247,14 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     override fun onRestart() {
         super.onRestart()
         player?.playWhenReady = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isInPictureInPictureMode) {
+            player?.release()
+            finish()
+        }
     }
 
     private fun playFromAsset() {
@@ -353,7 +366,11 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             setResult(PLAYER_ACTIVITY_FINISH, intent)
             finish()
         }
-        pip?.setOnClickListener {}
+        pip?.setOnClickListener {
+            val params = PictureInPictureParams.Builder()
+                .setAspectRatio(Rational(16, 9)).build()
+            enterPictureInPictureMode(params)
+        }
         cast?.setOnClickListener {}
         more?.setOnClickListener {
             showSettingsBottomSheet()
@@ -438,6 +455,23 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         }
     }
 
+    override fun onUserLeaveHint() {
+        val params = PictureInPictureParams.Builder()
+            .setAspectRatio(Rational(100, 50)).build()
+        enterPictureInPictureMode(params)
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        if (isInPictureInPictureMode) {
+            playerView?.hideController()
+        } else {
+            playerView?.showController()
+        }
+    }
+
     private fun getMegogoStream() {
         retrofitService?.getMegogoStream(
             playerConfiguration!!.authorization,
@@ -519,8 +553,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         println("newConfig.orientation: ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
-            pip?.visibility = View.VISIBLE
-            cast?.visibility = View.VISIBLE
+            title?.text = title1?.text
+            title?.visibility = View.VISIBLE
+            title1?.text = ""
+            title1?.visibility = View.GONE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
@@ -537,8 +573,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             }
         } else {
             cutFullScreen()
-            pip?.visibility = View.GONE
-            cast?.visibility = View.GONE
+            title1?.text = title?.text
+            title1?.visibility = View.VISIBLE
+            title?.text = ""
+            title?.visibility = View.INVISIBLE
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT

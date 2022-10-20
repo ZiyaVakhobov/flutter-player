@@ -11,9 +11,9 @@
     <application>
         <activity
             android:name=".activities.UdevsVideoPlayerActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode|layoutDirection"
+            android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.AppCompat"
-            tools:targetApi="n" />
+            android:theme="@style/Theme.AppCompat" />
     </application>
 </manifest>
