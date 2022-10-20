@@ -467,8 +467,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ) {
         if (isInPictureInPictureMode) {
             playerView?.hideController()
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         } else {
             playerView?.showController()
+            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
         }
     }
 
