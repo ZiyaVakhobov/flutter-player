@@ -11,12 +11,14 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Rational
 import android.view.*
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -110,8 +112,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         actionBar?.hide()
         val window = window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = Color.BLACK
-        window.navigationBarColor = Color.BLACK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.statusBarColor = Color.BLACK
+            window.navigationBarColor = Color.BLACK
+        }
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         seasonIndex = playerConfiguration!!.seasonIndex
         episodeIndex = playerConfiguration!!.episodeIndex
@@ -233,8 +237,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
-        if (isInPictureInPictureMode) {
-            player?.playWhenReady = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                player?.playWhenReady = true
+            }
         }
     }
 
@@ -251,9 +257,11 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     override fun onStop() {
         super.onStop()
-        if (isInPictureInPictureMode) {
-            player?.release()
-            finish()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                player?.release()
+                finish()
+            }
         }
     }
 
@@ -367,9 +375,13 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             finish()
         }
         pip?.setOnClickListener {
-            val params = PictureInPictureParams.Builder()
-                .setAspectRatio(Rational(16, 9)).build()
-            enterPictureInPictureMode(params)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val params = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9)).build()
+                enterPictureInPictureMode(params)
+            } else {
+                Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show();
+            }
         }
         cast?.setOnClickListener {}
         more?.setOnClickListener {
@@ -455,6 +467,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onUserLeaveHint() {
         val params = PictureInPictureParams.Builder()
             .setAspectRatio(Rational(100, 50)).build()
