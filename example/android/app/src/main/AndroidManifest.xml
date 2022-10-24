@@ -3,7 +3,8 @@
    <application
         android:label="udevs_video_player_example"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.AppCompat">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,5 +31,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+       <meta-data
+           android:name=
+               "com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+           android:value="com.foo.CastOptionsProvider" />
     </application>
 </manifest>

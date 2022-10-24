@@ -1,7 +1,7 @@
 package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
-import android.app.Activity
+import androidx.mediarouter.app.MediaRouteButton
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -19,6 +19,7 @@ import android.util.Rational
 import android.view.*
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -38,6 +39,15 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaMetadata
+import com.google.android.gms.cast.framework.CastButtonFactory
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import com.google.android.gms.common.images.WebImage
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
@@ -60,7 +70,7 @@ import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import kotlin.math.abs
 
 
-class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
+class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
 
     private var playerView: PlayerView? = null
@@ -68,7 +78,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private var playerConfiguration: PlayerConfiguration? = null
     private var close: ImageView? = null
     private var pip: ImageView? = null
-    private var cast: ImageView? = null
+    private var cast: MediaRouteButton? = null
     private var more: ImageView? = null
     private var title: TextView? = null
     private var title1: TextView? = null
@@ -112,10 +122,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         actionBar?.hide()
         val window = window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = Color.BLACK
-            window.navigationBarColor = Color.BLACK
-        }
+        window.statusBarColor = Color.BLACK
+        window.navigationBarColor = Color.BLACK
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
         seasonIndex = playerConfiguration!!.seasonIndex
         episodeIndex = playerConfiguration!!.episodeIndex
@@ -132,7 +140,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
-        cast = findViewById(R.id.video_cast)
+        cast = findViewById<View>(R.id.video_cast) as MediaRouteButton
+        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title1 = findViewById(R.id.video_title1)
@@ -162,7 +171,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         if (playerConfiguration?.isSerial == true && !(seasonIndex == playerConfiguration!!.seasons.size - 1 &&
                     episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1)
         ) {
-            nextButton?.visibility = View.VISIBLE
             nextText?.text = playerConfiguration?.nextButtonText
         }
         tvProgramsButton = findViewById(R.id.button_tv_programs)
@@ -217,6 +225,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         } else {
             playVideo()
         }
+
+        val castContext = CastContext.getSharedInstance(this)
     }
 
     override fun onBackPressed() {
@@ -237,10 +247,8 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                player?.playWhenReady = true
-            }
+        if (isInPictureInPictureMode) {
+            player?.playWhenReady = true
         }
     }
 
@@ -257,11 +265,9 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     override fun onStop() {
         super.onStop()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                player?.release()
-                finish()
-            }
+        if (isInPictureInPictureMode) {
+            player?.release()
+            finish()
         }
     }
 
@@ -380,7 +386,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                     .setAspectRatio(Rational(16, 9)).build()
                 enterPictureInPictureMode(params)
             } else {
-                Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show()
             }
         }
         cast?.setOnClickListener {}
@@ -478,12 +484,15 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration
     ) {
-        if (isInPictureInPictureMode) {
-            playerView?.hideController()
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-        } else {
-            playerView?.showController()
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+            if (isInPictureInPictureMode) {
+                playerView?.hideController()
+                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            } else {
+                playerView?.showController()
+                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            }
         }
     }
 
@@ -572,6 +581,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             title?.visibility = View.VISIBLE
             title1?.text = ""
             title1?.visibility = View.GONE
+            nextButton?.visibility = View.VISIBLE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
@@ -592,6 +602,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             title1?.visibility = View.VISIBLE
             title?.text = ""
             title?.visibility = View.INVISIBLE
+            nextButton?.visibility = View.GONE
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
@@ -955,5 +966,16 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         } else {
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
+    }
+
+    enum class PlaybackLocation {
+        LOCAL, REMOTE
+    }
+
+    /**
+     * List of various states that we can be in
+     */
+    enum class PlaybackState {
+        PLAYING, PAUSED, BUFFERING, IDLE
     }
 }
