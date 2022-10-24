@@ -8,6 +8,7 @@
 import UIKit
 import TinyConstraints
 import AVFoundation
+import AVKit
 import MediaPlayer
 import XLActionController
 import NVActivityIndicatorView
@@ -32,6 +33,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }
     private var speedList = ["0.25","0.5","0.75","1.0","1.25","1.5","1.75","2.0"].sorted()
     private var seasonList = ["1-сезон","2-сезон","3-сезон","4-сезон","5-сезон"]
+    
     private var player = AVPlayer()
     private var playerLayer =  AVPlayerLayer()
     private var playerItemContext = 0
@@ -68,7 +70,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
     
-    
     private var videoView: UIView = {
         let view = UIView()
         view.backgroundColor = .black
@@ -83,15 +84,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         return view
     }()
     
-    private var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .white
-        label.textAlignment = .center
-        label.numberOfLines = 2
-        label.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        return label
-    }()
+    private var titleLabel: TitleLabel = TitleLabel()
     
     private var landscapeButton: UIButton = {
         let button = UIButton()
@@ -181,24 +174,14 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         return slider
     }()
     
-    private var exitButton: UIButton = {
-        let button = UIButton()
-        button.setImage(Svg.exit.uiImage, for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = .clear
-        button.imageView?.contentMode = .scaleAspectFit
+    private var exitButton: ExitButton = {
+        let button = ExitButton()
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
-    private var playButton: UIButton = {
-        let button = UIButton()
-        button.setImage(Svg.play.uiImage, for: .normal)
-        button.tintColor = .white
-        button.layer.zPosition = 5
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
-        button.size(CGSize(width: 48, height: 48))
+    private var playButton: PlayButton = {
+        let button = PlayButton()
         button.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
@@ -277,7 +260,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-
         self.titleLabel.text = title ?? ""
         addTimeObserver()
         playerLayer = AVPlayerLayer(player: player)
@@ -311,7 +293,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         if #available(iOS 13.0, *) {
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
-        } else {
         }
         
         if #available(iOS 13.0, *) {
@@ -1076,20 +1057,20 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
-
+    
     func getMegogoStream(parameters:[String:String], id:String) -> MegogoStreamResponse? {
         var megogoResponse:MegogoStreamResponse?
         let _url:String = playerConfiguration.baseUrl+"megogo/stream"
-         let result = Networking.sharedInstance.getMegogoStream(_url, token: self.playerConfiguration.authorization, sessionId: id, parameters: parameters)
-                switch result {
-                case .failure(let error):
-                    print(error)
-                    break
-                case .success(let success):
-                    megogoResponse = success
-                    break
-                }
-            return megogoResponse
+        let result = Networking.sharedInstance.getMegogoStream(_url, token: self.playerConfiguration.authorization, sessionId: id, parameters: parameters)
+        switch result {
+        case .failure(let error):
+            print(error)
+            break
+        case .success(let success):
+            megogoResponse = success
+            break
+        }
+        return megogoResponse
         
     }
     
@@ -1097,12 +1078,12 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         let _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
         var premierSteamResponse: PremierStreamResponse?
         let result = Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId)
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let success):
-                premierSteamResponse = success
-            }
+        switch result {
+        case .failure(let error):
+            print(error)
+        case .success(let success):
+            premierSteamResponse = success
+        }
         return premierSteamResponse
     }
     
@@ -1146,31 +1127,31 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
         if playerConfiguration.isMegogo {
             let parameters : [String:String] = ["video_id":episodeId,"access_token":self.playerConfiguration.megogoAccessToken]
             var success : MegogoStreamResponse?
-                success = self.getMegogoStream(parameters: parameters,id: episodeId)
-                if success != nil {
-                    
-                    resolutions[self.playerConfiguration.autoText] = success?.data.src
-                    success?.data.bitrates.forEach({ bitrate in
-                        resolutions["\(bitrate.bitrate)p"] = bitrate.src
-                    })
-                    startAt = Int64(success?.data.playStartTime ?? 0)
-                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
-                }
+            success = self.getMegogoStream(parameters: parameters,id: episodeId)
+            if success != nil {
+                
+                resolutions[self.playerConfiguration.autoText] = success?.data.src
+                success?.data.bitrates.forEach({ bitrate in
+                    resolutions["\(bitrate.bitrate)p"] = bitrate.src
+                })
+                startAt = Int64(success?.data.playStartTime ?? 0)
+                self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+            }
         }
         if playerConfiguration.isPremier {
             var success : PremierStreamResponse?
-                success = self.getPremierStream(episodeId: episodeId)
-                if success != nil {
-                    success?.fileInfo.forEach({ file in
-                        if file.quality == "auto"{
-                            resolutions[self.playerConfiguration.autoText] = file.fileName
-                        } else {
-                            resolutions["\(file.quality)"] = file.fileName
-                        }
-                    })
-                    startAt = 0
-                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
-                }
+            success = self.getPremierStream(episodeId: episodeId)
+            if success != nil {
+                success?.fileInfo.forEach({ file in
+                    if file.quality == "auto"{
+                        resolutions[self.playerConfiguration.autoText] = file.fileName
+                    } else {
+                        resolutions["\(file.quality)"] = file.fileName
+                    }
+                })
+                startAt = 0
+                self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+            }
         }
         if !playerConfiguration.isMegogo && !playerConfiguration.isPremier {
             seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
