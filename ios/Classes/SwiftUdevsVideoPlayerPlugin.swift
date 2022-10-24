@@ -1,4 +1,5 @@
 import Flutter
+import AVFAudio
 import UIKit
 
 public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
@@ -18,7 +19,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        flutterResult = result;
+        flutterResult = result
         if (call.method == "closePlayer" ) {
             let vc = VideoPlayerViewController()
             vc.dismiss(animated: true, completion: nil)
@@ -31,29 +32,33 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 return
             }
             let playerConfiguration : PlayerConfiguration = PlayerConfiguration.fromMap(map: json)
-            
-            if (playerConfiguration.isLive){
+            let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
+            if (!playerConfiguration.isLive){
                 guard URL(string: playerConfiguration.url) != nil else {
                     return
                 }
-                let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
-                let vc = TVVideoPlayerViewController()
+                let vc = PlayerViewController()
                 vc.modalPresentationStyle = .fullScreen
-                vc.delegate = self
-                vc.urlString = playerConfiguration.url
-                vc.startPosition = playerConfiguration.lastPosition
-                vc.resolutions = sortedResolutions
-                vc.titleText = playerConfiguration.title
-                vc.speedLabelText = playerConfiguration.speedText
-                vc.qualityLabelText = playerConfiguration.qualityText
-                vc.showsBtnText = playerConfiguration.tvProgramsText
-                vc.programs = playerConfiguration.programsInfoList
+                vc.playerConfg = playerConfiguration
                 SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+               
+                
+//                let vc = TVVideoPlayerViewController()
+//                vc.modalPresentationStyle = .fullScreen
+//                vc.delegate = self
+//                vc.urlString = playerConfiguration.url
+//                vc.startPosition = playerConfiguration.lastPosition
+//                vc.resolutions = sortedResolutions
+//                vc.titleText = playerConfiguration.title
+//                vc.speedLabelText = playerConfiguration.speedText
+//                vc.qualityLabelText = playerConfiguration.qualityText
+//                vc.showsBtnText = playerConfiguration.tvProgramsText
+//                vc.programs = playerConfiguration.programsInfoList
+//                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
             } else {
                 guard URL(string: playerConfiguration.url) != nil else {
                     return
                 }
-                let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
                 let vc = VideoPlayerViewController()
                 vc.modalPresentationStyle = .fullScreen
                 vc.delegate = self
