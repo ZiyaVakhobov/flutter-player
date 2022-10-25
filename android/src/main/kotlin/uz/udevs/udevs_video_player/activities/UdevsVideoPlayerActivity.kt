@@ -146,6 +146,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                             .build()
                     )
                     .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(this)
                     .build()
             )
         } else {
@@ -205,6 +206,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                             .build()
                     )
                     .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(this)
                     .build()
             )
         } else {
