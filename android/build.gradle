@@ -63,5 +63,9 @@ android {
         //retrofit
         implementation 'com.squareup.retrofit2:retrofit:2.9.0'
         implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+        implementation 'org.checkerframework:checker-qual:3.13.0'
+        implementation 'com.google.android.gms:play-services-cronet:18.0.1'
+        implementation 'androidx.media3:extension-cronet:2.18.1'
+//        implementation 'com.google.android.exoplayer:exoplayer:2.X.X'
     }
 }

@@ -59,7 +59,6 @@ import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import kotlin.math.abs
 
-
 class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener {
 
