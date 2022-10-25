@@ -162,7 +162,6 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         if (playerConfiguration?.isSerial == true && !(seasonIndex == playerConfiguration!!.seasons.size - 1 &&
                     episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1)
         ) {
-            nextButton?.visibility = View.VISIBLE
             nextText?.text = playerConfiguration?.nextButtonText
         }
         tvProgramsButton = findViewById(R.id.button_tv_programs)
@@ -572,6 +571,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             title?.visibility = View.VISIBLE
             title1?.text = ""
             title1?.visibility = View.GONE
+            nextButton?.visibility = View.VISIBLE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
@@ -592,6 +592,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             title1?.visibility = View.VISIBLE
             title?.text = ""
             title?.visibility = View.INVISIBLE
+            nextButton?.visibility = View.GONE
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
