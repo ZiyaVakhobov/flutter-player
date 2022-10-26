@@ -136,26 +136,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         brightnessSeekbar?.max = 30
         brightnessSeekbar?.progress = 15
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager!!.requestAudioFocus(
-                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_GAME)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                            .build()
-                    )
-                    .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(this)
-                    .build()
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager!!.requestAudioFocus(
-                this, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN
-            )
-        }
+        setAudioFocus()
         maxVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
         volume = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
         volumeSeekBar?.max = maxVolume.toInt()
@@ -196,26 +177,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager!!.requestAudioFocus(
-                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_GAME)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                            .build()
-                    )
-                    .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(this)
-                    .build()
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager!!.requestAudioFocus(
-                this, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN
-            )
-        }
+        setAudioFocus()
         player?.playWhenReady = true
         if (brightness != 0.0) setScreenBrightness(brightness.toInt())
     }
@@ -777,17 +739,19 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         speedText?.text = currentSpeed
         quality?.setOnClickListener {
             if (playerConfiguration.isSerial) {
-                if (playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.isNotEmpty()) showQualitySpeedSheet(
-                    currentQuality,
-                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.keys.toList() as ArrayList,
-                    true,
-                )
+                if (playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.isNotEmpty())
+                    showQualitySpeedSheet(
+                        currentQuality,
+                        playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.keys.toList() as ArrayList,
+                        true,
+                    )
             } else {
-                if (playerConfiguration.resolutions.isNotEmpty()) showQualitySpeedSheet(
-                    currentQuality,
-                    playerConfiguration.resolutions.keys.toList() as ArrayList,
-                    true,
-                )
+                if (playerConfiguration.resolutions.isNotEmpty())
+                    showQualitySpeedSheet(
+                        currentQuality,
+                        playerConfiguration.resolutions.keys.toList() as ArrayList,
+                        true,
+                    )
             }
         }
         speed?.setOnClickListener {
@@ -852,6 +816,10 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         } else {
             l.addAll(list)
         }
+        repeat(l.size) {
+            Log.d(TAG, "showQualitySpeedSheet: ${l[it]}")
+        }
+        Log.d(TAG, "showQualitySpeedSheet: $currentQuality")
         val adapter = QualitySpeedAdapter(
             initialValue,
             this,
@@ -859,7 +827,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
             (object : QualitySpeedAdapter.OnClickListener {
                 override fun onClick(position: Int) {
                     if (fromQuality) {
-                        currentQuality = list[position]
+                        currentQuality = l[position]
                         qualityText?.text = currentQuality
                         if (player?.isPlaying == true) {
                             player?.pause()
@@ -878,10 +846,9 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                         }
                         player?.setMediaSource(hlsMediaSource)
                         player?.seekTo(currentPosition!!)
-                        player?.prepare()
-                        player?.playWhenReady
+                        player?.play()
                     } else {
-                        currentSpeed = list[position]
+                        currentSpeed = l[position]
                         speedText?.text = currentSpeed
                         player?.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
                     }
@@ -986,6 +953,29 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 player?.pause()
                 playerView?.hideController()
             }
+        }
+    }
+
+    private fun setAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioManager!!.requestAudioFocus(
+                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .build()
+                    )
+                    .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(this)
+                    .build()
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager!!.requestAudioFocus(
+                this, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
         }
     }
 }
