@@ -207,7 +207,17 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         button.setTitleColor(.white, for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(episodesButtonPressed(_:)), for: .touchUpInside)
-        button.isHidden = false
+        return button
+    }()
+    
+    private var showsBtn: UIButton = {
+        let button = UIButton()
+        button.setImage(Svg.programmes.uiImage, for: .normal)
+        button.setTitle("Телепередачи", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(self, action: #selector(action), for: .touchUpInside)
         return button
     }()
     
@@ -228,25 +238,25 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         guard let urlString = urlString, let url = URL(string: urlString) else {
             return
         }
-        let urlAsset = AVURLAsset(url: url)
-        let playerItem = AVPlayerItem(asset: urlAsset)
         player.automaticallyWaitsToMinimizeStalling = true
-        player.replaceCurrentItem(with: playerItem)
+        player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
+        if !playerConfiguration.isLive{
+            NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
+        }
         setTitle(title: title)
         addTimeObserver()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
-        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
+        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
+        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
     }
     
     func runPlayer(startAt: Int){
-        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
+        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
+        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
         player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
         player.automaticallyWaitsToMinimizeStalling = true;
         player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
@@ -269,11 +279,21 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                                                             options: [.initial, .new]) { [weak self] _, change in
                 // Update the PiP button's enabled state.
                 self?.pipButton.isEnabled = change.newValue ?? false
+                print("pip ----------")
             }
         } else {
             // PiP isn't supported by the current device. Disable the PiP button.
             pipButton.isEnabled = false
         }
+        
+    }
+    
+    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        isHiddenPiP(isPiP: true)
+    }
+
+    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        isHiddenPiP(isPiP: false)
     }
     
     override func viewDidLoad() {
@@ -281,6 +301,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         let resList = resolutions ?? ["480p":urlString!]
         sortedResolutions = Array(resList.keys).sorted().reversed()
         episodesButton.setTitle(playerConfiguration.episodeButtonText, for: .normal)
+        showsBtn.setTitle(playerConfiguration.tvProgramsText, for: .normal)
+        if playerConfiguration.isLive {
+            episodesButton.isHidden = true
+        } else {
+            showsBtn.isHidden = true
+        }
         Array(resList.keys).sorted().reversed().forEach { quality in
             if quality == "1080p"{
                 sortedResolutions.removeLast()
@@ -402,6 +428,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         bottomView.addSubview(seperatorLabel)
         bottomView.addSubview(timeSlider)
         bottomView.addSubview(episodesButton)
+        bottomView.addSubview(showsBtn)
         bottomView.addSubview(landscapeButton)
         bottomView.addSubview(liveStackView)
     }
@@ -438,6 +465,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         
         activityIndicatorView.center(in: view)
         activityIndicatorView.layer.cornerRadius = 20
+        if playerConfiguration.isLive {
+            skipForwardButton.isHidden = true
+            skipBackwardButton.isHidden = true
+        }
     }
     
     func addBottomViewConstraints() {
@@ -482,18 +513,21 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         episodesButton.rightToLeft(of: landscapeButton, offset: -8)
         episodesButton.centerY(to: landscapeButton)
         
+        showsBtn.rightToLeft(of: landscapeButton, offset: -8)
+        showsBtn.centerY(to: landscapeButton)
+        
         liveStackView.bottomToTop(of: timeSlider)
         liveStackView.spacing = 24
         liveStackView.leftToSuperview(offset: 2)
         liveStackView.centerY(to: landscapeButton)
         
-//        liveCircle.snp.makeConstraints { make in
-//            make.left.equalTo(bottomView).offset(8)
-//        }
-//        liveCircle.centerY(to: landscapeButton)
-//
-//        liveLabel.leftToRight(of: liveCircle, offset: 24)
-//        liveLabel.centerY(to: liveCircle)
+        //        liveCircle.snp.makeConstraints { make in
+        //            make.left.equalTo(bottomView).offset(8)
+        //        }
+        //        liveCircle.centerY(to: landscapeButton)
+        //
+        //        liveLabel.leftToRight(of: liveCircle, offset: 24)
+        //        liveLabel.centerY(to: liveCircle)
         
         if !playerConfiguration.isSerial {
             episodesButton.isHidden = true
@@ -565,7 +599,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func setSliderThumbTintColor(_ color: UIColor) {
-        let circleImage = makeCircleWith(size: CGSize(width: 28, height: 28),
+        let circleImage = makeCircleWith(size: CGSize(width: 24, height: 24),
                                          backgroundColor: color)
         timeSlider.setThumbImage(circleImage, for: .normal)
         timeSlider.setThumbImage(circleImage, for: .highlighted)
@@ -593,6 +627,16 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             player.pause()
             timer?.invalidate()
             showControls()
+        }
+    }
+    
+    @objc func action() {
+        let vc = ProgramViewController()
+        vc.modalPresentationStyle = .custom
+        vc.programInfo = self.playerConfiguration.programsInfoList
+        vc.menuHeight = self.playerConfiguration.programsInfoList.isEmpty ? 250 : UIScreen.main.bounds.height * 0.75
+        if !(vc.programInfo.isEmpty) {
+            self.present(vc, animated: true, completion: nil)
         }
     }
     
@@ -669,6 +713,13 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         self.present(vc, animated: true, completion: nil)
     }
     
+    private func isHiddenPiP(isPiP: Bool){
+        overlayView.isHidden = isPiP
+        playButton.isHidden = isPiP
+        skipForwardButton.isHidden = isPiP
+        skipBackwardButton.isHidden = isPiP
+    }
+    
     @objc func togglePictureInPictureMode(_ sender: UIButton) {
         if pipController.isPictureInPictureActive {
             pipController.stopPictureInPicture()
@@ -704,6 +755,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "duration", let duration = player.currentItem?.duration.seconds, duration > 0.0 {
             self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
+        }
+        if keyPath == "pip" {
+            print("pip .......")
+            if self.pipController.isPictureInPictureActive {
+               isHiddenPiP(isPiP: true)
+           }else {
+               isHiddenPiP(isPiP: false)
+           }
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
             if newValue != oldValue {
@@ -741,20 +800,21 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func addTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
-        _ = player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
-            guard let currentItem = self?.player.currentItem else {return}
-            
-            guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
-                return
-            }
-            let newDurationSeconds = Float(currentItem.duration.seconds)
-            self?.timeSlider.maximumValue = Float(newDurationSeconds)
-            self?.timeSlider.minimumValue = 0
-            self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-            let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
-            _ = CMTimeMake(value: Int64(remainTime), timescale: 1)
-            self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
-        })
+        if(!playerConfiguration.isLive){
+            player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
+                guard let currentItem = self?.player.currentItem else {return}
+                
+                guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
+                    return
+                }
+                self?.timeSlider.maximumValue = Float(currentItem.duration.seconds)
+                self?.timeSlider.minimumValue = 0
+                self?.timeSlider.value = Float(currentItem.currentTime().seconds)
+                self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
+            })
+        } else{
+            self.timeSlider.value = 1
+        }
     }
     
     func resetTimer() {
@@ -1136,14 +1196,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 return
             }
             if self.urlString != videoUrl!{
-                self.setupDataSource(title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
+                self.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
             } else {
                 print("ERROR")
             }
             return
         } else if !self.resolutions!.isEmpty {
             let videoUrl = Array(resolutions!.values)[0]
-            self.setupDataSource(title: title, urlString: videoUrl, startAt: startAt)
+            self.changeUrl(url: videoUrl, title: title)
             return
         }
     }
