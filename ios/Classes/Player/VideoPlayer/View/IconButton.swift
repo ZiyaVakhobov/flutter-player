@@ -8,7 +8,7 @@
 import Foundation
 
 @IBDesignable
-class PlayButton: UIButton {
+class IconButton: UIButton {
     override init(frame: CGRect) {
         super.init(frame: frame)
         shared()
@@ -24,11 +24,11 @@ class PlayButton: UIButton {
     }
     
     func shared() {
-        self.setImage(Svg.play.uiImage, for: .normal)
         self.tintColor = .white
-        self.layer.zPosition = 5
+        self.layer.zPosition = 3
+        self.backgroundColor = .clear
         self.imageView?.contentMode = .scaleAspectFit
-        self.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
+        self.layer.cornerRadius = 8
         self.size(CGSize(width: 48, height: 48))
     }
     

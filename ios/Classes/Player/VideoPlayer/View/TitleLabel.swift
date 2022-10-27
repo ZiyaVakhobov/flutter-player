@@ -24,5 +24,6 @@ class TitleLabel :UILabel {
         self.textAlignment = .center
         self.numberOfLines = 2
         self.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        self.isHidden = true
     }
 }
