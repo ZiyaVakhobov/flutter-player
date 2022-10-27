@@ -9,7 +9,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     public static var viewController = FlutterViewController()
-    public var flutterResult: FlutterResult?
+    private var flutterResult: FlutterResult?
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
@@ -21,8 +21,8 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         flutterResult = result
         if (call.method == "closePlayer" ) {
-            let vc = VideoPlayerViewController()
-            vc.dismiss(animated: true, completion: nil)
+            SwiftUdevsVideoPlayerPlugin.viewController.dismiss(animated:true)
+            return
         }
         if (call.method == "playVideo"){
             guard let args = call.arguments else {
@@ -33,29 +33,29 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             }
             let playerConfiguration : PlayerConfiguration = PlayerConfiguration.fromMap(map: json)
             let sortedResolutions = SortFunctions.sortWithKeys(playerConfiguration.resolutions)
-            //            if (playerConfiguration.isLive){
-            //                guard URL(string: playerConfiguration.url) != nil else {
-            //                    return
-            //                }
-            //                let vc = PlayerViewController()
-            //                vc.modalPresentationStyle = .fullScreen
-            //                vc.playerConfg = playerConfiguration
-            //                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-            //
-            //
-            ////                let vc = TVVideoPlayerViewController()
-            ////                vc.modalPresentationStyle = .fullScreen
-            ////                vc.delegate = self
-            ////                vc.urlString = playerConfiguration.url
-            ////                vc.startPosition = playerConfiguration.lastPosition
-            ////                vc.resolutions = sortedResolutions
-            ////                vc.titleText = playerConfiguration.title
-            ////                vc.speedLabelText = playerConfiguration.speedText
-            ////                vc.qualityLabelText = playerConfiguration.qualityText
-            ////                vc.showsBtnText = playerConfiguration.tvProgramsText
-            ////                vc.programs = playerConfiguration.programsInfoList
-            ////                SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-            //            } else {
+//                        if (playerConfiguration.isLive){
+////                            guard URL(string: playerConfiguration.url) != nil else {
+////                                return
+////                            }
+////                            let vc = PlayerViewController()
+////                            vc.modalPresentationStyle = .fullScreen
+////                            vc.playerConfg = playerConfiguration
+////                            SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+//
+//
+//                            let vc = TVVideoPlayerViewController()
+//                            vc.modalPresentationStyle = .fullScreen
+//                            vc.delegate = self
+//                            vc.urlString = playerConfiguration.url
+//                            vc.startPosition = playerConfiguration.lastPosition
+//                            vc.resolutions = sortedResolutions
+//                            vc.titleText = playerConfiguration.title
+//                            vc.speedLabelText = playerConfiguration.speedText
+//                            vc.qualityLabelText = playerConfiguration.qualityText
+//                            vc.showsBtnText = playerConfiguration.tvProgramsText
+//                            vc.programs = playerConfiguration.programsInfoList
+//                            SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
+//                        } else {
             guard URL(string: playerConfiguration.url) != nil else {
                 return
             }
@@ -71,7 +71,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             vc.selectedQualityText = playerConfiguration.autoText
             vc.seasons  = playerConfiguration.seasons
             SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-            //            }
+//                        }
         } else {
             result("iOS " + UIDevice.current.systemVersion);
         }

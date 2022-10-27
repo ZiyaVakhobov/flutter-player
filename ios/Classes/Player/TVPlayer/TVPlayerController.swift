@@ -704,12 +704,17 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
     func addTimeObserver(titleLabel: UILabel, title: String) {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
+        
+        print("TTTTTTTT")
         _ = player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
             guard let currentItem = self?.player.currentItem else {return}
             
             guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
                 return
             }
+            print("TTTTTTTT")
+            print(Float(currentItem.duration.seconds))
+            print(Float(currentItem.currentTime().seconds))
             let newDurationSeconds = Float(currentItem.duration.seconds)
             self?.timeSlider.maximumValue = Float(newDurationSeconds)
             self?.timeSlider.minimumValue = 0
