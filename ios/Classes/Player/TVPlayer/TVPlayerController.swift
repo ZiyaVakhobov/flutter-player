@@ -254,7 +254,6 @@ class TVVideoPlayerViewController: UIViewController, SettingsBottomSheetCellDele
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(action), for: .touchUpInside)
         button.isHidden = false
-        
         return button
     }()
     
