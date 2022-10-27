@@ -9,12 +9,15 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Rational
 import android.view.*
 import android.widget.*
@@ -71,11 +74,11 @@ import kotlin.math.abs
 
 
 class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
-    ScaleGestureDetector.OnScaleGestureListener {
+    ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
 
     private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
-    private var playerConfiguration: PlayerConfiguration? = null
+    private lateinit var playerConfiguration: PlayerConfiguration
     private var close: ImageView? = null
     private var pip: ImageView? = null
     private var cast: MediaRouteButton? = null
@@ -114,113 +117,43 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var seasonIndex: Int = 0
     private var episodeIndex: Int = 0
     private var retrofitService: RetrofitService? = null
+    private val TAG = "PlayerActivityTAG"
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
         actionBar?.hide()
         val window = window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = Color.BLACK
-        window.navigationBarColor = Color.BLACK
-        playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration?
-        seasonIndex = playerConfiguration!!.seasonIndex
-        episodeIndex = playerConfiguration!!.episodeIndex
-        currentQuality = playerConfiguration?.initialResolution?.keys?.first()!!
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = Color.BLACK
+            window.navigationBarColor = Color.BLACK
+        }
+        playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
+        seasonIndex = playerConfiguration.seasonIndex
+        episodeIndex = playerConfiguration.episodeIndex
+        currentQuality =
+            if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
 
-        playerView = findViewById(R.id.exo_player_view)
-        customPlayback = findViewById(R.id.custom_playback)
-        layoutBrightness = findViewById(R.id.layout_brightness)
-        brightnessSeekbar = findViewById(R.id.brightness_seek)
-        brightnessSeekbar?.isEnabled = false
-        layoutVolume = findViewById(R.id.layout_volume)
-        volumeSeekBar = findViewById(R.id.volume_seek)
-        volumeSeekBar?.isEnabled = false
-
-        close = findViewById(R.id.video_close)
-        pip = findViewById(R.id.video_pip)
-        cast = findViewById<View>(R.id.video_cast) as MediaRouteButton
-        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
-        more = findViewById(R.id.video_more)
-        title = findViewById(R.id.video_title)
-        title1 = findViewById(R.id.video_title1)
-        title?.text = playerConfiguration?.title
-        title1?.text = playerConfiguration?.title
-
-        rewind = findViewById(R.id.video_rewind)
-        forward = findViewById(R.id.video_forward)
-        playPause = findViewById(R.id.video_play_pause)
-        progressbar = findViewById(R.id.video_progress_bar)
-        timer = findViewById(R.id.timer)
-        if (playerConfiguration?.isLive == true) {
-            timer?.visibility = View.GONE
-        }
-        live = findViewById(R.id.live)
-        if (playerConfiguration?.isLive == true) {
-            live?.visibility = View.VISIBLE
-        }
-        episodesButton = findViewById(R.id.button_episodes)
-        episodesText = findViewById(R.id.text_episodes)
-        if (playerConfiguration?.seasons?.isNotEmpty() == true) {
-            episodesButton?.visibility = View.VISIBLE
-            episodesText?.text = playerConfiguration?.episodeButtonText
-        }
-        nextButton = findViewById(R.id.button_next)
-        nextText = findViewById(R.id.text_next)
-        if (playerConfiguration?.isSerial == true && !(seasonIndex == playerConfiguration!!.seasons.size - 1 &&
-                    episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1)
-        ) {
-            nextText?.text = playerConfiguration?.nextButtonText
-        }
-        tvProgramsButton = findViewById(R.id.button_tv_programs)
-        tvProgramsText = findViewById(R.id.text_tv_programs)
-        if (playerConfiguration?.isLive == true) {
-            tvProgramsButton?.visibility = View.VISIBLE
-            tvProgramsText?.text = playerConfiguration?.tvProgramsText
-        }
-        zoom = findViewById(R.id.zoom)
-        orientation = findViewById(R.id.orientation)
-        exoProgress = findViewById(R.id.exo_progress)
-        customSeekBar = findViewById(R.id.progress_bar)
-        customSeekBar?.isEnabled = false
-        if (playerConfiguration?.isLive == true) {
-            exoProgress?.visibility = View.GONE
-            rewind?.visibility = View.GONE
-            forward?.visibility = View.GONE
-            customSeekBar?.visibility = View.VISIBLE
-        }
-
-        retrofitService = Common.retrofitService(playerConfiguration!!.baseUrl)
+        initializeViews()
+        retrofitService =
+            if (playerConfiguration.baseUrl.isNotEmpty()) Common.retrofitService(playerConfiguration.baseUrl) else null
         initializeClickListeners()
 
         sWidth = Resources.getSystem().displayMetrics.widthPixels
-
         gestureDetector = GestureDetector(this, this)
         scaleGestureDetector = ScaleGestureDetector(this, this)
         brightnessSeekbar?.max = 30
         brightnessSeekbar?.progress = 15
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        setAudioFocus()
         maxVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
         volume = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
         volumeSeekBar?.max = maxVolume.toInt()
         maxVolume += 1.0
         volumeSeekBar?.progress = volume.toInt()
 
-        findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
-            if (motionEvent.pointerCount == 2) {
-                scaleGestureDetector?.onTouchEvent(motionEvent)
-            } else if (playerView?.isControllerFullyVisible == false && motionEvent.pointerCount == 1) {
-                gestureDetector?.onTouchEvent(motionEvent)
-                if (motionEvent.action == MotionEvent.ACTION_UP) {
-                    layoutBrightness?.visibility = View.GONE
-                    layoutVolume?.visibility = View.GONE
-                }
-            }
-            return@setOnTouchListener true
-        }
-
-        if (playerConfiguration?.playVideoFromAsset == true) {
+        if (playerConfiguration.playVideoFromAsset) {
             playFromAsset()
         } else {
             playVideo()
@@ -247,13 +180,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
-        if (isInPictureInPictureMode) {
-            player?.playWhenReady = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                player?.playWhenReady = true
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
+        setAudioFocus()
         player?.playWhenReady = true
         if (brightness != 0.0) setScreenBrightness(brightness.toInt())
     }
@@ -265,15 +201,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onStop() {
         super.onStop()
-        if (isInPictureInPictureMode) {
-            player?.release()
-            finish()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInPictureInPictureMode) {
+                player?.release()
+                finish()
+            }
         }
     }
 
     private fun playFromAsset() {
-        val uri =
-            Uri.parse("asset:///flutter_assets/${playerConfiguration!!.assetPath}")
+        val uri = Uri.parse("asset:///flutter_assets/${playerConfiguration.assetPath}")
         val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
         val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(uri))
@@ -290,55 +227,130 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun playVideo() {
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.initialResolution.values.first())))
+            .createMediaSource(MediaItem.fromUri(Uri.parse(if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.values.first() else "")))
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
-        playerView?.useController = playerConfiguration!!.showController
+        playerView?.useController = playerConfiguration.showController
         player?.setMediaSource(hlsMediaSource)
-        player?.seekTo(playerConfiguration!!.lastPosition * 1000)
+        player?.seekTo(playerConfiguration.lastPosition * 1000)
         player?.prepare()
-        player?.addListener(
-            object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    println(error.errorCode)
-                }
+        player?.addListener(object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                Log.d(TAG, "onPlayerError: ${error.errorCode}")
+            }
 
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    if (isPlaying) {
-                        playPause?.setImageResource(R.drawable.ic_pause)
-                    } else {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    playPause?.setImageResource(R.drawable.ic_pause)
+                } else {
+                    playPause?.setImageResource(R.drawable.ic_play)
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                when (playbackState) {
+                    Player.STATE_BUFFERING -> {
+                        playPause?.visibility = View.GONE
+                        progressbar?.visibility = View.VISIBLE
+                        if (playerView?.isControllerFullyVisible == false) {
+                            playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
+                        }
+                    }
+                    Player.STATE_READY -> {
+                        playPause?.visibility = View.VISIBLE
+                        progressbar?.visibility = View.GONE
+                        if (playerView?.isControllerFullyVisible == false) {
+                            playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
+                        }
+                    }
+                    Player.STATE_ENDED -> {
                         playPause?.setImageResource(R.drawable.ic_play)
                     }
+                    Player.STATE_IDLE -> {}
                 }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    when (playbackState) {
-                        Player.STATE_BUFFERING -> {
-                            playPause?.visibility = View.GONE
-                            progressbar?.visibility = View.VISIBLE
-                            if (playerView?.isControllerFullyVisible == false) {
-                                playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
-                            }
-                        }
-                        Player.STATE_READY -> {
-                            playPause?.visibility = View.VISIBLE
-                            progressbar?.visibility = View.GONE
-                            if (playerView?.isControllerFullyVisible == false) {
-                                playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
-                            }
-                        }
-                        Player.STATE_ENDED -> {
-                            playPause?.setImageResource(R.drawable.ic_play)
-                        }
-                        Player.STATE_IDLE -> {}
-                    }
-                }
-            })
+            }
+        })
         player?.playWhenReady = true
     }
 
     private var lastClicked1: Long = -1L
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeViews() {
+        playerView = findViewById(R.id.exo_player_view)
+        customPlayback = findViewById(R.id.custom_playback)
+        layoutBrightness = findViewById(R.id.layout_brightness)
+        brightnessSeekbar = findViewById(R.id.brightness_seek)
+        brightnessSeekbar?.isEnabled = false
+        layoutVolume = findViewById(R.id.layout_volume)
+        volumeSeekBar = findViewById(R.id.volume_seek)
+        volumeSeekBar?.isEnabled = false
+
+        close = findViewById(R.id.video_close)
+        pip = findViewById(R.id.video_pip)
+        cast = findViewById(R.id.video_cast)
+        more = findViewById(R.id.video_more)
+        title = findViewById(R.id.video_title)
+        title1 = findViewById(R.id.video_title1)
+        title?.text = playerConfiguration.title
+        title1?.text = playerConfiguration.title
+
+        rewind = findViewById(R.id.video_rewind)
+        forward = findViewById(R.id.video_forward)
+        playPause = findViewById(R.id.video_play_pause)
+        progressbar = findViewById(R.id.video_progress_bar)
+        timer = findViewById(R.id.timer)
+        if (playerConfiguration.isLive) {
+            timer?.visibility = View.GONE
+        }
+        live = findViewById(R.id.live)
+        if (playerConfiguration.isLive) {
+            live?.visibility = View.VISIBLE
+        }
+        episodesButton = findViewById(R.id.button_episodes)
+        episodesText = findViewById(R.id.text_episodes)
+        if (playerConfiguration.seasons.isNotEmpty()) {
+            episodesButton?.visibility = View.VISIBLE
+            episodesText?.text = playerConfiguration.episodeButtonText
+        }
+        nextButton = findViewById(R.id.button_next)
+        nextText = findViewById(R.id.text_next)
+
+        if (playerConfiguration.seasons.isNotEmpty())
+            if (playerConfiguration.isSerial && !(seasonIndex == playerConfiguration.seasons.size - 1 && episodeIndex == playerConfiguration.seasons[seasonIndex].movies.size - 1)) {
+                nextText?.text = playerConfiguration.nextButtonText
+            }
+        tvProgramsButton = findViewById(R.id.button_tv_programs)
+        tvProgramsText = findViewById(R.id.text_tv_programs)
+        if (playerConfiguration.isLive) {
+            tvProgramsButton?.visibility = View.VISIBLE
+            tvProgramsText?.text = playerConfiguration.tvProgramsText
+        }
+        zoom = findViewById(R.id.zoom)
+        orientation = findViewById(R.id.orientation)
+        exoProgress = findViewById(R.id.exo_progress)
+        customSeekBar = findViewById(R.id.progress_bar)
+        customSeekBar?.isEnabled = false
+        if (playerConfiguration.isLive) {
+            exoProgress?.visibility = View.GONE
+            rewind?.visibility = View.GONE
+            forward?.visibility = View.GONE
+            customSeekBar?.visibility = View.VISIBLE
+        }
+        findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
+            if (motionEvent.pointerCount == 2) {
+                scaleGestureDetector?.onTouchEvent(motionEvent)
+            } else if (playerView?.isControllerFullyVisible == false && motionEvent.pointerCount == 1) {
+                gestureDetector?.onTouchEvent(motionEvent)
+                if (motionEvent.action == MotionEvent.ACTION_UP) {
+                    layoutBrightness?.visibility = View.GONE
+                    layoutVolume?.visibility = View.GONE
+                }
+            }
+            return@setOnTouchListener true
+        }
+    }
 
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     private fun initializeClickListeners() {
@@ -382,8 +394,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         pip?.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val params = PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9)).build()
+                val params =
+                    PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
                 enterPictureInPictureMode(params)
             } else {
                 Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show()
@@ -394,10 +406,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             showSettingsBottomSheet()
         }
         rewind?.setOnClickListener {
-            player?.seekTo(player!!.currentPosition - 10000)
+            if (player != null) player?.seekTo(player!!.currentPosition - 10000)
         }
         forward?.setOnClickListener {
-            player?.seekTo(player!!.currentPosition + 10000)
+            if (player != null) player?.seekTo(player!!.currentPosition + 10000)
         }
         playPause?.setOnClickListener {
             if (player?.isPlaying == true) {
@@ -407,40 +419,40 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         }
         episodesButton?.setOnClickListener {
-            showEpisodesBottomSheet()
+            if (playerConfiguration.seasons.isNotEmpty())
+                showEpisodesBottomSheet()
         }
         nextButton?.setOnClickListener {
-            if (seasonIndex < playerConfiguration!!.seasons.size) {
-                if (episodeIndex < playerConfiguration!!.seasons[seasonIndex].movies.size - 1) {
+            if (playerConfiguration.seasons.isEmpty()) {
+                return@setOnClickListener
+            }
+            if (seasonIndex < playerConfiguration.seasons.size) {
+                if (episodeIndex < playerConfiguration.seasons[seasonIndex].movies.size - 1) {
                     episodeIndex++
                 } else {
                     seasonIndex++
                 }
             }
-            if (seasonIndex == playerConfiguration!!.seasons.size - 1 &&
-                episodeIndex == playerConfiguration!!.seasons[seasonIndex].movies.size - 1
-            ) {
+            if (seasonIndex == playerConfiguration.seasons.size - 1 && episodeIndex == playerConfiguration.seasons[seasonIndex].movies.size - 1) {
                 nextButton?.visibility = View.GONE
             }
             title?.text =
-                "S${seasonIndex + 1} E${episodeIndex + 1} " +
-                        playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title
-            if (playerConfiguration!!.isMegogo && playerConfiguration!!.isSerial) {
+                "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
+            if (playerConfiguration.isMegogo && playerConfiguration.isSerial) {
                 getMegogoStream()
-            } else if (playerConfiguration!!.isPremier && playerConfiguration!!.isSerial) {
+            } else if (playerConfiguration.isPremier && playerConfiguration.isSerial) {
                 getPremierStream()
             } else {
                 val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                val hlsMediaSource: HlsMediaSource =
-                    HlsMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
                 player?.setMediaSource(hlsMediaSource)
                 player?.prepare()
                 player?.playWhenReady
             }
         }
         tvProgramsButton?.setOnClickListener {
-            showTvProgramsBottomSheet()
+            if (playerConfiguration.programsInfoList.isNotEmpty()) showTvProgramsBottomSheet()
         }
         zoom?.setOnClickListener {
             when (playerView?.resizeMode) {
@@ -475,14 +487,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onUserLeaveHint() {
-        val params = PictureInPictureParams.Builder()
-            .setAspectRatio(Rational(100, 50)).build()
+        val params = PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50)).build()
         enterPictureInPictureMode(params)
     }
 
     override fun onPictureInPictureModeChanged(
-        isInPictureInPictureMode: Boolean,
-        newConfig: Configuration
+        isInPictureInPictureMode: Boolean, newConfig: Configuration
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
@@ -498,28 +508,25 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private fun getMegogoStream() {
         retrofitService?.getMegogoStream(
-            playerConfiguration!!.authorization,
-            playerConfiguration!!.sessionId,
-            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
-            playerConfiguration!!.megogoAccessToken
+            playerConfiguration.authorization,
+            playerConfiguration.sessionId,
+            playerConfiguration.seasons[seasonIndex].movies[episodeIndex].id,
+            playerConfiguration.megogoAccessToken
         )?.enqueue(object : Callback<MegogoStreamResponse> {
             override fun onResponse(
-                call: Call<MegogoStreamResponse>,
-                response: Response<MegogoStreamResponse>
+                call: Call<MegogoStreamResponse>, response: Response<MegogoStreamResponse>
             ) {
                 val body = response.body()
                 if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
-                    map[playerConfiguration!!.autoText] = body.data!!.src!!
+                    map[playerConfiguration.autoText] = body.data!!.src!!
                     body.data.bitrates?.forEach {
                         map["${it!!.bitrate}p"] = it.src!!
                     }
-                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
-                        map
+                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions = map
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                    val hlsMediaSource: HlsMediaSource =
-                        HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
                     player?.setMediaSource(hlsMediaSource)
                     player?.prepare()
                     player?.playWhenReady
@@ -534,32 +541,28 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private fun getPremierStream() {
         retrofitService?.getPremierStream(
-            playerConfiguration!!.authorization,
-            playerConfiguration!!.sessionId,
-            playerConfiguration!!.videoId,
-            playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].id,
+            playerConfiguration.authorization,
+            playerConfiguration.sessionId,
+            playerConfiguration.videoId,
+            playerConfiguration.seasons[seasonIndex].movies[episodeIndex].id,
         )?.enqueue(object : Callback<PremierStreamResponse> {
             override fun onResponse(
-                call: Call<PremierStreamResponse>,
-                response: Response<PremierStreamResponse>
+                call: Call<PremierStreamResponse>, response: Response<PremierStreamResponse>
             ) {
                 val body = response.body()
-                println(body.toString())
                 if (body != null) {
                     val map: HashMap<String, String> = hashMapOf()
                     body.file_info?.forEach {
                         if (it!!.quality == "auto") {
-                            map[playerConfiguration!!.autoText] = it.file_name!!
+                            map[playerConfiguration.autoText] = it.file_name!!
                         } else {
                             map[it.quality!!] = it.file_name!!
                         }
                     }
-                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions =
-                        map
+                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions = map
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                    val hlsMediaSource: HlsMediaSource =
-                        HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
                     player?.setMediaSource(hlsMediaSource)
                     player?.prepare()
                     player?.playWhenReady
@@ -574,7 +577,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        println("newConfig.orientation: ${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             title?.text = title1?.text
@@ -655,10 +657,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         titleBottomSheet?.text = title?.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_programs_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_programs_view_pager)
-        viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration!!.programsInfoList)
+        viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration.programsInfoList)
         viewPager?.currentItem = 1
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
-            tab.text = playerConfiguration!!.programsInfoList[position].day
+            tab.text = playerConfiguration.programsInfoList[position].day
         }.attach()
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
@@ -672,8 +674,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
-        backButtonEpisodeBottomSheet =
-            bottomSheetDialog.findViewById(R.id.episode_sheet_back)
+        backButtonEpisodeBottomSheet = bottomSheetDialog.findViewById(R.id.episode_sheet_back)
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             backButtonEpisodeBottomSheet?.visibility = View.GONE
         } else {
@@ -686,30 +687,24 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         titleBottomSheet?.text = title?.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.episode_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.episode_view_pager)
-        viewPager?.adapter = EpisodePagerAdapter(
-            this,
-            playerConfiguration!!.seasons,
+        viewPager?.adapter = EpisodePagerAdapter(this,
+            playerConfiguration.seasons,
             object : EpisodePagerAdapter.OnClickListener {
                 @SuppressLint("SetTextI18n")
                 override fun onClick(epIndex: Int, seasIndex: Int) {
                     seasonIndex = seasIndex
                     episodeIndex = epIndex
                     title?.text =
-                        "S${seasonIndex + 1} E${episodeIndex + 1} " +
-                                playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].title
+                        "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource =
-                        HlsMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(
-                                MediaItem.fromUri(
-                                    Uri.parse(
-                                        playerConfiguration!!
-                                            .seasons[seasonIndex]
-                                            .movies[episodeIndex]
-                                            .resolutions[currentQuality]
-                                    )
+                        HlsMediaSource.Factory(dataSourceFactory).createMediaSource(
+                            MediaItem.fromUri(
+                                Uri.parse(
+                                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
                                 )
                             )
+                        )
                     player?.setMediaSource(hlsMediaSource)
                     player?.prepare()
                     player?.playWhenReady
@@ -717,7 +712,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 }
             })
         TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
-            tab.text = playerConfiguration!!.seasons[position].title
+            tab.text = playerConfiguration.seasons[position].title
         }.attach()
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
@@ -750,26 +745,28 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val quality = bottomSheetDialog.findViewById<LinearLayout>(R.id.quality)
         val speed = bottomSheetDialog.findViewById<LinearLayout>(R.id.speed)
         bottomSheetDialog.findViewById<TextView>(R.id.quality_settings_text)?.text =
-            playerConfiguration!!.qualityText
+            playerConfiguration.qualityText
         bottomSheetDialog.findViewById<TextView>(R.id.speed_settings_text)?.text =
-            playerConfiguration!!.speedText
+            playerConfiguration.speedText
         qualityText = bottomSheetDialog.findViewById(R.id.quality_settings_value_text)
         speedText = bottomSheetDialog.findViewById(R.id.speed_settings_value_text)
         qualityText?.text = currentQuality
         speedText?.text = currentSpeed
         quality?.setOnClickListener {
-            if (playerConfiguration!!.isSerial) {
-                showQualitySpeedSheet(
-                    currentQuality,
-                    playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions.keys.toList() as ArrayList,
-                    true,
-                )
+            if (playerConfiguration.isSerial) {
+                if (playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.isNotEmpty())
+                    showQualitySpeedSheet(
+                        currentQuality,
+                        playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions.keys.toList() as ArrayList,
+                        true,
+                    )
             } else {
-                showQualitySpeedSheet(
-                    currentQuality,
-                    playerConfiguration?.resolutions?.keys?.toList() as ArrayList,
-                    true,
-                )
+                if (playerConfiguration.resolutions.isNotEmpty())
+                    showQualitySpeedSheet(
+                        currentQuality,
+                        playerConfiguration.resolutions.keys.toList() as ArrayList,
+                        true,
+                    )
             }
         }
         speed?.setOnClickListener {
@@ -783,9 +780,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private var backButtonQualitySpeedBottomSheet: ImageView? = null
     private fun showQualitySpeedSheet(
-        initialValue: String,
-        list: ArrayList<String>,
-        fromQuality: Boolean
+        initialValue: String, list: ArrayList<String>, fromQuality: Boolean
     ) {
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -802,8 +797,13 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         backButtonQualitySpeedBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
-        bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
-            playerConfiguration!!.qualityText
+        if (fromQuality) {
+            bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
+                playerConfiguration.qualityText
+        } else {
+            bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
+                playerConfiguration.speedText
+        }
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         //sorting
         val l = mutableListOf<String>()
@@ -821,8 +821,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     val first = l[i]
                     val second = l[j]
                     if (first.substring(0, first.length - 1).toInt() < second.substring(
-                            0,
-                            second.length - 1
+                            0, second.length - 1
                         ).toInt()
                     ) {
                         val a = l[i]
@@ -840,33 +839,32 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val adapter = QualitySpeedAdapter(
             initialValue,
             this,
-            l as ArrayList<String>, (object : QualitySpeedAdapter.OnClickListener {
+            l as ArrayList<String>,
+            (object : QualitySpeedAdapter.OnClickListener {
                 override fun onClick(position: Int) {
                     if (fromQuality) {
-                        currentQuality = list[position]
+                        currentQuality = l[position]
                         qualityText?.text = currentQuality
                         if (player?.isPlaying == true) {
                             player?.pause()
                         }
                         val currentPosition = player?.currentPosition
                         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                        val hlsMediaSource: HlsMediaSource = if (playerConfiguration!!.isSerial) {
-                            HlsMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(
-                                    MediaItem.fromUri(
-                                        Uri.parse(playerConfiguration!!.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])
-                                    )
+                        val hlsMediaSource: HlsMediaSource = if (playerConfiguration.isSerial) {
+                            HlsMediaSource.Factory(dataSourceFactory).createMediaSource(
+                                MediaItem.fromUri(
+                                    Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])
                                 )
+                            )
                         } else {
                             HlsMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration!!.resolutions[currentQuality])))
+                                .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.resolutions[currentQuality])))
                         }
                         player?.setMediaSource(hlsMediaSource)
                         player?.seekTo(currentPosition!!)
-                        player?.prepare()
-                        player?.playWhenReady
+                        player?.play()
                     } else {
-                        currentSpeed = list[position]
+                        currentSpeed = l[position]
                         speedText?.text = currentSpeed
                         player?.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
                     }
@@ -916,10 +914,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
 
     override fun onScroll(
-        event: MotionEvent?,
-        event1: MotionEvent?,
-        distanceX: Float,
-        distanceY: Float
+        event: MotionEvent?, event1: MotionEvent?, distanceX: Float, distanceY: Float
     ): Boolean {
         if (abs(distanceX) < abs(distanceY)) {
             if (event!!.x < sWidth / 2) {
@@ -965,6 +960,38 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         } else {
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                player?.pause()
+                playerView?.hideController()
+            }
+        }
+    }
+
+    private fun setAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioManager!!.requestAudioFocus(
+                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .build()
+                    )
+                    .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(this)
+                    .build()
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager!!.requestAudioFocus(
+                this, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
         }
     }
 
