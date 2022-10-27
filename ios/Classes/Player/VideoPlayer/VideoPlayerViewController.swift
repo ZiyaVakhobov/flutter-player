@@ -159,7 +159,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var screencastButton: IconButton = {
         let button = IconButton()
         button.setImage(Svg.screencast.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
+//        button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
@@ -300,8 +300,8 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         super.viewDidLoad()
         let resList = resolutions ?? ["480p":urlString!]
         sortedResolutions = Array(resList.keys).sorted().reversed()
-        episodesButton.setTitle(playerConfiguration.episodeButtonText, for: .normal)
-        showsBtn.setTitle(playerConfiguration.tvProgramsText, for: .normal)
+        episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
+        showsBtn.setTitle(" "+playerConfiguration.tvProgramsText, for: .normal)
         if playerConfiguration.isLive {
             episodesButton.isHidden = true
         } else {
