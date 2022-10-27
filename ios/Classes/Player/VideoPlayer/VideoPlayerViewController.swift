@@ -101,6 +101,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         return newCircle
     }()
     
+    private lazy var liveStackView: UIStackView = {
+        let liveView = UIStackView(arrangedSubviews: [liveCircle, liveLabel])
+        liveView.height(20)
+        liveView.sizeToFit()
+        liveView.axis = .horizontal
+        liveView.distribution = .equalSpacing
+        return liveView
+    }()
+    
     private var landscapeButton: IconButton = {
         let button = IconButton()
         button.setImage(Svg.portrait.uiImage, for: .normal)
@@ -394,8 +403,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         bottomView.addSubview(timeSlider)
         bottomView.addSubview(episodesButton)
         bottomView.addSubview(landscapeButton)
-        bottomView.addSubview(liveLabel)
-        bottomView.addSubview(liveCircle)
+        bottomView.addSubview(liveStackView)
     }
     
     func addTopViewSubviews() {
@@ -474,13 +482,18 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         episodesButton.rightToLeft(of: landscapeButton, offset: -8)
         episodesButton.centerY(to: landscapeButton)
         
-        liveCircle.snp.makeConstraints { make in
-            make.left.equalTo(bottomView).offset(8)
-        }
-        liveCircle.centerY(to: landscapeButton)
+        liveStackView.bottomToTop(of: timeSlider)
+        liveStackView.spacing = 24
+        liveStackView.leftToSuperview(offset: 2)
+        liveStackView.centerY(to: landscapeButton)
         
-        liveLabel.leftToRight(of: liveCircle)
-        liveLabel.centerY(to: liveCircle)
+//        liveCircle.snp.makeConstraints { make in
+//            make.left.equalTo(bottomView).offset(8)
+//        }
+//        liveCircle.centerY(to: landscapeButton)
+//
+//        liveLabel.leftToRight(of: liveCircle, offset: 24)
+//        liveLabel.centerY(to: liveCircle)
         
         if !playerConfiguration.isSerial {
             episodesButton.isHidden = true
