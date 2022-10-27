@@ -782,8 +782,13 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         backButtonQualitySpeedBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
-        bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
-            playerConfiguration.qualityText
+        if (fromQuality) {
+            bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
+                playerConfiguration.qualityText
+        } else {
+            bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
+                playerConfiguration.speedText
+        }
         val listView = bottomSheetDialog.findViewById<View>(R.id.quality_speed_listview) as ListView
         //sorting
         val l = mutableListOf<String>()
