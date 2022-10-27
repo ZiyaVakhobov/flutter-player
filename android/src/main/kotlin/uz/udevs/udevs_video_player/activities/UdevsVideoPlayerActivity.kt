@@ -42,15 +42,6 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.gms.cast.MediaInfo
-import com.google.android.gms.cast.MediaLoadRequestData
-import com.google.android.gms.cast.MediaMetadata
-import com.google.android.gms.cast.framework.CastButtonFactory
-import com.google.android.gms.cast.framework.CastContext
-import com.google.android.gms.cast.framework.CastSession
-import com.google.android.gms.cast.framework.SessionManagerListener
-import com.google.android.gms.cast.framework.media.RemoteMediaClient
-import com.google.android.gms.common.images.WebImage
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
@@ -124,11 +115,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         setContentView(R.layout.player_activity)
         actionBar?.hide()
         val window = window
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.statusBarColor = Color.BLACK
-            window.navigationBarColor = Color.BLACK
-        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = Color.BLACK
+        window.navigationBarColor = Color.BLACK
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
         seasonIndex = playerConfiguration.seasonIndex
         episodeIndex = playerConfiguration.episodeIndex
@@ -158,8 +147,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         } else {
             playVideo()
         }
-
-        val castContext = CastContext.getSharedInstance(this)
     }
 
     override fun onBackPressed() {
@@ -180,10 +167,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                player?.playWhenReady = true
-            }
+        if (isInPictureInPictureMode) {
+            player?.playWhenReady = true
         }
     }
 
@@ -201,11 +186,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onStop() {
         super.onStop()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (isInPictureInPictureMode) {
-                player?.release()
-                finish()
-            }
+        if (isInPictureInPictureMode) {
+            player?.release()
+            finish()
         }
     }
 
@@ -993,16 +976,5 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 AudioManager.AUDIOFOCUS_GAIN
             )
         }
-    }
-
-    enum class PlaybackLocation {
-        LOCAL, REMOTE
-    }
-
-    /**
-     * List of various states that we can be in
-     */
-    enum class PlaybackState {
-        PLAYING, PAUSED, BUFFERING, IDLE
     }
 }
