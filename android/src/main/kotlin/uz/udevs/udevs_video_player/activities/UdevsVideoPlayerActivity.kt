@@ -674,7 +674,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
         titleBottomSheet?.text = title?.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.episode_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.episode_view_pager)
-        viewPager?.adapter = EpisodePagerAdapter(this,
+        viewPager?.adapter = EpisodePagerAdapter(viewPager!!, this,
             playerConfiguration.seasons,
             object : EpisodePagerAdapter.OnClickListener {
                 @SuppressLint("SetTextI18n")
@@ -711,7 +711,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                     bottomSheetDialog.dismiss()
                 }
             })
-        TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
+        TabLayoutMediator(tabLayout!!, viewPager) { tab, position ->
             tab.text = playerConfiguration.seasons[position].title
         }.attach()
         bottomSheetDialog.show()

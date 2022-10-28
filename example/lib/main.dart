@@ -161,6 +161,7 @@ class _MyAppState extends State<MyApp> {
       resolutions: {},
     ));
     seasons.add(Season(title: '1 Season', movies: movies1));
+    seasons.add(Season(title: '2 Season', movies: movies1));
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(

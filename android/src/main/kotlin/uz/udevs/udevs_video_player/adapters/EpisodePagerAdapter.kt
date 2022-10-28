@@ -3,15 +3,19 @@ package uz.udevs.udevs_video_player.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnItemTouchListener
+import androidx.viewpager2.widget.ViewPager2
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.models.Season
 
 
 class EpisodePagerAdapter(
+    var viewPager: ViewPager2,
     var context: Context,
     var seasons: List<Season>,
     var onClickListener: OnClickListener
@@ -22,6 +26,28 @@ class EpisodePagerAdapter(
 
         init {
             rv = itemView.findViewById(R.id.episodes_rv)
+            rv.addOnItemTouchListener(object : OnItemTouchListener {
+                var lastX = 0
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                    when (e.action) {
+                        MotionEvent.ACTION_DOWN -> lastX = e.x.toInt()
+                        MotionEvent.ACTION_MOVE -> {
+                            val isScrollingRight = e.x < lastX
+                            viewPager.isUserInputEnabled =
+                                isScrollingRight && (rv.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition() == rv.adapter!!.itemCount - 1 ||
+                                        !isScrollingRight && (rv.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0
+                        }
+                        MotionEvent.ACTION_UP -> {
+                            lastX = 0
+                            viewPager.isUserInputEnabled = true
+                        }
+                    }
+                    return false
+                }
+
+                override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+                override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            })
         }
     }
 
