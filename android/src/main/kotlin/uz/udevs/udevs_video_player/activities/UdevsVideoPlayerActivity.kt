@@ -108,6 +108,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
     private var episodeIndex: Int = 0
     private var retrofitService: RetrofitService? = null
     private val TAG = "PlayerActivityTAG"
+    private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -562,6 +563,7 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        currentOrientation = newConfig.orientation
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             title?.text = title1?.text
@@ -679,20 +681,33 @@ class UdevsVideoPlayerActivity : Activity(), GestureDetector.OnGestureListener,
                 override fun onClick(epIndex: Int, seasIndex: Int) {
                     seasonIndex = seasIndex
                     episodeIndex = epIndex
-                    title?.text =
-                        "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
-                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                    val hlsMediaSource: HlsMediaSource =
-                        HlsMediaSource.Factory(dataSourceFactory).createMediaSource(
-                            MediaItem.fromUri(
-                                Uri.parse(
-                                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
-                                )
-                            )
-                        )
-                    player?.setMediaSource(hlsMediaSource)
-                    player?.prepare()
-                    player?.playWhenReady
+                    if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                        title?.text =
+                            "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
+                        title1?.text = title?.text
+                        title1?.visibility = View.VISIBLE
+                        title?.text = ""
+                        title?.visibility = View.INVISIBLE
+                    } else {
+                        title?.text =
+                            "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
+                        title?.visibility = View.VISIBLE
+                        title1?.text = ""
+                        title1?.visibility = View.GONE
+                    }
+                    if (playerConfiguration.isMegogo && playerConfiguration.isSerial) {
+                        getMegogoStream()
+                    } else if (playerConfiguration.isPremier && playerConfiguration.isSerial) {
+                        getPremierStream()
+                    } else {
+                        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                        val hlsMediaSource: HlsMediaSource =
+                            HlsMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                        player?.setMediaSource(hlsMediaSource)
+                        player?.prepare()
+                        player?.playWhenReady
+                    }
                     bottomSheetDialog.dismiss()
                 }
             })
