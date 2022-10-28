@@ -55,16 +55,6 @@
                 android:visibility="invisible"
                 tools:ignore="HardcodedText" />
 
-            <!--            <ImageView-->
-            <!--                android:id="@+id/video_cast"-->
-            <!--                android:layout_width="50dp"-->
-            <!--                android:layout_height="30dp"-->
-            <!--                android:layout_gravity="center_vertical"-->
-            <!--                android:padding="2dp"-->
-            <!--                android:src="@drawable/ic_cast"-->
-            <!--                android:visibility="visible"-->
-            <!--                tools:ignore="ContentDescription" />-->
-
             <androidx.mediarouter.app.MediaRouteButton
                 android:id="@+id/video_cast"
                 android:layout_width="50dp"
@@ -237,7 +227,8 @@
                     android:textColor="@color/red"
                     android:textFontWeight="900"
                     android:textSize="15sp"
-                    tools:ignore="HardcodedText" />
+                    tools:ignore="HardcodedText"
+                    tools:targetApi="p" />
 
             </LinearLayout>
 
