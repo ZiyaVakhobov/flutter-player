@@ -9,7 +9,7 @@ import UIKit
 
 class ProgramCell: UITableViewCell {
     
-    var programModel : Programms?{
+    var programModel : TvProgram?{
         didSet{
             timeLB.text = programModel?.scheduledTime
             channelNamesLB.text = programModel?.programTitle
