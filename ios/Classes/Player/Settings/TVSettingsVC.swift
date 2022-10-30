@@ -15,8 +15,8 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
     
     var resolutions: [String:String]?
     var movieController = VideoPlayerViewController()
-    var delegete: TVQualityDelegate?
-    var speedDelegate: TVSpeedDelegate?
+//    var delegete: TVQualityDelegate?
+//    var speedDelegate: TVSpeedDelegate?
     var speedTitle: String = "1x"
     
     var settingModel = [SettingModel]()
@@ -195,15 +195,15 @@ extension TVSettingVC: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if (indexPath.row == 0) {
-            self.dismiss(animated: true) {
-                self.speedDelegate?.speedBottomSheet()
-            }
-        } else {
-            self.dismiss(animated: true) {
-                self.delegete?.qualityBottomSheet()
-            }
-        }
+//        if (indexPath.row == 0) {
+//            self.dismiss(animated: true) {
+//                self.speedDelegate?.speedBottomSheet()
+//            }
+//        } else {
+//            self.dismiss(animated: true) {
+//                self.delegete?.qualityBottomSheet()
+//            }
+//        }
     }
 }
 
