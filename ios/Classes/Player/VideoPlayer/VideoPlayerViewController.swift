@@ -397,7 +397,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func addGestures(){
         swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(swipePan))
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureControls))
-        
         view.addGestureRecognizer(swipeGesture)
         view.addGestureRecognizer(tapGesture)
     }
