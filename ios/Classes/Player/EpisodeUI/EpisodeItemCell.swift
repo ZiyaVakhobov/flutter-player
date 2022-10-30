@@ -10,7 +10,7 @@ import SnapKit
 class EpisodeCollectionCell: UICollectionViewCell {
     
     var episodes : Movie? {
-        didSet{
+        didSet {
             titleLbl.text = episodes?.title ?? ""
             descriptionLabel.text = episodes?.description ?? ""
             durationLbl.text = VGPlayerUtils.getTimeIntString(from: episodes?.duration ?? 0)
@@ -45,6 +45,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
         image.layer.cornerRadius = 4
         return image
     }()
+    
     var playIcon: UIImageView = {
         let image = UIImageView()
         image.image = Svg.serialPlay.uiImage
@@ -82,8 +83,8 @@ class EpisodeCollectionCell: UICollectionViewCell {
         label.textColor = UIColor(rgb: 0xFF9D9D9D)
         label.numberOfLines = 0
         label.textAlignment = .left
-        label.numberOfLines = 4
-         label.sizeToFit()
+        label.numberOfLines = 3
+        label.sizeToFit()
         label.backgroundColor = .clear
         label.font = UIFont.systemFont(ofSize: 11,weight: .medium)
         return label
