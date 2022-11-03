@@ -42,6 +42,12 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.gms.cast.MediaInfo
+import com.google.android.gms.cast.MediaLoadRequestData
+import com.google.android.gms.cast.MediaMetadata
+import com.google.android.gms.cast.framework.*
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
+import com.google.android.gms.common.images.WebImage
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
@@ -55,6 +61,7 @@ import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
 import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
 import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
+import uz.udevs.udevs_video_player.expandedcontrols.ExpandedControlsActivity
 import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.MegogoStreamResponse
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
@@ -110,6 +117,27 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var retrofitService: RetrofitService? = null
     private val TAG = "PlayerActivityTAG"
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
+    private var titleText = ""
+
+    private var mLocation: PlaybackLocation? = null
+    private var mPlaybackState: PlaybackState? = null
+    private var mSessionManagerListener: SessionManagerListener<CastSession>? = null
+    private var mCastSession: CastSession? = null
+    private var mCastContext: CastContext? = null
+
+    /**
+     * indicates whether we are doing a local or a remote playback
+     */
+    enum class PlaybackLocation {
+        LOCAL, REMOTE
+    }
+
+    /**
+     * List of various states that we can be in
+     */
+    enum class PlaybackState {
+        PLAYING, PAUSED, BUFFERING, IDLE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,8 +152,14 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         episodeIndex = playerConfiguration.episodeIndex
         currentQuality =
             if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
+        titleText = playerConfiguration.title
 
         initializeViews()
+
+        mCastContext = CastContext.getSharedInstance(this)
+        mCastSession = mCastContext!!.sessionManager.currentCastSession
+        setupCastListener()
+
         retrofitService =
             if (playerConfiguration.baseUrl.isNotEmpty()) Common.retrofitService(playerConfiguration.baseUrl) else null
         initializeClickListeners()
@@ -150,6 +184,114 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
     }
 
+    private fun setupCastListener() {
+        Log.d(TAG, "setupCastListener: ")
+        mSessionManagerListener = object : SessionManagerListener<CastSession> {
+            override fun onSessionEnded(session: CastSession, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
+                onApplicationConnected(session)
+            }
+
+            override fun onSessionResumeFailed(session: CastSession, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            override fun onSessionStarted(session: CastSession, sessionId: String) {
+                onApplicationConnected(session)
+            }
+
+            override fun onSessionStartFailed(session: CastSession, error: Int) {
+                onApplicationDisconnected()
+            }
+
+            override fun onSessionStarting(session: CastSession) {}
+            override fun onSessionEnding(session: CastSession) {}
+            override fun onSessionResuming(session: CastSession, sessionId: String) {}
+            override fun onSessionSuspended(session: CastSession, reason: Int) {}
+            private fun onApplicationConnected(castSession: CastSession) {
+                Log.d(TAG, "onApplicationConnected: ")
+                mCastSession = castSession
+                if (mPlaybackState == PlaybackState.PLAYING) {
+                    player?.pause()
+                    loadRemoteMedia((player!!.currentPosition / 1000).toInt(), true)
+                    return
+                } else {
+                    mPlaybackState = PlaybackState.IDLE
+                    updatePlaybackLocation(PlaybackLocation.REMOTE)
+                }
+//                updatePlayButton(mPlaybackState)
+                invalidateOptionsMenu()
+            }
+
+            private fun onApplicationDisconnected() {
+                updatePlaybackLocation(PlaybackLocation.LOCAL)
+                mPlaybackState = PlaybackState.IDLE
+                mLocation = PlaybackLocation.LOCAL
+//                updatePlayButton(mPlaybackState)
+                invalidateOptionsMenu()
+            }
+        }
+    }
+
+    private fun updatePlaybackLocation(location: PlaybackLocation) {
+        mLocation = location
+        if (location == PlaybackLocation.LOCAL) {
+            if (mPlaybackState == PlaybackState.PLAYING
+                || mPlaybackState == PlaybackState.BUFFERING
+            ) {
+//                setCoverArtStatus(null)
+//                startControllersTimer()
+            } else {
+//                stopControllersTimer()
+//                setCoverArtStatus(mSelectedMedia!!.getImage(0))
+            }
+        } else {
+//            stopControllersTimer()
+//            setCoverArtStatus(mSelectedMedia!!.getImage(0))
+//            updateControllersVisibility(false)
+        }
+    }
+
+    private fun loadRemoteMedia(position: Int, autoPlay: Boolean) {
+        if (mCastSession == null) {
+            return
+        }
+        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        remoteMediaClient.registerCallback(object : RemoteMediaClient.Callback() {
+            override fun onStatusUpdated() {
+                val intent = Intent(this@UdevsVideoPlayerActivity, ExpandedControlsActivity::class.java)
+                startActivity(intent)
+                remoteMediaClient.unregisterCallback(this)
+            }
+        })
+        remoteMediaClient.load(
+            MediaLoadRequestData.Builder()
+                .setMediaInfo(buildMediaInfo())
+                .setAutoplay(autoPlay)
+                .setCurrentTime(position.toLong())
+                .setCredentials("user-credentials")
+                .setAtvCredentials("atv-user-credentials")
+                .build()
+        )
+    }
+
+    private fun buildMediaInfo(): MediaInfo? {
+        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+//        mSelectedMedia?.studio?.let { movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, it) }
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, titleText)
+        movieMetadata.addImage(WebImage(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].image)))
+        movieMetadata.addImage(WebImage(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].image)))
+        return MediaInfo.Builder(playerConfiguration.initialResolution.keys.first())
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType("videos/mp4")
+                .setMetadata(movieMetadata)
+                .setStreamDuration((playerConfiguration.lastPosition * 1000))
+                .build()
+    }
+
     override fun onBackPressed() {
         if (player?.isPlaying == true) {
             player?.stop()
@@ -171,13 +313,22 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (isInPictureInPictureMode) {
             player?.playWhenReady = true
         }
+        mCastContext!!.sessionManager.removeSessionManagerListener(
+            mSessionManagerListener!!, CastSession::class.java)
     }
 
     override fun onResume() {
-        super.onResume()
         setAudioFocus()
         player?.playWhenReady = true
         if (brightness != 0.0) setScreenBrightness(brightness.toInt())
+        mCastContext!!.sessionManager.addSessionManagerListener(
+            mSessionManagerListener!!, CastSession::class.java)
+        if (mCastSession != null && mCastSession!!.isConnected) {
+            updatePlaybackLocation(PlaybackLocation.REMOTE)
+        } else {
+            updatePlaybackLocation(PlaybackLocation.LOCAL)
+        }
+        super.onResume()
     }
 
     override fun onRestart() {
@@ -226,8 +377,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
+                    mPlaybackState = PlaybackState.PLAYING
                     playPause?.setImageResource(R.drawable.ic_pause)
                 } else {
+                    mPlaybackState = PlaybackState.PAUSED
                     playPause?.setImageResource(R.drawable.ic_play)
                 }
             }
@@ -235,6 +388,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
                     Player.STATE_BUFFERING -> {
+                        mPlaybackState = PlaybackState.BUFFERING
                         playPause?.visibility = View.GONE
                         progressbar?.visibility = View.VISIBLE
                         if (playerView?.isControllerFullyVisible == false) {
@@ -251,7 +405,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     Player.STATE_ENDED -> {
                         playPause?.setImageResource(R.drawable.ic_play)
                     }
-                    Player.STATE_IDLE -> {}
+                    Player.STATE_IDLE -> {
+                        mPlaybackState = PlaybackState.IDLE
+                    }
                 }
             }
         })
@@ -274,11 +430,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
         cast = findViewById(R.id.video_cast)
+        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title1 = findViewById(R.id.video_title1)
-        title?.text = playerConfiguration.title
-        title1?.text = playerConfiguration.title
+        title?.text = titleText
+        title1?.text = titleText
 
         rewind = findViewById(R.id.video_rewind)
         forward = findViewById(R.id.video_forward)
