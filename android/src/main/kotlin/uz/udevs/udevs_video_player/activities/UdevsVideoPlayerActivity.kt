@@ -117,6 +117,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private val TAG = "TAG1"
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
     private var titleText = ""
+    private var url: String? = null
 
     private var mLocation: PlaybackLocation? = null
     private var mPlaybackState: PlaybackState? = null
@@ -146,6 +147,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         currentQuality =
             if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
         titleText = playerConfiguration.title
+        url = playerConfiguration.initialResolution.values.first()
 
         initializeViews()
         mPlaybackState = PlaybackState.PLAYING
@@ -230,10 +232,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     }
                 })
                 playPause?.setImageResource(R.drawable.ic_pause)
-                loadRemoteMedia(
-                    if (player?.currentPosition != null) player!!.currentPosition else 0,
-                    true
-                )
+                loadRemoteMedia(player?.currentPosition ?: 0)
             }
 
             private fun onApplicationDisconnected() {
@@ -251,7 +250,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
     }
 
-    private fun loadRemoteMedia(position: Long, autoPlay: Boolean) {
+    private fun loadRemoteMedia(position: Long) {
         if (mCastSession == null) {
             return
         }
@@ -267,8 +266,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         })
         remoteMediaClient.load(
             MediaLoadRequestData.Builder()
-                .setMediaInfo(buildMediaInfo())
-                .setAutoplay(autoPlay)
+                .setMediaInfo(buildMediaInfo(position, url))
+                .setAutoplay(true)
                 .setCurrentTime(position)
                 .setCredentials("user-credentials")
                 .setAtvCredentials("atv-user-credentials")
@@ -291,18 +290,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             .setContentType("videos/m3u8")
             .setMetadata(movieMetadata)
             .setStreamDuration(position)
-            .build()
-    }
-
-
-    private fun buildMediaInfo(): MediaInfo {
-        val movieMetadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-        movieMetadata.putString(MediaMetadata.KEY_TITLE, titleText)
-        return MediaInfo.Builder(if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.values.first() else "")
-            .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-            .setContentType("videos/m3u8")
-            .setMetadata(movieMetadata)
-            .setStreamDuration(if (player?.currentPosition != null) player!!.currentPosition else 0)
             .build()
     }
 
@@ -621,18 +608,26 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             } else if (playerConfiguration.isPremier && playerConfiguration.isSerial) {
                 getPremierStream()
             } else {
+                url = playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
                 val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
+                    .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
                 player?.setMediaSource(hlsMediaSource)
                 player?.prepare()
-                player?.playWhenReady
+                if (mLocation == PlaybackLocation.LOCAL) {
+                    player?.playWhenReady
+                } else {
+                    loadRemoteMedia(0)
+                }
             }
         }
         tvProgramsButton?.setOnClickListener {
             if (playerConfiguration.programsInfoList.isNotEmpty()) showTvProgramsBottomSheet()
         }
         zoom?.setOnClickListener {
+            if (mLocation == PlaybackLocation.REMOTE) {
+                return@setOnClickListener
+            }
             when (playerView?.resizeMode) {
                 AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> {
                     zoom?.setImageResource(R.drawable.ic_fit)
@@ -651,9 +646,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         }
         orientation?.setOnClickListener {
-            if (mLocation == PlaybackLocation.REMOTE) {
-                return@setOnClickListener
-            }
             requestedOrientation =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -900,39 +892,19 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     } else if (playerConfiguration.isPremier && playerConfiguration.isSerial) {
                         getPremierStream()
                     } else {
-                        if(mLocation == PlaybackLocation.LOCAL) {
-                            val dataSourceFactory: DataSource.Factory =
-                                DefaultHttpDataSource.Factory()
-                            val hlsMediaSource: HlsMediaSource =
-                                HlsMediaSource.Factory(dataSourceFactory)
-                                    .createMediaSource(
-                                        MediaItem.fromUri(
-                                            Uri.parse(
-                                                playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
-                                            )
-                                        )
-                                    )
-                            player?.setMediaSource(hlsMediaSource)
-                            player?.prepare()
+                        url =
+                            playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
+                        val dataSourceFactory: DataSource.Factory =
+                            DefaultHttpDataSource.Factory()
+                        val hlsMediaSource: HlsMediaSource =
+                            HlsMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
+                        player?.setMediaSource(hlsMediaSource)
+                        player?.prepare()
+                        if (mLocation == PlaybackLocation.LOCAL) {
                             player?.playWhenReady
                         } else {
-                            val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
-                            remoteMediaClient.load(
-                                MediaLoadRequestData.Builder()
-                                    .setMediaInfo(buildMediaInfo(0, playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]))
-                                    .setAutoplay(true)
-                                    .setCurrentTime(0)
-                                    .setCredentials("user-credentials")
-                                    .setAtvCredentials("atv-user-credentials")
-                                    .build()
-                            )
-                            remoteMediaClient.addProgressListener(
-                                { current, max ->
-                                    Log.d(TAG, "loadRemoteMedia: $max -> $current")
-                                    customSeekBar?.progress = (current / 1000).toInt()
-                                    videoPosition?.text = MyHelper().formatDuration(current / 1000)
-                                }, 1500
-                            )
+                            loadRemoteMedia(0)
                         }
                     }
                     bottomSheetDialog.dismiss()
@@ -1077,20 +1049,26 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         }
                         val currentPosition = player?.currentPosition
                         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                        val hlsMediaSource: HlsMediaSource = if (playerConfiguration.isSerial) {
-                            HlsMediaSource.Factory(dataSourceFactory).createMediaSource(
-                                MediaItem.fromUri(
-                                    Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])
-                                )
-                            )
-                        } else {
+                        url =
+                            if (playerConfiguration.isSerial) playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality] else playerConfiguration.resolutions[currentQuality]
+                        val hlsMediaSource: HlsMediaSource =
                             HlsMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.resolutions[currentQuality])))
-                        }
+                                .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
                         player?.setMediaSource(hlsMediaSource)
                         player?.seekTo(currentPosition!!)
-                        player?.play()
+                        if (mLocation == PlaybackLocation.LOCAL) {
+                            player?.play()
+                        } else {
+                            if (playerConfiguration.isSerial) {
+                                loadRemoteMedia(currentPosition ?: 0)
+                            } else {
+                                loadRemoteMedia(currentPosition ?: 0)
+                            }
+                        }
                     } else {
+                        if (mLocation == PlaybackLocation.REMOTE) {
+                            return
+                        }
                         currentSpeed = l[position]
                         speedText?.text = currentSpeed
                         player?.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
