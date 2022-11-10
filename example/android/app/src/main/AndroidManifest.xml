@@ -1,8 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-sdk
-        android:minSdkVersion="19"
-        android:targetSdkVersion="28" />
    <application
         android:label="udevs_video_player_example"
         android:name="${applicationName}"
