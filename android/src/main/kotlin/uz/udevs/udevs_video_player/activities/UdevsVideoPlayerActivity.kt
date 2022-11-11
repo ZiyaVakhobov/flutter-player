@@ -118,6 +118,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
     private var titleText = ""
     private var url: String? = null
+    private var sameWithStreamingContent = false
 
     private var mLocation: PlaybackLocation? = null
     private var mPlaybackState: PlaybackState? = null
@@ -152,7 +153,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         initializeViews()
         mPlaybackState = PlaybackState.PLAYING
         mCastContext = CastContext.getSharedInstance(this)
-        mCastSession = mCastContext!!.sessionManager.currentCastSession
+        mCastSession = mCastContext?.sessionManager?.currentCastSession
         setupCastListener()
         val remoteMediaClient = mCastSession?.remoteMediaClient
         mLocation =
@@ -161,6 +162,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             } else {
                 PlaybackLocation.LOCAL
             }
+        Log.d(TAG, "onCreate: ${remoteMediaClient?.mediaInfo?.contentUrl}")
+        if(mLocation == PlaybackLocation.REMOTE) {
+            playerConfiguration.resolutions.values.forEach {
+                Log.d(TAG, "onCreate: $it")
+                if(it == remoteMediaClient?.mediaInfo?.contentUrl) {
+                    url = it
+                    sameWithStreamingContent = true
+                }
+            }
+        }
 
         retrofitService =
             if (playerConfiguration.baseUrl.isNotEmpty()) Common.retrofitService(playerConfiguration.baseUrl) else null
@@ -301,7 +312,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun unregisterCallBack() {
-        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        val remoteMediaClient = mCastSession?.remoteMediaClient ?: return
         if (callback != null)
             remoteMediaClient.unregisterCallback(callback!!)
     }
@@ -320,7 +331,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun removeProgressListener() {
-        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        val remoteMediaClient = mCastSession?.remoteMediaClient ?: return
         if (listener != null)
             remoteMediaClient.removeProgressListener(listener!!)
     }
@@ -456,6 +467,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (mLocation == PlaybackLocation.LOCAL) {
             player?.playWhenReady = true
         } else {
+            if(!sameWithStreamingContent) {
+               loadRemoteMedia(playerConfiguration.lastPosition)
+            }
             registerCallBack()
             listenToProgress()
         }
