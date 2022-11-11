@@ -147,10 +147,20 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         currentQuality =
             if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
         titleText = playerConfiguration.title
-        url = playerConfiguration.initialResolution.values.first()
+        url = playerConfiguration.initialResolution.values.first().ifEmpty { "" }
 
         initializeViews()
         mPlaybackState = PlaybackState.PLAYING
+        mCastContext = CastContext.getSharedInstance(this)
+        mCastSession = mCastContext!!.sessionManager.currentCastSession
+        setupCastListener()
+        val remoteMediaClient = mCastSession?.remoteMediaClient
+        mLocation =
+            if ((remoteMediaClient?.isPlaying == true) || (remoteMediaClient?.isPaused == true) || (remoteMediaClient?.isBuffering == true)) {
+                PlaybackLocation.REMOTE
+            } else {
+                PlaybackLocation.LOCAL
+            }
 
         retrofitService =
             if (playerConfiguration.baseUrl.isNotEmpty()) Common.retrofitService(playerConfiguration.baseUrl) else null
@@ -170,10 +180,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         volumeSeekBar?.progress = volume.toInt()
 
         playVideo()
-
-        mCastContext = CastContext.getSharedInstance(this)
-        mCastSession = mCastContext!!.sessionManager.currentCastSession
-        setupCastListener()
     }
 
     private fun setupCastListener() {
@@ -207,47 +213,60 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 mCastSession = castSession
                 mLocation = PlaybackLocation.REMOTE
                 player?.pause()
-                videoPosition?.visibility = View.VISIBLE
-                exoPosition?.visibility = View.GONE
-                exoProgress?.visibility = View.GONE
-                customSeekBar?.visibility = View.VISIBLE
-                customSeekBar?.isEnabled = true
-                customSeekBar?.max =
-                    if (player?.duration != null) (player!!.duration / 1000).toInt() else 0
-                customSeekBar?.progress =
-                    if (player?.currentPosition != null) (player!!.currentPosition / 1000).toInt() else 0
-                customSeekBar?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
-                    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                        if (mLocation == PlaybackLocation.REMOTE) {
-                            val seekOptions: MediaSeekOptions = MediaSeekOptions
-                                .Builder()
-                                .setPosition((seekBar?.progress)!!.toLong() * 1000)
-                                .build()
-                            mCastSession!!.remoteMediaClient?.seek(seekOptions)
-                        }
-                    }
-                })
-                playPause?.setImageResource(R.drawable.ic_pause)
+                performViewsOnConnect()
                 loadRemoteMedia(player?.currentPosition ?: 0)
+                registerCallBack()
+                listenToProgress()
             }
 
             private fun onApplicationDisconnected() {
                 Log.d(TAG, "onApplicationDisconnected: $mPlaybackState")
                 mPlaybackState = PlaybackState.IDLE
                 mLocation = PlaybackLocation.LOCAL
-                videoPosition?.visibility = View.GONE
-                exoPosition?.visibility = View.VISIBLE
-                exoProgress?.visibility = View.VISIBLE
-                customSeekBar?.visibility = View.GONE
-                customSeekBar?.isEnabled = false
+                performViewsOnDisconnect()
                 player?.seekTo((customSeekBar!!.progress * 1000).toLong())
                 player?.play()
             }
         }
+    }
+
+    private fun performViewsOnConnect() {
+        pip?.visibility = View.GONE
+        videoPosition?.visibility = View.VISIBLE
+        exoPosition?.visibility = View.GONE
+        exoProgress?.visibility = View.GONE
+        customSeekBar?.visibility = View.VISIBLE
+        customSeekBar?.isEnabled = true
+        Log.d(TAG, "performViewsOnConnect: ${(player!!.duration / 1000).toInt()}")
+        customSeekBar?.max =
+            if (player?.duration != null) (player!!.duration / 1000).toInt() else 0
+        customSeekBar?.progress =
+            if (player?.currentPosition != null) (player!!.currentPosition / 1000).toInt() else 0
+        customSeekBar?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                if (mLocation == PlaybackLocation.REMOTE) {
+                    val seekOptions: MediaSeekOptions = MediaSeekOptions
+                        .Builder()
+                        .setPosition((seekBar?.progress)!!.toLong() * 1000)
+                        .build()
+                    mCastSession!!.remoteMediaClient?.seek(seekOptions)
+                }
+            }
+        })
+        playPause?.setImageResource(R.drawable.ic_pause)
+    }
+
+    private fun performViewsOnDisconnect() {
+        pip?.visibility = View.VISIBLE
+        videoPosition?.visibility = View.GONE
+        exoPosition?.visibility = View.VISIBLE
+        exoProgress?.visibility = View.VISIBLE
+        customSeekBar?.visibility = View.GONE
+        customSeekBar?.isEnabled = false
     }
 
     private fun loadRemoteMedia(position: Long) {
@@ -255,15 +274,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             return
         }
         val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
-        remoteMediaClient.registerCallback(object : RemoteMediaClient.Callback() {
-            override fun onStatusUpdated() {
-                if (!remoteMediaClient.isPlaying) {
-                    playPause?.setImageResource(R.drawable.ic_play)
-                } else {
-                    playPause?.setImageResource(R.drawable.ic_pause)
-                }
-            }
-        })
         remoteMediaClient.load(
             MediaLoadRequestData.Builder()
                 .setMediaInfo(buildMediaInfo(position, url))
@@ -273,13 +283,46 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 .setAtvCredentials("atv-user-credentials")
                 .build()
         )
-        remoteMediaClient.addProgressListener(
-            { current, max ->
+    }
+
+    private var callback: RemoteMediaClient.Callback? = null
+    private fun registerCallBack() {
+        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        remoteMediaClient.registerCallback(object : RemoteMediaClient.Callback() {
+            override fun onStatusUpdated() {
+                if (!remoteMediaClient.isPlaying) {
+                    playPause?.setImageResource(R.drawable.ic_play)
+                } else {
+                    playPause?.setImageResource(R.drawable.ic_pause)
+                }
+                callback = this
+            }
+        })
+    }
+
+    private fun unregisterCallBack() {
+        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        if (callback != null)
+            remoteMediaClient.unregisterCallback(callback!!)
+    }
+
+    private var listener: RemoteMediaClient.ProgressListener? = null
+    private fun listenToProgress() {
+        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        remoteMediaClient.addProgressListener(object : RemoteMediaClient.ProgressListener {
+            override fun onProgressUpdated(current: Long, max: Long) {
                 Log.d(TAG, "loadRemoteMedia: $max -> $current")
                 customSeekBar?.progress = (current / 1000).toInt()
                 videoPosition?.text = MyHelper().formatDuration(current / 1000)
-            }, 1500
-        )
+                listener = this
+            }
+        }, 1500)
+    }
+
+    private fun removeProgressListener() {
+        val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
+        if (listener != null)
+            remoteMediaClient.removeProgressListener(listener!!)
     }
 
     private fun buildMediaInfo(position: Long, url: String?): MediaInfo {
@@ -301,6 +344,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (player?.currentPosition != null) {
             seconds = player?.currentPosition!! / 1000
         }
+        removeProgressListener()
+        unregisterCallBack()
         val intent = Intent()
         intent.putExtra("position", seconds.toString())
         setResult(PLAYER_ACTIVITY_FINISH, intent)
@@ -344,6 +389,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onStop() {
         super.onStop()
         if (isInPictureInPictureMode) {
+            removeProgressListener()
+            unregisterCallBack()
             player?.release()
             finish()
         }
@@ -352,7 +399,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun playVideo() {
         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(Uri.parse(if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.values.first() else "")))
+            .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
         player = ExoPlayer.Builder(this).build()
         playerView?.player = player
         playerView?.keepScreenOn = true
@@ -388,6 +435,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         }
                     }
                     Player.STATE_READY -> {
+                        if (mLocation == PlaybackLocation.REMOTE && customSeekBar?.visibility == View.GONE) {
+                            performViewsOnConnect()
+                        }
                         playPause?.visibility = View.VISIBLE
                         progressbar?.visibility = View.GONE
                         if (playerView?.isControllerFullyVisible == false) {
@@ -403,7 +453,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 }
             }
         })
-        player?.playWhenReady = true
+        if (mLocation == PlaybackLocation.LOCAL) {
+            player?.playWhenReady = true
+        } else {
+            registerCallBack()
+            listenToProgress()
+        }
     }
 
     private var lastClicked1: Long = -1L
@@ -522,6 +577,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             if (player?.currentPosition != null) {
                 seconds = player?.currentPosition!! / 1000
             }
+            removeProgressListener()
+            unregisterCallBack()
             val intent = Intent()
             intent.putExtra("position", seconds.toString())
             setResult(PLAYER_ACTIVITY_FINISH, intent)
@@ -608,7 +665,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             } else if (playerConfiguration.isPremier && playerConfiguration.isSerial) {
                 getPremierStream()
             } else {
-                url = playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
+                url =
+                    playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality]
                 val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
@@ -969,7 +1027,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         }
         speed?.setOnClickListener {
-            showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
+            if (mLocation == PlaybackLocation.LOCAL)
+                showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
