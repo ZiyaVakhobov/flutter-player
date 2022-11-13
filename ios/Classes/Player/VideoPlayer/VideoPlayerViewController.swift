@@ -13,8 +13,16 @@ import MediaPlayer
 import XLActionController
 import NVActivityIndicatorView
 import SnapKit
+import GoogleCast
 
-class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
+/* The player state. */
+enum PlaybackMode: Int {
+  case none = 0
+  case local
+  case remote
+}
+
+class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, GCKSessionManagerListener, GCKRemoteMediaClientListener, GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
     
     private var speedList = ["0.5","1.0","1.25","1.5","2.0"].sorted()
     
@@ -23,6 +31,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var pipController: AVPictureInPictureController!
     private var pipPossibleObservation: NSKeyValueObservation?
     private var playerItemContext = 0
+    /// chrome cast
+    private var sessionManager: GCKSessionManager!
+    private var castMediaController: GCKUIMediaController!
+    private var volumeController: GCKUIDeviceVolumeController!
+    private var castButton: GCKUICastButton!
+  
     weak var delegate: VideoPlayerDelegate?
     var urlString: String?
     var qualityLabelText = ""
@@ -156,13 +170,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         return button
     }()
     
-    private var screencastButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.screencast.uiImage, for: .normal)
-//        button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
     private var pipButton: IconButton = {
         let button = IconButton()
         button.setImage(Svg.pip.uiImage, for: .normal)
@@ -213,7 +220,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var showsBtn: UIButton = {
         let button = UIButton()
         button.setImage(Svg.programmes.uiImage, for: .normal)
-        button.setTitle("Телепередачи", for: .normal)
+        button.setTitle("", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.imageView?.contentMode = .scaleAspectFit
@@ -279,7 +286,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                                                             options: [.initial, .new]) { [weak self] _, change in
                 // Update the PiP button's enabled state.
                 self?.pipButton.isEnabled = change.newValue ?? false
-                print("pip ----------")
             }
         } else {
             // PiP isn't supported by the current device. Disable the PiP button.
@@ -325,6 +331,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         view.backgroundColor = .black
         setNeedsUpdateOfHomeIndicatorAutoHidden()
         
+        castButton = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
+                                                   width: CGFloat(20), height: CGFloat(20)))
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
+                                               name: NSNotification.Name.gckCastStateDidChange,
+                                               object: GCKCastContext.sharedInstance())
         addSubviews()
         pinchGesture()
         bottomView.clipsToBounds = true
@@ -335,6 +347,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         activityIndicatorView.startAnimating()
         setupDataSource(title: playerConfiguration.title, urlString: urlString, startAt: nil)
         setupPictureInPicture()
+    }
+    
+    @objc func castDeviceDidChange(_: Notification) {
+      if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
+        // You can present the instructions on how to use Google Cast on
+        // the first time the user uses you app
+        GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: castButton)
+      }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -437,7 +457,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         topView.addSubview(titleLabelLandacape)
         topView.addSubview(settingsButton)
         topView.addSubview(pipButton)
-        topView.addSubview(screencastButton)
+        topView.addSubview(castButton)
     }
     
     func addConstraints() {
@@ -520,14 +540,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         liveStackView.leftToSuperview(offset: 2)
         liveStackView.centerY(to: landscapeButton)
         
-        //        liveCircle.snp.makeConstraints { make in
-        //            make.left.equalTo(bottomView).offset(8)
-        //        }
-        //        liveCircle.centerY(to: landscapeButton)
-        //
-        //        liveLabel.leftToRight(of: liveCircle, offset: 24)
-        //        liveLabel.centerY(to: liveCircle)
-        
         if !playerConfiguration.isSerial {
             episodesButton.isHidden = true
         }
@@ -553,15 +565,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
         
-        screencastButton.rightToLeft(of: settingsButton)
-        screencastButton.centerY(to: topView)
+        castButton.rightToLeft(of: settingsButton)
+        castButton.centerY(to: topView)
         
         pipButton.leftToRight(of: exitButton)
         pipButton.centerY(to: topView)
         
         titleLabelLandacape.centerY(to: topView)
         titleLabelLandacape.centerX(to: topView)
-        titleLabelLandacape.rightToLeft(of: screencastButton)
+        titleLabelLandacape.rightToLeft(of: castButton)
         titleLabelLandacape.leftToRight(of: pipButton)
         titleLabelLandacape.layoutMargins = .horizontal(8)
         titleLabelPortrait.centerX(to: view)
