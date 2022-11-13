@@ -22,12 +22,10 @@ enum PlaybackMode: Int {
   case remote
 }
 
-class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, GCKSessionManagerListener, GCKRemoteMediaClientListener, GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
+class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, GCKSessionManagerListener, GCKRemoteMediaClientListener, GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate, PlayerViewDelegate {
     
-    private var speedList = ["0.5","1.0","1.25","1.5","2.0"].sorted()
+    private var speedList = ["2.0","1.5","1.25","1.0","0.5"].sorted()
     
-    private var player = AVPlayer()
-    private var playerLayer =  AVPlayerLayer()
     private var pipController: AVPictureInPictureController!
     private var pipPossibleObservation: NSKeyValueObservation?
     private var playerItemContext = 0
@@ -35,13 +33,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var sessionManager: GCKSessionManager!
     private var castMediaController: GCKUIMediaController!
     private var volumeController: GCKUIDeviceVolumeController!
-    private var castButton: GCKUICastButton!
   
     weak var delegate: VideoPlayerDelegate?
-    var urlString: String?
     var qualityLabelText = ""
     var speedLabelText = ""
-    var startPosition: Int?
     var selectedSeason: Int = 0
     var selectSesonNum: Int = 0
     var isRegular: Bool = false
@@ -52,267 +47,49 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
     var playerConfiguration: PlayerConfiguration!
-    private var swipeGesture: UIPanGestureRecognizer!
-    private var tapGesture: UITapGestureRecognizer!
-    private var tapHideGesture: UITapGestureRecognizer!
-    private var panDirection = SwipeDirection.vertical
     private var isVolume = false
     private var volumeViewSlider: UISlider!
-    private var timer: Timer?
-    private var seekForwardTimer: Timer?
-    private var seekBackwardTimer: Timer?
     private var playerRate = 1.0
     private var selectedSpeedText = "1.0x"
     var selectedQualityText = "Auto"
-    private var selectedAudioTrack = "None"
-    private var selectedSubtitle = "None"
     
-    private var videoView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    private var overlayView: UIView = {
-        let view = UIView()
-        view.tag = 2
-        view.layer.zPosition = 2
-        view.backgroundColor =  .clear
-        return view
-    }()
-    
-    private var bottomView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    private var topView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    private var titleLabelPortrait: TitleLabel = TitleLabel()
-    private var titleLabelLandacape: TitleLabel = TitleLabel()
-    
-    private var liveLabel: UILabel = {
-        let label = UILabel()
-        label.text = "LIVE"
-        label.textColor = .red
-        label.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        label.isHidden = true
-        return label;
-    }()
-    
-    private var liveCircle: UIView = {
-        let circle = UIView(frame: CGRect(x:6,y:5,width: 12, height: 12))
-        circle.layer.cornerRadius = (circle.frame.size.width) / 2
-        circle.backgroundColor = .red
-        let newCircle = UIView()
-        newCircle.addSubview(circle)
-        newCircle.isHidden = true
-        return newCircle
-    }()
-    
-    private lazy var liveStackView: UIStackView = {
-        let liveView = UIStackView(arrangedSubviews: [liveCircle, liveLabel])
-        liveView.height(20)
-        liveView.sizeToFit()
-        liveView.axis = .horizontal
-        liveView.distribution = .equalSpacing
-        return liveView
-    }()
-    
-    private var landscapeButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.portrait.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var currentTimeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "00:00"
-        label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        return label
-    }()
-    
-    private var durationTimeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "00:00"
-        label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        return label
-    }()
-    
-    private var seperatorLabel: UILabel = {
-        let label = UILabel()
-        label.text = " / "
-        label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        return label
-    }()
-    
-    private var timeSlider: UISlider = {
-        let slider = UISlider()
-        slider.tintColor = Colors.mainColor
-        slider.maximumTrackTintColor = .lightGray
-        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
-        return slider
-    }()
-    
-    private var exitButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.exit.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var pipButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.pip.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(togglePictureInPictureMode(_ :)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var settingsButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.more.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var playButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.play.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var skipForwardButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.forward.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var skipBackwardButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.replay.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var episodesButton: UIButton = {
-        let button = UIButton()
-        button.setImage(Svg.serial.uiImage, for: .normal)
-        button.setTitle("Episodes", for: .normal)
-        button.layer.zPosition = 3
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-        button.setTitleColor(.white, for: .normal)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(episodesButtonPressed(_:)), for: .touchUpInside)
-        return button
-    }()
-    
-    private var showsBtn: UIButton = {
-        let button = UIButton()
-        button.setImage(Svg.programmes.uiImage, for: .normal)
-        button.setTitle("", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
-        button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(action), for: .touchUpInside)
-        return button
-    }()
-    
-    private var activityIndicatorView: NVActivityIndicatorView = {
-        let activityView = NVActivityIndicatorView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), type: .circleStrokeSpin, color: .white)
-        return activityView
+    private var playerView: PlayerView = {
+        return PlayerView()
     }()
     
     private var portraitConstraints = Constraints()
     private var landscapeConstraints = Constraints()
-    private var enableGesture = true
-    private var backwardGestureTimer: Timer?
-    private var forwardGestureTimer: Timer?
-    private var backwardTouches = 0
-    private var forwardTouches = 0
-    
-    func setupDataSource(title : String?, urlString : String?, startAt : Int64?){
-        guard let urlString = urlString, let url = URL(string: urlString) else {
-            return
-        }
-        player.automaticallyWaitsToMinimizeStalling = true
-        player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
-        player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
-        player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-        if !playerConfiguration.isLive{
-            NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-        }
-        setTitle(title: title)
-        addTimeObserver()
-        playerLayer = AVPlayerLayer(player: player)
-        playerLayer.videoGravity = .resizeAspect
-        videoView.layer.addSublayer(playerLayer)
-        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-    }
-    
-    func runPlayer(startAt: Int){
-        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
-        player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
-        player.automaticallyWaitsToMinimizeStalling = true;
-        player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
-        player.play()
-    }
-    
-    private func setTitle(title: String?){
-        self.titleLabelPortrait.text = title ?? ""
-        self.titleLabelLandacape.text = title ?? ""
-    }
     
     func setupPictureInPicture() {
         // Ensure PiP is supported by current device.
         if AVPictureInPictureController.isPictureInPictureSupported() {
             // Create a new controller, passing the reference to the AVPlayerLayer.
-            pipController = AVPictureInPictureController(playerLayer: playerLayer)
+            pipController = AVPictureInPictureController(playerLayer: playerView.playerLayer)
             pipController.delegate = self
             
             pipPossibleObservation = pipController.observe(\AVPictureInPictureController.isPictureInPicturePossible,
                                                             options: [.initial, .new]) { [weak self] _, change in
                 // Update the PiP button's enabled state.
-                self?.pipButton.isEnabled = change.newValue ?? false
+                self?.playerView.setIsPipEnabled(v: change.newValue ?? false)
             }
         } else {
             // PiP isn't supported by the current device. Disable the PiP button.
-            pipButton.isEnabled = false
+            playerView.setIsPipEnabled(v: false)
         }
-        
     }
     
     func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        isHiddenPiP(isPiP: true)
+        playerView.isHiddenPiP(isPiP: true)
     }
 
     func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        isHiddenPiP(isPiP: false)
+        playerView.isHiddenPiP(isPiP: false)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let resList = resolutions ?? ["480p":urlString!]
+        let resList = resolutions ?? ["480p":playerConfiguration.url]
         sortedResolutions = Array(resList.keys).sorted().reversed()
-        episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
-        showsBtn.setTitle(" "+playerConfiguration.tvProgramsText, for: .normal)
-        if playerConfiguration.isLive {
-            episodesButton.isHidden = true
-        } else {
-            showsBtn.isHidden = true
-        }
         Array(resList.keys).sorted().reversed().forEach { quality in
             if quality == "1080p"{
                 sortedResolutions.removeLast()
@@ -323,38 +100,25 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
         }
-        if #available(iOS 13.0, *) {
-            setSliderThumbTintColor(Colors.mainColor)
-        } else {
-            timeSlider.thumbTintColor = Colors.moreColor
-        }
         view.backgroundColor = .black
         setNeedsUpdateOfHomeIndicatorAutoHidden()
-        
-        castButton = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
-                                                   width: CGFloat(20), height: CGFloat(20)))
-        
         NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
                                                name: NSNotification.Name.gckCastStateDidChange,
                                                object: GCKCastContext.sharedInstance())
-        addSubviews()
-        pinchGesture()
-        bottomView.clipsToBounds = true
-        timeSlider.clipsToBounds = true
-        addConstraints()
-        addGestures()
-        playButton.alpha = 0.0
-        activityIndicatorView.startAnimating()
-        setupDataSource(title: playerConfiguration.title, urlString: urlString, startAt: nil)
+        playerView.delegate = self
+        playerView.playerConfiguration = playerConfiguration
+        view.addSubview(playerView)
+        playerView.edgesToSuperview()
+        playerView.loadMedia(area: view.safeAreaLayoutGuide)
         setupPictureInPicture()
     }
     
     @objc func castDeviceDidChange(_: Notification) {
-      if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
-        // You can present the instructions on how to use Google Cast on
-        // the first time the user uses you app
-        GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: castButton)
-      }
+//      if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
+//        // You can present the instructions on how to use Google Cast on
+//        // the first time the user uses you app
+//        GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: castButton)
+//      }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -365,15 +129,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        playerLayer.frame = videoView.bounds
         setNeedsUpdateOfHomeIndicatorAutoHidden()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        resetTimer()
         configureVolume()
-        runPlayer(startAt: startPosition ?? 0)
         self.shouldHideHomeIndicator = true
         setNeedsUpdateOfHomeIndicatorAutoHidden()
     }
@@ -381,22 +142,16 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         NotificationCenter.default.removeObserver(self)
-        player.cancelPendingPrerolls()
-        player.pause()
-        playerLayer.player = nil
-        playerLayer.removeFromSuperlayer()
-        delegate?.getDuration(duration: player.currentTime().seconds)
         let value = UIInterfaceOrientationMask.portrait.rawValue
         UIDevice.current.setValue(value, forKey: "orientation")
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
+        playerView.updateConstraints()
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
-            landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
             addVideosLandscapeConstraints()
         } else {
-            landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
             addVideoPortaitConstraints()
         }
     }
@@ -410,210 +165,20 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     override var childForHomeIndicatorAutoHidden: UIViewController? {
         return nil
     }
+    
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
         return [.bottom]
     }
-    
-    func addGestures(){
-        swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(swipePan))
-        tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureControls))
-        view.addGestureRecognizer(swipeGesture)
-        view.addGestureRecognizer(tapGesture)
-    }
-    
-    func addSubviews() {
-        view.addSubview(videoView)
-        view.addSubview(overlayView)
-        overlayView.addSubview(topView)
-        overlayView.addSubview(playButton)
-        overlayView.addSubview(skipForwardButton)
-        view.addSubview(skipForwardButton)
-        overlayView.addSubview(skipBackwardButton)
-        view.addSubview(skipBackwardButton)
-        overlayView.addSubview(activityIndicatorView)
-        overlayView.addSubview(bottomView)
-        overlayView.addSubview(landscapeButton)
-        overlayView.addSubview(topView)
-        overlayView.addSubview(topView)
-        topView.addSubview(titleLabelPortrait)
-        addTopViewSubviews()
-        addBottomViewSubviews()
-    }
-    
-    //MARK: - addBottomViewSubviews
-    func addBottomViewSubviews() {
-        bottomView.addSubview(currentTimeLabel)
-        bottomView.addSubview(durationTimeLabel)
-        bottomView.addSubview(seperatorLabel)
-        bottomView.addSubview(timeSlider)
-        bottomView.addSubview(episodesButton)
-        bottomView.addSubview(showsBtn)
-        bottomView.addSubview(landscapeButton)
-        bottomView.addSubview(liveStackView)
-    }
-    
-    func addTopViewSubviews() {
-        topView.addSubview(exitButton)
-        topView.addSubview(titleLabelLandacape)
-        topView.addSubview(settingsButton)
-        topView.addSubview(pipButton)
-        topView.addSubview(castButton)
-    }
-    
-    func addConstraints() {
-        addVideoPortaitConstraints()
-        addBottomViewConstraints()
-        addTopViewConstraints()
-        addControlButtonConstraints()
-    }
-    
-    func addControlButtonConstraints(){
-        playButton.center(in: view)
-        playButton.width(Constants.controlButtonSize)
-        playButton.height(Constants.controlButtonSize)
-        
-        skipBackwardButton.width(Constants.controlButtonSize)
-        skipBackwardButton.height(Constants.controlButtonSize)
-        skipBackwardButton.rightToLeft(of: playButton, offset: -60)
-        skipBackwardButton.top(to: playButton)
-        
-        skipForwardButton.width(Constants.controlButtonSize)
-        skipForwardButton.height(Constants.controlButtonSize)
-        skipForwardButton.leftToRight(of: playButton, offset: 60)
-        skipForwardButton.top(to: playButton)
-        
-        activityIndicatorView.center(in: view)
-        activityIndicatorView.layer.cornerRadius = 20
-        if playerConfiguration.isLive {
-            skipForwardButton.isHidden = true
-            skipBackwardButton.isHidden = true
-        }
-    }
-    
-    func addBottomViewConstraints() {
-        var bottomPad: CGFloat = 0.0
-        if #available(iOS 13.0, *) {
-            bottomPad = -5
-        } else {
-            bottomPad = 5
-        }
-        overlayView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        bottomView.leading(to: view.safeAreaLayoutGuide, offset: 0)
-        bottomView.trailing(to: view.safeAreaLayoutGuide, offset: 0)
-        bottomView.bottom(to: view.safeAreaLayoutGuide, offset: 0)
-        bottomView.height(82)
-        
-        timeSlider.bottom(to: bottomView, offset: -8)
-        timeSlider.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(8)
-            make.right.equalToSuperview().offset(-8)
-        }
-        
-        landscapeButton.bottomToTop(of: timeSlider, offset: 8)
-        landscapeButton.snp.makeConstraints { make in
-            make.right.equalTo(bottomView).offset(0)
-        }
-        
-        currentTimeLabel.snp.makeConstraints { make in
-            make.left.equalTo(bottomView).offset(8)
-        }
-        currentTimeLabel.centerY(to: landscapeButton)
-        
-        seperatorLabel.leftToRight(of: currentTimeLabel)
-        seperatorLabel.centerY(to: currentTimeLabel)
-        
-        durationTimeLabel.leftToRight(of: seperatorLabel)
-        durationTimeLabel.centerY(to: seperatorLabel)
-        
-        
-        episodesButton.rightToLeft(of: landscapeButton, offset: -8)
-        episodesButton.centerY(to: landscapeButton)
-        
-        showsBtn.rightToLeft(of: landscapeButton, offset: -8)
-        showsBtn.centerY(to: landscapeButton)
-        
-        liveStackView.bottomToTop(of: timeSlider)
-        liveStackView.spacing = 24
-        liveStackView.leftToSuperview(offset: 2)
-        liveStackView.centerY(to: landscapeButton)
-        
-        if !playerConfiguration.isSerial {
-            episodesButton.isHidden = true
-        }
-        
-        if playerConfiguration.isLive {
-            liveCircle.isHidden = false
-            liveLabel.isHidden = false
-            currentTimeLabel.isHidden = true
-            durationTimeLabel.isHidden = true
-            seperatorLabel.isHidden = true
-        }
-    }
-    
-    func addTopViewConstraints() {
-        topView.leading(to: view.safeAreaLayoutGuide, offset: 0)
-        topView.trailing(to: view.safeAreaLayoutGuide, offset: 0)
-        topView.top(to: view.safeAreaLayoutGuide, offset: 8)
-        topView.height(48)
-        
-        exitButton.left(to: topView)
-        exitButton.centerY(to: topView)
-        //
-        settingsButton.right(to: topView)
-        settingsButton.centerY(to: topView)
-        
-        castButton.rightToLeft(of: settingsButton)
-        castButton.centerY(to: topView)
-        
-        pipButton.leftToRight(of: exitButton)
-        pipButton.centerY(to: topView)
-        
-        titleLabelLandacape.centerY(to: topView)
-        titleLabelLandacape.centerX(to: topView)
-        titleLabelLandacape.rightToLeft(of: castButton)
-        titleLabelLandacape.leftToRight(of: pipButton)
-        titleLabelLandacape.layoutMargins = .horizontal(8)
-        titleLabelPortrait.centerX(to: view)
-        titleLabelPortrait.topToBottom(of: topView, offset: 8)
-        titleLabelPortrait.layoutMargins = .horizontal(24)
-    }
-    
+   
     func addVideosLandscapeConstraints() {
         portraitConstraints.deActivate()
-        titleLabelLandacape.isHidden = false
-        titleLabelPortrait.isHidden = true
-        landscapeConstraints.append(contentsOf: videoView.edgesToSuperview())
+        landscapeConstraints.append(contentsOf: playerView.edgesToSuperview())
     }
     
     func addVideoPortaitConstraints() {
         landscapeConstraints.deActivate()
-        titleLabelLandacape.isHidden = true
-        titleLabelPortrait.isHidden = false
-        portraitConstraints.append(contentsOf: videoView.center(in: view))
-        portraitConstraints.append(contentsOf: videoView.edgesToSuperview())
-    }
-    
-    fileprivate func makeCircleWith(size: CGSize, backgroundColor: UIColor) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        let context = UIGraphicsGetCurrentContext()
-        context?.setFillColor(backgroundColor.cgColor)
-        context?.setStrokeColor(UIColor.clear.cgColor)
-        let bounds = CGRect(origin: .zero, size: size)
-        context?.addEllipse(in: bounds)
-        context?.drawPath(using: .fill)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
-    }
-    
-    func setSliderThumbTintColor(_ color: UIColor) {
-        let circleImage = makeCircleWith(size: CGSize(width: 24, height: 24),
-                                         backgroundColor: color)
-        timeSlider.setThumbImage(circleImage, for: .normal)
-        timeSlider.setThumbImage(circleImage, for: .highlighted)
+        portraitConstraints.append(contentsOf: playerView.center(in: view))
+        portraitConstraints.append(contentsOf: playerView.edgesToSuperview())
     }
     
     func configureVolume() {
@@ -625,23 +190,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    //MARK: - Buttons logic
-    @objc func playButtonPressed(_ sender: UIButton){
-        if !player.isPlaying {
-            player.play()
-            playButton.setImage(Svg.pause.uiImage, for: .normal)
-            self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
-            self.player.rate = Float(self.playerRate)
-            resetTimer()
-        } else {
-            playButton.setImage(Svg.play.uiImage, for: .normal)
-            player.pause()
-            timer?.invalidate()
-            showControls()
-        }
-    }
-    
-    @objc func action() {
+    func showPressed() {
         let vc = ProgramViewController()
         vc.modalPresentationStyle = .custom
         vc.programInfo = self.playerConfiguration.programsInfoList
@@ -651,15 +200,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    @objc func exitButtonPressed(_ sender: UIButton){
+    func close(duration:Double){
         self.dismiss(animated: true, completion: nil);
+        delegate?.getDuration(duration: duration)
     }
     
-    @objc func changeOrientation(_ sender: UIButton){
+    func changeOrientation(){
         var value  = UIInterfaceOrientation.landscapeRight.rawValue
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
             value = UIInterfaceOrientation.portrait.rawValue
-            videoView.backgroundColor = .black
         }
         UIDevice.current.setValue(value, forKey: "orientation")
         if #available(iOS 16.0, *) {
@@ -678,32 +227,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    @objc func skipBackButtonPressed(_ sender: UIButton){
-        self.backwardTouches += 1
-        self.seekBackwardTo(10.0 * Double(self.backwardTouches))
-        self.backwardGestureTimer?.invalidate()
-        self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            self.backwardTouches = 0
-        }
-        resetTimer()
-    }
-    
-    @objc func skipForwardButtonPressed(_ sender: UIButton){
-        self.forwardTouches += 1
-        self.seekForwardTo(10.0 * Double(self.forwardTouches))
-        self.forwardGestureTimer?.invalidate()
-        self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            self.forwardTouches = 0
-        }
-        resetTimer()
-    }
-    
     func updateSeasonNum(index:Int) {
         selectedSeason = index
     }
     
     //MARK: - ****** SEASONS *******
-    @objc func episodesButtonPressed(_ sender: UIButton){
+    func episodesButtonPressed(){
         let episodeVC = EpisodeCollectionUI()
         episodeVC.modalPresentationStyle = .custom
         episodeVC.seasons = self.seasons
@@ -712,7 +241,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         self.present(episodeVC, animated: true, completion: nil)
     }
     
-    @objc func settingPressed(_ sender: UIButton) {
+    func settingsPressed() {
         let vc = SettingVC()
         vc.modalPresentationStyle = .custom
         vc.delegete = self
@@ -724,14 +253,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         self.present(vc, animated: true, completion: nil)
     }
     
-    private func isHiddenPiP(isPiP: Bool){
-        overlayView.isHidden = isPiP
-        playButton.isHidden = isPiP
-        skipForwardButton.isHidden = isPiP
-        skipBackwardButton.isHidden = isPiP
-    }
-    
-    @objc func togglePictureInPictureMode(_ sender: UIButton) {
+   func togglePictureInPictureMode() {
         if pipController.isPictureInPictureActive {
             pipController.stopPictureInPicture()
         } else {
@@ -739,320 +261,13 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    fileprivate func seekForwardTo(_ seekPosition: Double) {
-        guard let duration = player.currentItem?.duration else {return}
-        let currentTime = CMTimeGetSeconds(player.currentTime())
-        let newTime = currentTime + seekPosition
-        if newTime < (CMTimeGetSeconds(duration) - seekPosition) {
-            let time: CMTime = CMTimeMake(value: Int64(newTime*1000), timescale: 1000)
-            player.seek(to: time)
-        }
-    }
-    
-    fileprivate func seekBackwardTo(_ seekPosition: Double) {
-        let currentTime = CMTimeGetSeconds(player.currentTime())
-        var newTime = currentTime - seekPosition
-        if newTime < 0 {
-            newTime = 0
-        }
-        let time: CMTime = CMTimeMake(value: Int64(newTime*1000), timescale: 1000)
-        player.seek(to: time)
-    }
-    
-    @objc func sliderValueChanged(_ sender: UISlider) {
-        player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
-    }
-    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == "duration", let duration = player.currentItem?.duration.seconds, duration > 0.0 {
-            self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
-        }
         if keyPath == "pip" {
-            print("pip .......")
             if self.pipController.isPictureInPictureActive {
-               isHiddenPiP(isPiP: true)
+                self.playerView.isHiddenPiP(isPiP: true)
            }else {
-               isHiddenPiP(isPiP: false)
+               self.playerView.isHiddenPiP(isPiP: false)
            }
-        }
-        if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
-            if newValue != oldValue {
-                DispatchQueue.main.async {[weak self] in
-                    if newValue == 2 {
-                        self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
-                        self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
-                        self?.activityIndicatorView.stopAnimating()
-                        self?.enableGesture = true
-                    } else if newValue == 0 {
-                        self?.playButton.setImage(Svg.play.uiImage, for: .normal)
-                        self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
-                        self?.activityIndicatorView.stopAnimating()
-                        self?.enableGesture = true
-                        self?.timer?.invalidate()
-                        self?.showControls()
-                    } else {
-                        self?.playButton.alpha = 0.0
-                        self?.activityIndicatorView.startAnimating()
-                        self?.enableGesture = false
-                    }
-                }
-            }
-        }
-    }
-    
-    @objc func playerEndedPlaying(_ notification: Notification) {
-        DispatchQueue.main.async {[weak self] in
-            self?.player.seek(to: CMTime.zero)
-            self?.playButton.setImage(Svg.play.uiImage, for: .normal)
-        }
-    }
-    
-    //MARK: - Time logic
-    func addTimeObserver() {
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        let mainQueue = DispatchQueue.main
-        if(!playerConfiguration.isLive){
-            player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
-                guard let currentItem = self?.player.currentItem else {return}
-                
-                guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
-                    return
-                }
-                self?.timeSlider.maximumValue = Float(currentItem.duration.seconds)
-                self?.timeSlider.minimumValue = 0
-                self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-                self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
-            })
-        } else{
-            self.timeSlider.value = 1
-        }
-    }
-    
-    func resetTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(hideControls), userInfo: nil, repeats: false)
-    }
-    
-    func resetSeekForwardTimer() {
-        seekForwardTimer?.invalidate()
-        seekForwardTimer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(hideSeekForwardButton), userInfo: nil, repeats: false)
-    }
-    
-    func resetSeekBackwardTimer() {
-        seekBackwardTimer?.invalidate()
-        seekBackwardTimer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(hideSeekBackwardButton), userInfo: nil, repeats: false)
-    }
-    
-    private func pinchGesture() {
-        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(didpinch))
-        videoView.addGestureRecognizer(pinchGesture)
-    }
-    
-    @objc func didpinch(_ gesture: UIPinchGestureRecognizer) {
-        if gesture.state == .changed {
-            let scale = gesture.scale
-            if scale < 0.9 {
-                self.playerLayer.videoGravity = .resizeAspect
-            }else {
-                self.playerLayer.videoGravity = .resizeAspectFill
-            }
-            resetTimer()
-        }
-    }
-    
-    @objc func hideControls() {
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 0.0
-            topView.alpha = alpha
-            skipForwardButton.alpha = alpha
-            overlayView.alpha = alpha
-            if enableGesture {
-                playButton.alpha = alpha
-            }
-            skipBackwardButton.alpha = alpha
-            bottomView.alpha = alpha
-        }, completion: nil)
-    }
-    
-    @objc func hideSeekForwardButton() {
-        if topView.alpha == 0 {
-            let options: UIView.AnimationOptions = [.curveEaseIn]
-            UIView.animate(withDuration: 0.1, delay: 0.1, options: options, animations: {[self] in
-                let alpha = 0.0
-                skipForwardButton.alpha = alpha
-            }, completion: nil)
-        }
-    }
-    
-    @objc func hideSeekBackwardButton() {
-        if topView.alpha == 0 {
-            let options: UIView.AnimationOptions = [.curveEaseIn]
-            UIView.animate(withDuration: 0.1, delay: 0.1, options: options, animations: {[self] in
-                let alpha = 0.0
-                skipBackwardButton.alpha = alpha
-            }, completion: nil)
-        }
-    }
-    
-    func showSeekForwardButton(){
-        skipForwardButton.alpha = 1.0
-    }
-    func showSeekBackwardButton(){
-        skipBackwardButton.alpha = 1.0
-    }
-    
-    @objc func hideBlockControls() {
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            _ = 0.0
-        }, completion: nil)
-    }
-    
-    func showBlockControls(){
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 1.0
-            topView.alpha = alpha
-            resetTimer()
-        }, completion: nil)
-    }
-    
-    func showControls() {
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.3, delay: 0.2, options: options, animations: {[self] in
-            let alpha = 1.0
-            topView.alpha = alpha
-            skipForwardButton.alpha = alpha
-            skipBackwardButton.alpha = alpha
-            if enableGesture {
-                playButton.alpha = alpha
-            }
-            bottomView.alpha = alpha
-        }, completion: nil)
-        
-    }
-    
-    func toggleViews() {
-        let options: UIView.AnimationOptions = [.curveEaseIn]
-        UIView.animate(withDuration: 0.05, delay: 0, options: options, animations: {[self] in
-            let alpha = topView.alpha == 0.0 ? 1.0 : 0.0
-            topView.alpha = alpha
-            overlayView.alpha = alpha
-            skipForwardButton.alpha = alpha
-            skipBackwardButton.alpha = alpha
-            if enableGesture {
-                playButton.alpha = alpha
-            }
-            
-            bottomView.alpha = alpha
-            
-            if(alpha == 1.0){
-                resetTimer()
-            }
-        }, completion: nil)
-    }
-    
-    @objc func tapGestureControls() {
-        
-        let location = tapGesture.location(in: view)
-        
-        if location.x > view.bounds.width / 2 + 50 {
-            self.fastForward()
-        } else if location.x <= view.bounds.width / 2 - 50 {
-            self.fastBackward()
-        } else {
-            toggleViews()
-        }
-    }
-    
-    func fastForward() {
-        self.forwardTouches += 1
-        if forwardTouches < 2{
-            self.forwardGestureTimer?.invalidate()
-            self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-                self.forwardTouches = 0
-                self.toggleViews()
-            }
-        } else {
-            self.showSeekForwardButton()
-            self.seekForwardTo(10.0 * Double(self.forwardTouches))
-            self.forwardGestureTimer?.invalidate()
-            self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                self.forwardTouches = 0
-                self.resetSeekForwardTimer()
-            }
-        }
-    }
-    func fastBackward() {
-        self.backwardTouches += 1
-        if backwardTouches < 2{
-            self.backwardGestureTimer?.invalidate()
-            self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-                self.backwardTouches = 0
-                self.toggleViews()
-            }
-        } else {
-            self.showSeekBackwardButton()
-            self.seekBackwardTo(10.0 * Double(self.backwardTouches))
-            self.backwardGestureTimer?.invalidate()
-            self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                self.backwardTouches = 0
-                self.resetSeekBackwardTimer()
-            }
-        }
-    }
-    
-    @objc func swipePan() {
-        let locationPoint = swipeGesture.location(in: view)
-        
-        let velocityPoint = swipeGesture.velocity(in: view)
-        
-        switch swipeGesture.state {
-        case .began:
-            
-            let x = abs(velocityPoint.x)
-            let y = abs(velocityPoint.y)
-            
-            if x > y {
-                panDirection = SwipeDirection.horizontal
-            } else {
-                panDirection = SwipeDirection.vertical
-                if locationPoint.x > view.bounds.size.width / 2 {
-                    isVolume = true
-                } else {
-                    isVolume = false
-                }
-            }
-            
-        case UIGestureRecognizer.State.changed:
-            switch panDirection {
-            case SwipeDirection.horizontal:
-                //                horizontalMoved(velocityPoint.x)
-                break
-            case SwipeDirection.vertical:
-                verticalMoved(velocityPoint.y)
-                break
-            }
-            
-        case UIGestureRecognizer.State.ended:
-            switch panDirection {
-            case SwipeDirection.horizontal:
-                break
-            case SwipeDirection.vertical:
-                isVolume = false
-                break
-            }
-        default:
-            break
-        }
-    }
-    func verticalMoved(_ value: CGFloat) {
-        if isVolume{
-            self.volumeViewSlider.value -= Float(value / 10000)
-        }
-        else{
-            UIScreen.main.brightness -= value / 10000
         }
     }
     
@@ -1081,48 +296,26 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func onBottomSheetCellTapped(index: Int, type : BottomSheetType) {
         switch type {
         case .quality:
-            let resList = resolutions ?? ["480p":urlString!]
-            _ = Array(resList.keys)
+            let resList = resolutions ?? ["480p":playerConfiguration.url]
             self.selectedQualityText = sortedResolutions[index]
             let url = resList[sortedResolutions[index]]
-            guard let videoURL = URL(string: url ?? "") else {
-                return
-            }
-            let currentTime = self.player.currentTime()
-            let asset = AVURLAsset(url: videoURL)
-            let playerItem = AVPlayerItem(asset: asset)
-            self.player.replaceCurrentItem(with: playerItem)
-            self.player.seek(to: currentTime)
-            self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
-            self.player.automaticallyWaitsToMinimizeStalling = true
+            self.playerView.changeQuality(url: url)
             break
         case .speed:
-            self.playerRate =  Double(speedList[index])!
+            self.playerRate = Double(speedList[index])!
             self.selectedSpeedText = isRegular  ? "\(self.playerRate)x(Обычный)" : "\(self.playerRate)x"
-            self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
-            self.player.rate = Float(self.playerRate)
+            self.playerView.changeSpeed(rate: self.playerRate)
             break
         case .subtitle:
-            var subtitles = player.currentItem?.tracks(type: .subtitle) ?? ["None"]
-            subtitles.insert("None", at: 0)
-            let selectedSubtitleLabel = subtitles[index]
-            if ((player.currentItem?.select(type: .subtitle, name: selectedSubtitleLabel)) != nil){
-                selectedSubtitle = selectedSubtitleLabel
-            }
+
             break
-            
         case .audio:
-            let audios = player.currentItem?.tracks(type: .audio) ?? ["None"]
-            let selectedAudio = audios[index]
-            if ((player.currentItem?.select(type: .audio, name: selectedAudio)) != nil){
-                selectedAudioTrack = selectedAudio
-            }
             break
         }
     }
     
     func showQualityBottomSheet(){
-        let resList = resolutions ?? ["480p":urlString!]
+        let resList = resolutions ?? ["480p": playerConfiguration.url]
         let array = Array(resList.keys)
         var listOfQuality = [String]()
         listOfQuality = array.sorted().reversed()
@@ -1206,30 +399,17 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             guard URL(string: videoUrl!) != nil else {
                 return
             }
-            if self.urlString != videoUrl!{
-                self.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
+            if self.playerConfiguration.url != videoUrl!{
+                self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
             } else {
                 print("ERROR")
             }
             return
         } else if !self.resolutions!.isEmpty {
             let videoUrl = Array(resolutions!.values)[0]
-            self.changeUrl(url: videoUrl, title: title)
+            self.playerView.changeUrl(url: videoUrl, title: title)
             return
         }
-    }
-    
-    func changeUrl(url:String?, title: String?){
-        guard let videoURL = URL(string: url ?? "") else {
-            return
-        }
-        self.setTitle(title: title)
-        let playerItem = AVPlayerItem(asset: AVURLAsset(url: videoURL))
-        self.player.replaceCurrentItem(with: playerItem)
-        self.player.seek(to: CMTime.zero)
-        self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
-        self.player.automaticallyWaitsToMinimizeStalling = true
-        self.player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
     }
 }
 
