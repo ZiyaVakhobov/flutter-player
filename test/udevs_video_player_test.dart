@@ -8,9 +8,11 @@ class MockUdevsVideoPlayerPlatform
     with MockPlatformInterfaceMixin
     implements UdevsVideoPlayerPlatform {
   @override
-  Future<String?> playVideo({
-    required String playerConfigJsonString,
-  }) =>
+  Future<String?> playVideo({required String playerConfigJsonString}) =>
+      Future.value('42');
+
+  @override
+  Future<String?> downloadVideo({required String downloadConfigJsonString}) =>
       Future.value('42');
 
   @override
@@ -31,35 +33,35 @@ void main() {
     UdevsVideoPlayerPlatform.instance = fakePlatform;
 
     expect(
-        await udevsVideoPlayerPlugin.playVideo(
-            playerConfig: PlayerConfiguration(
-                initialResolution: {},
-                resolutions: {},
-                qualityText: '',
-                speedText: '',
-                lastPosition: 0,
-                title: '',
-                isSerial: false,
-                episodeButtonText: '',
-                nextButtonText: '',
-                seasons: [],
-                isLive: false,
-                tvProgramsText: '',
-                programsInfoList: [],
-                showController: false,
-                playVideoFromAsset: false,
-                assetPath: '',
-                seasonIndex: 0,
-                episodeIndex: 0,
-                isMegogo: false,
-                isPremier: false,
-                videoId: '',
-                sessionId: '',
-                megogoAccessToken: '',
-                authorization: '',
-                autoText: 'Автонастройка',
-                baseUrl: '')),
-        '42',
+      await udevsVideoPlayerPlugin.playVideo(
+          playerConfig: PlayerConfiguration(
+              initialResolution: {},
+              resolutions: {},
+              qualityText: '',
+              speedText: '',
+              lastPosition: 0,
+              title: '',
+              isSerial: false,
+              episodeButtonText: '',
+              nextButtonText: '',
+              seasons: [],
+              isLive: false,
+              tvProgramsText: '',
+              programsInfoList: [],
+              showController: false,
+              playVideoFromAsset: false,
+              assetPath: '',
+              seasonIndex: 0,
+              episodeIndex: 0,
+              isMegogo: false,
+              isPremier: false,
+              videoId: '',
+              sessionId: '',
+              megogoAccessToken: '',
+              authorization: '',
+              autoText: 'Автонастройка',
+              baseUrl: '')),
+      '42',
     );
   });
 }

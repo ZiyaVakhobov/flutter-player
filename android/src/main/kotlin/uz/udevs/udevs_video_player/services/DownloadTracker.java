@@ -10,17 +10,15 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentManager;
+import androidx.media3.common.C;
 import androidx.media3.common.DrmInitData;
 import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.TrackGroup;
+import androidx.media3.common.TrackSelectionOverride;
 import androidx.media3.common.TrackSelectionParameters;
-import androidx.media3.common.Tracks;
 import androidx.media3.common.util.Util;
 import androidx.media3.datasource.DataSource;
-import androidx.media3.exoplayer.RenderersFactory;
 import androidx.media3.exoplayer.drm.DrmSession;
 import androidx.media3.exoplayer.drm.DrmSessionEventListener;
 import androidx.media3.exoplayer.drm.OfflineLicenseHelper;
@@ -32,10 +30,14 @@ import androidx.media3.exoplayer.offline.DownloadManager;
 import androidx.media3.exoplayer.offline.DownloadRequest;
 import androidx.media3.exoplayer.offline.DownloadService;
 import androidx.media3.exoplayer.source.TrackGroupArray;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.exoplayer.trackselection.MappingTrackSelector;
+
+import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import uz.udevs.udevs_video_player.R;
@@ -57,6 +59,8 @@ public class DownloadTracker {
     }
 
     private static final String TAG = "DownloadTracker";
+    public static final ImmutableList<Integer> SUPPORTED_TRACK_TYPES =
+            ImmutableList.of(C.TRACK_TYPE_VIDEO, C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT);
 
     private final Context context;
     private final DataSource.Factory dataSourceFactory;
@@ -97,8 +101,7 @@ public class DownloadTracker {
         return download != null && download.state != Download.STATE_FAILED ? download.request : null;
     }
 
-    public void toggleDownload(
-            FragmentManager fragmentManager, MediaItem mediaItem, RenderersFactory renderersFactory) {
+    public void toggleDownload(MediaItem mediaItem) {
         @Nullable Download download = downloads.get(checkNotNull(mediaItem.localConfiguration).uri);
         if (download != null && download.state != Download.STATE_FAILED) {
             DownloadService.sendRemoveDownload(
@@ -109,8 +112,7 @@ public class DownloadTracker {
             }
             startDownloadDialogHelper =
                     new StartDownloadDialogHelper(
-                            fragmentManager,
-                            DownloadHelper.forMediaItem(context, mediaItem, renderersFactory, dataSourceFactory),
+                            DownloadHelper.forMediaItem(context, mediaItem, null, dataSourceFactory),
                             mediaItem);
         }
     }
@@ -148,21 +150,16 @@ public class DownloadTracker {
 
     private final class StartDownloadDialogHelper
             implements DownloadHelper.Callback,
-            TrackSelectionDialog.TrackSelectionListener,
             DialogInterface.OnDismissListener {
 
-        private final FragmentManager fragmentManager;
         private final DownloadHelper downloadHelper;
         private final MediaItem mediaItem;
 
-        private TrackSelectionDialog trackSelectionDialog;
         private WidevineOfflineLicenseFetchTask widevineOfflineLicenseFetchTask;
         @Nullable
         private byte[] keySetId;
 
-        public StartDownloadDialogHelper(
-                FragmentManager fragmentManager, DownloadHelper downloadHelper, MediaItem mediaItem) {
-            this.fragmentManager = fragmentManager;
+        public StartDownloadDialogHelper(DownloadHelper downloadHelper, MediaItem mediaItem) {
             this.downloadHelper = downloadHelper;
             this.mediaItem = mediaItem;
             downloadHelper.prepare(this);
@@ -170,9 +167,6 @@ public class DownloadTracker {
 
         public void release() {
             downloadHelper.release();
-            if (trackSelectionDialog != null) {
-                trackSelectionDialog.dismiss();
-            }
             if (widevineOfflineLicenseFetchTask != null) {
                 widevineOfflineLicenseFetchTask.cancel(false);
             }
@@ -228,7 +222,6 @@ public class DownloadTracker {
 
         // TrackSelectionListener implementation.
 
-        @Override
         public void onTracksSelected(TrackSelectionParameters trackSelectionParameters) {
             for (int periodIndex = 0; periodIndex < downloadHelper.getPeriodCount(); periodIndex++) {
                 downloadHelper.clearTrackSelections(periodIndex);
@@ -246,7 +239,6 @@ public class DownloadTracker {
 
         @Override
         public void onDismiss(DialogInterface dialogInterface) {
-            trackSelectionDialog = null;
             downloadHelper.release();
         }
 
@@ -297,23 +289,18 @@ public class DownloadTracker {
                 return;
             }
 
-            Tracks tracks = downloadHelper.getTracks(/* periodIndex= */ 0);
-            if (!TrackSelectionDialog.willHaveContent(tracks)) {
-                Log.d(TAG, "No dialog content. Downloading entire stream.");
-                startDownload();
-                downloadHelper.release();
-                return;
+            DefaultTrackSelector.Parameters parameters = DownloadHelper.getDefaultTrackSelectorParameters(context);
+            TrackSelectionParameters.Builder builder = parameters.buildUpon();
+            for (int i = 0; i < SUPPORTED_TRACK_TYPES.size(); i++) {
+                int trackType = SUPPORTED_TRACK_TYPES.get(i);
+                builder.setTrackTypeDisabled(trackType, parameters.disabledTrackTypes.contains(trackType));
+                builder.clearOverridesOfType(trackType);
+                Map<TrackGroup, TrackSelectionOverride> overrides = parameters.overrides;
+                for (TrackSelectionOverride override : overrides.values()) {
+                    builder.addOverride(override);
+                }
             }
-            trackSelectionDialog =
-                    TrackSelectionDialog.createForTracksAndParameters(
-                            /* titleId= */ R.string.exo_download_description,
-                            tracks,
-                            DownloadHelper.getDefaultTrackSelectorParameters(context),
-                            /* allowAdaptiveSelections= */ false,
-                            /* allowMultipleOverrides= */ true,
-                            /* onTracksSelectedListener= */ this,
-                            /* onDismissListener= */ this);
-            trackSelectionDialog.show(fragmentManager, /* tag= */ null);
+            onTracksSelected(builder.build());
         }
 
         /**
@@ -339,6 +326,7 @@ public class DownloadTracker {
         }
 
         private DownloadRequest buildDownloadRequest() {
+            assert mediaItem.mediaMetadata.title != null;
             return downloadHelper
                     .getDownloadRequest(
                             Util.getUtf8Bytes(checkNotNull(mediaItem.mediaMetadata.title.toString())))
@@ -349,7 +337,6 @@ public class DownloadTracker {
     /**
      * Downloads a Widevine offline license in a background thread.
      */
-    @RequiresApi(18)
     private static final class WidevineOfflineLicenseFetchTask extends AsyncTask<Void, Void, Void> {
 
         private final Format format;
@@ -378,6 +365,7 @@ public class DownloadTracker {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            assert drmConfiguration.licenseUri != null;
             OfflineLicenseHelper offlineLicenseHelper =
                     OfflineLicenseHelper.newWidevineInstance(
                             drmConfiguration.licenseUri.toString(),

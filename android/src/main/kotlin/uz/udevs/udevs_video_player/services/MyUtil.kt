@@ -36,6 +36,13 @@ class MyUtil {
     private val DOWNLOAD_CONTENT_DIRECTORY = "downloads"
     private val USE_CRONET_FOR_NETWORKING = true
 
+
+    @Synchronized
+    fun getDownloadTracker(context: Context): DownloadTracker? {
+        ensureDownloadManagerInitialized(context)
+        return downloadTracker
+    }
+
     @Synchronized
     fun getDownloadManager(context: Context): DownloadManager {
         ensureDownloadManagerInitialized(context)
