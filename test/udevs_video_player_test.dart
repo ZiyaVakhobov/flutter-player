@@ -12,6 +12,9 @@ class MockUdevsVideoPlayerPlatform
     required String playerConfigJsonString,
   }) =>
       Future.value('42');
+
+  @override
+  Future<dynamic> closeVideo() => Future.value('42');
 }
 
 void main() {
@@ -56,6 +59,7 @@ void main() {
                 authorization: '',
                 autoText: 'Автонастройка',
                 baseUrl: '')),
-        '42');
+        '42',
+    );
   });
 }

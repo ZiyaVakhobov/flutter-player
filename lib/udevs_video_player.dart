@@ -18,4 +18,7 @@ class UdevsVideoPlayer {
       playerConfigJsonString: jsonStringConfig,
     );
   }
+  Future<dynamic> closeVideo() {
+    return UdevsVideoPlayerPlatform.instance.closeVideo();
+  }
 }

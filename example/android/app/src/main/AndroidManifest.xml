@@ -3,7 +3,8 @@
    <application
         android:label="udevs_video_player_example"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.AppCompat">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,13 +31,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-       <service android:name="uz.udevs.udevs_video_player.services.MyDownloadService"
-           android:exported="false">
-           <!-- This is needed for Scheduler -->
-           <intent-filter>
-               <action android:name="com.google.android.exoplayer.downloadService.action.RESTART"/>
-               <category android:name="android.intent.category.DEFAULT"/>
-           </intent-filter>
-       </service>
+
     </application>
 </manifest>

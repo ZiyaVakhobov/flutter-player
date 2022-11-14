@@ -8,45 +8,31 @@
 import UIKit
 import TinyConstraints
 import AVFoundation
+import AVKit
 import MediaPlayer
 import XLActionController
 import NVActivityIndicatorView
 import SnapKit
 
-class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
+class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate {
     
-    struct Constants {
-        static let horizontalSpacing: CGFloat = 0
-        static let controlButtonSize: CGFloat = 55.0
-        static let maxButtonSize: CGFloat = 40.0
-        static let bottomViewButtonSize: CGFloat = 16
-        static let unblockButtonSize : CGFloat = 32.0
-        static let unblockButtonInset : CGFloat = 24.0
-        static let bottomViewButtonInset: CGFloat = 24.0
-        static let topButtonSize: CGFloat = 50.0
-        static let controlButtonInset: CGFloat = 48
-        static let alphaValue: CGFloat = 0.3
-        static let topButtonInset: CGFloat = 34
-        static let nextEpisodeInset: CGFloat = 20
-        static let nextEpisodeShowTime : Float = 60
-    }
-    private var speedList = ["0.25","0.5","0.75","1.0","1.25","1.5","1.75","2.0"].sorted()
-    private var seasonList = ["1-сезон","2-сезон","3-сезон","4-сезон","5-сезон"]
+    private var speedList = ["0.5","1.0","1.25","1.5","2.0"].sorted()
+    
     private var player = AVPlayer()
     private var playerLayer =  AVPlayerLayer()
+    private var pipController: AVPictureInPictureController!
+    private var pipPossibleObservation: NSKeyValueObservation?
     private var playerItemContext = 0
     weak var delegate: VideoPlayerDelegate?
     var urlString: String?
     var qualityLabelText = ""
     var speedLabelText = ""
     var startPosition: Int?
-    var titleText: String?
+    var selectedSeason: Int = 0
+    var selectSesonNum: Int = 0
     var isRegular: Bool = false
     var resolutions: [String:String]?
     var sortedResolutions: [String] = []
-    var isSerial = false
-    var serialLabelText = ""
-    var sesonNum: Int?
     var seasons : [Season] = [Season]()
     var shouldHideHomeIndicator = false
     var qualityDelegate: QualityDelegate!
@@ -62,16 +48,14 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var seekForwardTimer: Timer?
     private var seekBackwardTimer: Timer?
     private var playerRate = 1.0
-    var selectedSeason = 0
     private var selectedSpeedText = "1.0x"
     var selectedQualityText = "Auto"
     private var selectedAudioTrack = "None"
     private var selectedSubtitle = "None"
     
-    
     private var videoView: UIView = {
         let view = UIView()
-        view.backgroundColor = .black
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -79,27 +63,56 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         let view = UIView()
         view.tag = 2
         view.layer.zPosition = 2
-        view.backgroundColor =  UIColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 0.64)
+        view.backgroundColor =  .clear
         return view
     }()
     
-    private var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = ""
-        label.textColor = .white
-        label.textAlignment = .center
-        label.numberOfLines = 2
-        label.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        return label
+    private var bottomView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
     }()
     
-    private var landscapeButton: UIButton = {
-        let button = UIButton()
-        if (UIDevice.current.orientation.isLandscape) {
-            button.setImage(Svg.horizontal.uiImage, for: .normal)
-        } else {
-            button.setImage(Svg.portrait.uiImage, for: .normal)
-        }
+    private var topView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }()
+    
+    private var titleLabelPortrait: TitleLabel = TitleLabel()
+    private var titleLabelLandacape: TitleLabel = TitleLabel()
+    
+    private var liveLabel: UILabel = {
+        let label = UILabel()
+        label.text = "LIVE"
+        label.textColor = .red
+        label.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        label.isHidden = true
+        return label;
+    }()
+    
+    private var liveCircle: UIView = {
+        let circle = UIView(frame: CGRect(x:6,y:5,width: 12, height: 12))
+        circle.layer.cornerRadius = (circle.frame.size.width) / 2
+        circle.backgroundColor = .red
+        let newCircle = UIView()
+        newCircle.addSubview(circle)
+        newCircle.isHidden = true
+        return newCircle
+    }()
+    
+    private lazy var liveStackView: UIStackView = {
+        let liveView = UIStackView(arrangedSubviews: [liveCircle, liveLabel])
+        liveView.height(20)
+        liveView.sizeToFit()
+        liveView.axis = .horizontal
+        liveView.distribution = .equalSpacing
+        return liveView
+    }()
+    
+    private var landscapeButton: IconButton = {
+        let button = IconButton()
+        button.setImage(Svg.portrait.uiImage, for: .normal)
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
         return button
     }()
@@ -117,14 +130,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         label.text = "00:00"
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        
-        return label
-    }()
-    
-    private var leftTimeLabel: UILabel = {
-        let label = UILabel()
-        label.text = "00:00"
-        label.textColor = .white
         return label
     }()
     
@@ -136,43 +141,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         return label
     }()
     
-    private var blockBottomView: UIView = {
-        let view = UIView()
-        return view
-    }()
-    
-    private var bottomView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    private var topView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    //MARK: - BottomActionsStackView
-    private lazy var bottomActionsStackView: UIStackView = {
-        let spacer = UIView()
-        let stackView = UIStackView(arrangedSubviews: [episodesButton])
-        stackView.axis = .horizontal
-        stackView.backgroundColor = .clear
-        stackView.distribution = .equalSpacing
-        return stackView
-    }()
-    
-    //MARK: - *************Time Stack View ***************
-    private lazy var timeStackView: UIStackView = {
-        let stackView = UIStackView(arrangedSubviews: [timeSlider])
-        stackView.axis = .horizontal
-        stackView.spacing = 12
-        stackView.backgroundColor = .clear
-        stackView.distribution = .fill
-        return stackView
-    }()
-    
     private var timeSlider: UISlider = {
         let slider = UISlider()
         slider.tintColor = Colors.mainColor
@@ -181,46 +149,51 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         return slider
     }()
     
-    private var exitButton: UIButton = {
-        let button = UIButton()
+    private var exitButton: IconButton = {
+        let button = IconButton()
         button.setImage(Svg.exit.uiImage, for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = .clear
-        button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
-    private var playButton: UIButton = {
-        let button = UIButton()
+    private var screencastButton: IconButton = {
+        let button = IconButton()
+        button.setImage(Svg.screencast.uiImage, for: .normal)
+//        button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
+        return button
+    }()
+    
+    private var pipButton: IconButton = {
+        let button = IconButton()
+        button.setImage(Svg.pip.uiImage, for: .normal)
+        button.addTarget(self, action: #selector(togglePictureInPictureMode(_ :)), for: .touchUpInside)
+        return button
+    }()
+    
+    private var settingsButton: IconButton = {
+        let button = IconButton()
+        button.setImage(Svg.more.uiImage, for: .normal)
+        button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
+        return button
+    }()
+    
+    private var playButton: IconButton = {
+        let button = IconButton()
         button.setImage(Svg.play.uiImage, for: .normal)
-        button.tintColor = .white
-        button.layer.zPosition = 5
-        button.imageView?.contentMode = .scaleAspectFit
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.controlButtonInset, left: Constants.controlButtonInset, bottom: Constants.controlButtonInset, right: Constants.controlButtonInset)
-        button.size(CGSize(width: 48, height: 48))
         button.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
-    private var skipForwardButton: UIButton = {
-        let button = UIButton()
+    private var skipForwardButton: IconButton = {
+        let button = IconButton()
         button.setImage(Svg.forward.uiImage, for: .normal)
-        button.tintColor = .white
-        button.layer.zPosition = 3
-        button.imageView?.contentMode = .scaleAspectFit
-        button.size(CGSize(width: 48, height: 48))
         button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
-    private var skipBackwardButton: UIButton = {
-        let button = UIButton()
+    private var skipBackwardButton: IconButton = {
+        let button = IconButton()
         button.setImage(Svg.replay.uiImage, for: .normal)
-        button.tintColor = .white
-        button.layer.zPosition = 3
-        button.size(CGSize(width: 48, height: 48))
-        button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
@@ -228,28 +201,23 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     private var episodesButton: UIButton = {
         let button = UIButton()
         button.setImage(Svg.serial.uiImage, for: .normal)
-        button.setTitle("", for: .normal)
+        button.setTitle("Episodes", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 0)
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset + 6, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(episodesButtonPressed(_:)), for: .touchUpInside)
-        button.isHidden = false
         return button
     }()
     
-    private var settingsButton: UIButton = {
+    private var showsBtn: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.more.uiImage, for: .normal)
-        button.layer.zPosition = 3
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 8)
-        button.imageEdgeInsets = UIEdgeInsets(top: Constants.bottomViewButtonInset, left: 0, bottom: Constants.bottomViewButtonInset, right: 0)
+        button.setImage(Svg.programmes.uiImage, for: .normal)
+        button.setTitle("Телепередачи", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.imageView?.contentMode = .scaleAspectFit
-        button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
-        button.isHidden = false
+        button.addTarget(self, action: #selector(action), for: .touchUpInside)
         return button
     }()
     
@@ -270,50 +238,85 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         guard let urlString = urlString, let url = URL(string: urlString) else {
             return
         }
-        let urlAsset = AVURLAsset(url: url)
-        let playerItem = AVPlayerItem(asset: urlAsset)
         player.automaticallyWaitsToMinimizeStalling = true
-        player.replaceCurrentItem(with: playerItem)
+        player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-
-        self.titleLabel.text = title ?? ""
+        if !playerConfiguration.isLive{
+            NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
+        }
+        setTitle(title: title)
         addTimeObserver()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
-        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
+        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
+        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
     }
     
     func runPlayer(startAt: Int){
-        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
-        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
+        //        selectedAudioTrack = player.currentItem?.selected(type: .audio) ?? "None"
+        //        selectedSubtitle = player.currentItem?.selected(type: .subtitle) ?? "None"
         player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
         player.automaticallyWaitsToMinimizeStalling = true;
         player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
         player.play()
     }
     
+    private func setTitle(title: String?){
+        self.titleLabelPortrait.text = title ?? ""
+        self.titleLabelLandacape.text = title ?? ""
+    }
+    
+    func setupPictureInPicture() {
+        // Ensure PiP is supported by current device.
+        if AVPictureInPictureController.isPictureInPictureSupported() {
+            // Create a new controller, passing the reference to the AVPlayerLayer.
+            pipController = AVPictureInPictureController(playerLayer: playerLayer)
+            pipController.delegate = self
+            
+            pipPossibleObservation = pipController.observe(\AVPictureInPictureController.isPictureInPicturePossible,
+                                                            options: [.initial, .new]) { [weak self] _, change in
+                // Update the PiP button's enabled state.
+                self?.pipButton.isEnabled = change.newValue ?? false
+                print("pip ----------")
+            }
+        } else {
+            // PiP isn't supported by the current device. Disable the PiP button.
+            pipButton.isEnabled = false
+        }
+        
+    }
+    
+    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        isHiddenPiP(isPiP: true)
+    }
+
+    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        isHiddenPiP(isPiP: false)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         let resList = resolutions ?? ["480p":urlString!]
         sortedResolutions = Array(resList.keys).sorted().reversed()
-        episodesButton.setTitle(serialLabelText, for: .normal)
+        episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
+        showsBtn.setTitle(" "+playerConfiguration.tvProgramsText, for: .normal)
+        if playerConfiguration.isLive {
+            episodesButton.isHidden = true
+        } else {
+            showsBtn.isHidden = true
+        }
         Array(resList.keys).sorted().reversed().forEach { quality in
             if quality == "1080p"{
                 sortedResolutions.removeLast()
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-        view.backgroundColor = Colors.moreColor
         if #available(iOS 13.0, *) {
             let value = UIInterfaceOrientationMask.landscapeRight.rawValue
             UIDevice.current.setValue(value, forKey: "orientation")
-        } else {
         }
-        
         if #available(iOS 13.0, *) {
             setSliderThumbTintColor(Colors.mainColor)
         } else {
@@ -321,6 +324,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
         view.backgroundColor = .black
         setNeedsUpdateOfHomeIndicatorAutoHidden()
+        
         addSubviews()
         pinchGesture()
         bottomView.clipsToBounds = true
@@ -329,7 +333,8 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         addGestures()
         playButton.alpha = 0.0
         activityIndicatorView.startAnimating()
-        setupDataSource(title: titleText, urlString: urlString, startAt: nil)
+        setupDataSource(title: playerConfiguration.title, urlString: urlString, startAt: nil)
+        setupPictureInPicture()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -392,7 +397,6 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     func addGestures(){
         swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(swipePan))
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapGestureControls))
-        
         view.addGestureRecognizer(swipeGesture)
         view.addGestureRecognizer(tapGesture)
     }
@@ -409,6 +413,9 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         overlayView.addSubview(activityIndicatorView)
         overlayView.addSubview(bottomView)
         overlayView.addSubview(landscapeButton)
+        overlayView.addSubview(topView)
+        overlayView.addSubview(topView)
+        topView.addSubview(titleLabelPortrait)
         addTopViewSubviews()
         addBottomViewSubviews()
     }
@@ -419,18 +426,22 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         bottomView.addSubview(durationTimeLabel)
         bottomView.addSubview(seperatorLabel)
         bottomView.addSubview(timeSlider)
-        bottomView.addSubview(timeStackView)
-        bottomView.addSubview(bottomActionsStackView)
+        bottomView.addSubview(episodesButton)
+        bottomView.addSubview(showsBtn)
+        bottomView.addSubview(landscapeButton)
+        bottomView.addSubview(liveStackView)
     }
     
     func addTopViewSubviews() {
         topView.addSubview(exitButton)
-        topView.addSubview(titleLabel)
+        topView.addSubview(titleLabelLandacape)
         topView.addSubview(settingsButton)
+        topView.addSubview(pipButton)
+        topView.addSubview(screencastButton)
     }
     
     func addConstraints() {
-        addVideosLandscapeConstraints()
+        addVideoPortaitConstraints()
         addBottomViewConstraints()
         addTopViewConstraints()
         addControlButtonConstraints()
@@ -440,19 +451,23 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         playButton.center(in: view)
         playButton.width(Constants.controlButtonSize)
         playButton.height(Constants.controlButtonSize)
-        playButton.layer.cornerRadius = Constants.controlButtonSize/2
+        
         skipBackwardButton.width(Constants.controlButtonSize)
         skipBackwardButton.height(Constants.controlButtonSize)
         skipBackwardButton.rightToLeft(of: playButton, offset: -60)
         skipBackwardButton.top(to: playButton)
-        skipBackwardButton.layer.cornerRadius = Constants.controlButtonSize/2
+        
         skipForwardButton.width(Constants.controlButtonSize)
         skipForwardButton.height(Constants.controlButtonSize)
         skipForwardButton.leftToRight(of: playButton, offset: 60)
         skipForwardButton.top(to: playButton)
-        skipForwardButton.layer.cornerRadius = Constants.controlButtonSize/2
+        
         activityIndicatorView.center(in: view)
         activityIndicatorView.layer.cornerRadius = 20
+        if playerConfiguration.isLive {
+            skipForwardButton.isHidden = true
+            skipBackwardButton.isHidden = true
+        }
     }
     
     func addBottomViewConstraints() {
@@ -462,91 +477,111 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         } else {
             bottomPad = 5
         }
-        
-        bottomView.leading(to: view.safeAreaLayoutGuide, offset: Constants.horizontalSpacing)
-        bottomView.trailing(to: view.safeAreaLayoutGuide, offset: -Constants.horizontalSpacing)
-        bottomView.bottom(to: view.safeAreaLayoutGuide, offset: 0)
-        bottomView.height(70)
-        
-        timeStackView.snp.makeConstraints { make in
-            make.centerY.equalTo(bottomView)
-            make.left.equalToSuperview().offset(14)
-            make.right.equalToSuperview().offset(-14)
-        }
-        
         overlayView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         
-        if (isSerial) {
-            bottomActionsStackView.snp.makeConstraints { make in
-                make.right.equalToSuperview().offset(-10)
-            }
-        } else {
-            bottomActionsStackView.snp.makeConstraints { make in
-                make.left.equalToSuperview().offset(80)
-                make.right.equalToSuperview().offset(-80)
-            }
+        bottomView.leading(to: view.safeAreaLayoutGuide, offset: 0)
+        bottomView.trailing(to: view.safeAreaLayoutGuide, offset: 0)
+        bottomView.bottom(to: view.safeAreaLayoutGuide, offset: 0)
+        bottomView.height(82)
+        
+        timeSlider.bottom(to: bottomView, offset: -8)
+        timeSlider.snp.makeConstraints { make in
+            make.left.equalToSuperview().offset(8)
+            make.right.equalToSuperview().offset(-8)
         }
+        
+        landscapeButton.bottomToTop(of: timeSlider, offset: 8)
+        landscapeButton.snp.makeConstraints { make in
+            make.right.equalTo(bottomView).offset(0)
+        }
+        
         currentTimeLabel.snp.makeConstraints { make in
-            make.left.equalTo(bottomView).offset(16)
+            make.left.equalTo(bottomView).offset(8)
         }
-        currentTimeLabel.bottomToTop(of: timeSlider, offset: bottomPad)
+        currentTimeLabel.centerY(to: landscapeButton)
+        
         seperatorLabel.leftToRight(of: currentTimeLabel)
         seperatorLabel.centerY(to: currentTimeLabel)
+        
         durationTimeLabel.leftToRight(of: seperatorLabel)
-        durationTimeLabel.bottomToTop(of: timeSlider, offset: bottomPad)
-        landscapeButton.bottomToTop(of: timeSlider, offset: 0)
-        landscapeButton.snp.makeConstraints { make in
-            make.right.equalTo(bottomView).offset(-16)
-        }
+        durationTimeLabel.centerY(to: seperatorLabel)
         
-        episodesButton.width(140)
-        episodesButton.height(Constants.bottomViewButtonSize)
-        episodesButton.snp.makeConstraints{ make in
-            make.right.equalTo(landscapeButton).offset(-12)
-        }
-        episodesButton.layer.cornerRadius = 8
         
-        if !isSerial {
+        episodesButton.rightToLeft(of: landscapeButton, offset: -8)
+        episodesButton.centerY(to: landscapeButton)
+        
+        showsBtn.rightToLeft(of: landscapeButton, offset: -8)
+        showsBtn.centerY(to: landscapeButton)
+        
+        liveStackView.bottomToTop(of: timeSlider)
+        liveStackView.spacing = 24
+        liveStackView.leftToSuperview(offset: 2)
+        liveStackView.centerY(to: landscapeButton)
+        
+        //        liveCircle.snp.makeConstraints { make in
+        //            make.left.equalTo(bottomView).offset(8)
+        //        }
+        //        liveCircle.centerY(to: landscapeButton)
+        //
+        //        liveLabel.leftToRight(of: liveCircle, offset: 24)
+        //        liveLabel.centerY(to: liveCircle)
+        
+        if !playerConfiguration.isSerial {
             episodesButton.isHidden = true
+        }
+        
+        if playerConfiguration.isLive {
+            liveCircle.isHidden = false
+            liveLabel.isHidden = false
+            currentTimeLabel.isHidden = true
+            durationTimeLabel.isHidden = true
+            seperatorLabel.isHidden = true
         }
     }
     
     func addTopViewConstraints() {
-        topView.leading(to: view.safeAreaLayoutGuide, offset: Constants.horizontalSpacing)
+        topView.leading(to: view.safeAreaLayoutGuide, offset: 0)
         topView.trailing(to: view.safeAreaLayoutGuide, offset: 0)
-        topView.top(to: view.safeAreaLayoutGuide, offset: 10)
-        topView.height(64)
-        titleLabel.centerY(to: topView)
-        titleLabel.centerX(to: topView)
-        titleLabel.layoutMargins = .horizontal(16)
-        exitButton.width(Constants.topButtonSize)
-        exitButton.height(Constants.topButtonSize)
+        topView.top(to: view.safeAreaLayoutGuide, offset: 8)
+        topView.height(48)
+        
         exitButton.left(to: topView)
         exitButton.centerY(to: topView)
-        exitButton.layer.cornerRadius = Constants.topButtonSize/2
-        
-        settingsButton.width(50)
-        settingsButton.height(Constants.bottomViewButtonSize)
-        settingsButton.layer.cornerRadius = 8
+        //
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
         
+        screencastButton.rightToLeft(of: settingsButton)
+        screencastButton.centerY(to: topView)
+        
+        pipButton.leftToRight(of: exitButton)
+        pipButton.centerY(to: topView)
+        
+        titleLabelLandacape.centerY(to: topView)
+        titleLabelLandacape.centerX(to: topView)
+        titleLabelLandacape.rightToLeft(of: screencastButton)
+        titleLabelLandacape.leftToRight(of: pipButton)
+        titleLabelLandacape.layoutMargins = .horizontal(8)
+        titleLabelPortrait.centerX(to: view)
+        titleLabelPortrait.topToBottom(of: topView, offset: 8)
+        titleLabelPortrait.layoutMargins = .horizontal(24)
     }
     
     func addVideosLandscapeConstraints() {
         portraitConstraints.deActivate()
+        titleLabelLandacape.isHidden = false
+        titleLabelPortrait.isHidden = true
         landscapeConstraints.append(contentsOf: videoView.edgesToSuperview())
     }
+    
     func addVideoPortaitConstraints() {
         landscapeConstraints.deActivate()
-        let width = view.frame.width
-        let heigth = width * 9 / 16
+        titleLabelLandacape.isHidden = true
+        titleLabelPortrait.isHidden = false
         portraitConstraints.append(contentsOf: videoView.center(in: view))
-        portraitConstraints.append(contentsOf: videoView.height(min: heigth, max: view.frame.height, priority: .defaultLow, isActive: true))
-        portraitConstraints.append(videoView.left(to: view))
-        portraitConstraints.append(videoView.right(to: view))
+        portraitConstraints.append(contentsOf: videoView.edgesToSuperview())
     }
     
     fileprivate func makeCircleWith(size: CGSize, backgroundColor: UIColor) -> UIImage? {
@@ -563,7 +598,7 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     }
     
     func setSliderThumbTintColor(_ color: UIColor) {
-        let circleImage = makeCircleWith(size: CGSize(width: 28, height: 28),
+        let circleImage = makeCircleWith(size: CGSize(width: 24, height: 24),
                                          backgroundColor: color)
         timeSlider.setThumbImage(circleImage, for: .normal)
         timeSlider.setThumbImage(circleImage, for: .highlighted)
@@ -591,6 +626,16 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
             player.pause()
             timer?.invalidate()
             showControls()
+        }
+    }
+    
+    @objc func action() {
+        let vc = ProgramViewController()
+        vc.modalPresentationStyle = .custom
+        vc.programInfo = self.playerConfiguration.programsInfoList
+        vc.menuHeight = self.playerConfiguration.programsInfoList.isEmpty ? 250 : UIScreen.main.bounds.height * 0.75
+        if !(vc.programInfo.isEmpty) {
+            self.present(vc, animated: true, completion: nil)
         }
     }
     
@@ -667,6 +712,21 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         self.present(vc, animated: true, completion: nil)
     }
     
+    private func isHiddenPiP(isPiP: Bool){
+        overlayView.isHidden = isPiP
+        playButton.isHidden = isPiP
+        skipForwardButton.isHidden = isPiP
+        skipBackwardButton.isHidden = isPiP
+    }
+    
+    @objc func togglePictureInPictureMode(_ sender: UIButton) {
+        if pipController.isPictureInPictureActive {
+            pipController.stopPictureInPicture()
+        } else {
+            pipController.startPictureInPicture()
+        }
+    }
+    
     fileprivate func seekForwardTo(_ seekPosition: Double) {
         guard let duration = player.currentItem?.duration else {return}
         let currentTime = CMTimeGetSeconds(player.currentTime())
@@ -694,6 +754,14 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "duration", let duration = player.currentItem?.duration.seconds, duration > 0.0 {
             self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
+        }
+        if keyPath == "pip" {
+            print("pip .......")
+            if self.pipController.isPictureInPictureActive {
+               isHiddenPiP(isPiP: true)
+           }else {
+               isHiddenPiP(isPiP: false)
+           }
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
             if newValue != oldValue {
@@ -731,20 +799,21 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
     func addTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
-        _ = player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
-            guard let currentItem = self?.player.currentItem else {return}
-            
-            guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
-                return
-            }
-            let newDurationSeconds = Float(currentItem.duration.seconds)
-            self?.timeSlider.maximumValue = Float(newDurationSeconds)
-            self?.timeSlider.minimumValue = 0
-            self?.timeSlider.value = Float(currentItem.currentTime().seconds)
-            let remainTime = Double(newDurationSeconds) - currentItem.currentTime().seconds
-            _ = CMTimeMake(value: Int64(remainTime), timescale: 1)
-            self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
-        })
+        if(!playerConfiguration.isLive){
+            player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
+                guard let currentItem = self?.player.currentItem else {return}
+                
+                guard currentItem.duration >= .zero, !currentItem.duration.seconds.isNaN else {
+                    return
+                }
+                self?.timeSlider.maximumValue = Float(currentItem.duration.seconds)
+                self?.timeSlider.minimumValue = 0
+                self?.timeSlider.value = Float(currentItem.currentTime().seconds)
+                self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
+            })
+        } else{
+            self.timeSlider.value = 1
+        }
     }
     
     func resetTimer() {
@@ -1076,20 +1145,20 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         }
     }
     
-
+    
     func getMegogoStream(parameters:[String:String], id:String) -> MegogoStreamResponse? {
         var megogoResponse:MegogoStreamResponse?
         let _url:String = playerConfiguration.baseUrl+"megogo/stream"
-         let result = Networking.sharedInstance.getMegogoStream(_url, token: self.playerConfiguration.authorization, sessionId: id, parameters: parameters)
-                switch result {
-                case .failure(let error):
-                    print(error)
-                    break
-                case .success(let success):
-                    megogoResponse = success
-                    break
-                }
-            return megogoResponse
+        let result = Networking.sharedInstance.getMegogoStream(_url, token: self.playerConfiguration.authorization, sessionId: id, parameters: parameters)
+        switch result {
+        case .failure(let error):
+            print(error)
+            break
+        case .success(let success):
+            megogoResponse = success
+            break
+        }
+        return megogoResponse
         
     }
     
@@ -1097,16 +1166,18 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
         let _url : String = playerConfiguration.baseUrl+"premier/videos/\(playerConfiguration.videoId)/episodes/\(episodeId)/stream"
         var premierSteamResponse: PremierStreamResponse?
         let result = Networking.sharedInstance.getPremierStream(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId)
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let success):
-                premierSteamResponse = success
-            }
+        switch result {
+        case .failure(let error):
+            print(error)
+        case .success(let success):
+            premierSteamResponse = success
+        }
         return premierSteamResponse
     }
     
     func playSeason(_resolutions : [String:String],startAt:Int64?,_episodeIndex:Int,_seasonIndex:Int ){
+        self.selectedSeason = _seasonIndex
+        self.selectSesonNum = _episodeIndex
         self.resolutions = SortFunctions.sortWithKeys(_resolutions)
         let isFinded = resolutions?.contains(where: { (key, value) in
             if key == self.selectedQualityText {
@@ -1124,16 +1195,29 @@ class VideoPlayerViewController: UIViewController, SettingsBottomSheetCellDelega
                 return
             }
             if self.urlString != videoUrl!{
-                self.setupDataSource(title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" , urlString: videoUrl, startAt: startAt)
+                self.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
             } else {
                 print("ERROR")
             }
             return
         } else if !self.resolutions!.isEmpty {
             let videoUrl = Array(resolutions!.values)[0]
-            self.setupDataSource(title: title, urlString: videoUrl, startAt: startAt)
+            self.changeUrl(url: videoUrl, title: title)
             return
         }
+    }
+    
+    func changeUrl(url:String?, title: String?){
+        guard let videoURL = URL(string: url ?? "") else {
+            return
+        }
+        self.setTitle(title: title)
+        let playerItem = AVPlayerItem(asset: AVURLAsset(url: videoURL))
+        self.player.replaceCurrentItem(with: playerItem)
+        self.player.seek(to: CMTime.zero)
+        self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
+        self.player.automaticallyWaitsToMinimizeStalling = true
+        self.player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
     }
 }
 
@@ -1146,31 +1230,31 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
         if playerConfiguration.isMegogo {
             let parameters : [String:String] = ["video_id":episodeId,"access_token":self.playerConfiguration.megogoAccessToken]
             var success : MegogoStreamResponse?
-                success = self.getMegogoStream(parameters: parameters,id: episodeId)
-                if success != nil {
-                    
-                    resolutions[self.playerConfiguration.autoText] = success?.data.src
-                    success?.data.bitrates.forEach({ bitrate in
-                        resolutions["\(bitrate.bitrate)p"] = bitrate.src
-                    })
-                    startAt = Int64(success?.data.playStartTime ?? 0)
-                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
-                }
+            success = self.getMegogoStream(parameters: parameters,id: episodeId)
+            if success != nil {
+                
+                resolutions[self.playerConfiguration.autoText] = success?.data.src
+                success?.data.bitrates.forEach({ bitrate in
+                    resolutions["\(bitrate.bitrate)p"] = bitrate.src
+                })
+                startAt = Int64(success?.data.playStartTime ?? 0)
+                self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+            }
         }
         if playerConfiguration.isPremier {
             var success : PremierStreamResponse?
-                success = self.getPremierStream(episodeId: episodeId)
-                if success != nil {
-                    success?.fileInfo.forEach({ file in
-                        if file.quality == "auto"{
-                            resolutions[self.playerConfiguration.autoText] = file.fileName
-                        } else {
-                            resolutions["\(file.quality)"] = file.fileName
-                        }
-                    })
-                    startAt = 0
-                    self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
-                }
+            success = self.getPremierStream(episodeId: episodeId)
+            if success != nil {
+                success?.fileInfo.forEach({ file in
+                    if file.quality == "auto"{
+                        resolutions[self.playerConfiguration.autoText] = file.fileName
+                    } else {
+                        resolutions["\(file.quality)"] = file.fileName
+                    }
+                })
+                startAt = 0
+                self.playSeason(_resolutions: resolutions, startAt: startAt, _episodeIndex: episodeIndex, _seasonIndex: seasonIndex)
+            }
         }
         if !playerConfiguration.isMegogo && !playerConfiguration.isPremier {
             seasons[seasonIndex].movies[episodeIndex].resolutions.map { (key: String, value: String) in
@@ -1188,4 +1272,4 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
         showQualityBottomSheet()
     }
 }
-// 1277
+// 1170
