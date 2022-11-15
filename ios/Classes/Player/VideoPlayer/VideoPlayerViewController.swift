@@ -126,16 +126,38 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
         view.backgroundColor = .black
         setNeedsUpdateOfHomeIndicatorAutoHidden()
+        castMedio()
         playerView.delegate = self
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
         playerView.edgesToSuperview()
-        playerView.loadMedia(area: view.safeAreaLayoutGuide)
+//        playerView.loadMedia(mediaInfo, area: view.safeAreaLayoutGuide)
         setupPictureInPicture()
         
         NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
                                                name: NSNotification.Name.gckCastStateDidChange,
                                                object: GCKCastContext.sharedInstance())
+    }
+    
+    private func castMedio(){
+        let metadata = GCKMediaMetadata()
+            metadata.setString("Big Buck Bunny (2008)", forKey: kGCKMetadataKeyTitle)
+            metadata.setString("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than " +
+              "himself. When one sunny day three rodents rudely harass him, something " +
+              "snaps... and the rabbit ain't no bunny anymore! In the typical cartoon " +
+              "tradition he prepares the nasty rodents a comical revenge.",
+                               forKey: kGCKMetadataKeySubtitle)
+            metadata.addImage(GCKImage(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg")!,
+                                       width: 480,
+                                       height: 360))
+            
+            /*Loading media to cast by creating a media request*/
+            let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
+                                                                                playerConfiguration.url)!)
+            mediaInfoBuilder.streamType = GCKMediaStreamType.none
+            mediaInfoBuilder.contentType = "video/mp4"
+            mediaInfoBuilder.metadata = metadata
+           mediaInfo = mediaInfoBuilder.build()
     }
     
     @objc func castDeviceDidChange(_: Notification) {
@@ -162,15 +184,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             switchToRemotePlayback()
         } else if sessionManager.currentSession == nil, (playbackMode != .local) {
             switchToLocalPlayback()
+        } else {
+            populateMediaInfo(false, playPosition: 0)
         }
         
         sessionManager.add(self)
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         super.viewWillAppear(animated)
-        if (selectedSpeedText == speedList[1]) {
-            isRegular = true
-        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -216,6 +237,30 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         return [.bottom]
     }
     
+    // MARK: - GCKSessionManagerListener
+
+    func sessionManager(_: GCKSessionManager, didStart session: GCKSession) {
+      print("MediaViewController: sessionManager didStartSession \(session)")
+      setQueueButtonVisible(true)
+      switchToRemotePlayback()
+    }
+
+    func sessionManager(_: GCKSessionManager, didResumeSession session: GCKSession) {
+      print("MediaViewController: sessionManager didResumeSession \(session)")
+      setQueueButtonVisible(true)
+      switchToRemotePlayback()
+    }
+
+    func sessionManager(_: GCKSessionManager, didEnd _: GCKSession, withError error: Error?) {
+      print("session ended with error: \(String(describing: error))")
+      let message = "The Casting session has ended.\n\(String(describing: error))"
+//      if let window = appDelegate?.window {
+//        Toast.displayMessage(message, for: 3, in: window)
+//      }
+      setQueueButtonVisible(false)
+      switchToLocalPlayback()
+    }
+    
     func setQueueButtonVisible(_ visible: Bool) {
         if visible, !queueAdded {
             var barItems = navigationItem.rightBarButtonItems
@@ -253,15 +298,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     func populateMediaInfo(_ autoPlay: Bool, playPosition: TimeInterval) {
         print("populateMediaInfo")
-        //      _titleLabel.text = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyTitle)
-        var subtitle = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyArtist)
-        if subtitle == nil {
-            subtitle = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyStudio)
-        }
-        playerView.setTitle(title: subtitle)
-        let description = mediaInfo?.metadata?.string(forKey: kMediaKeyDescription)
-        //      _descriptionTextView.text = description?.replacingOccurrences(of: "\\n", with: "\n")
-        //      playerView.loadMedia(mediaInfo, autoPlay: autoPlay, playPosition: playPosition)
+        playerView.loadMedia(mediaInfo, autoPlay: autoPlay, playPosition: playPosition, area: view.safeAreaLayoutGuide)
     }
     
     func switchToRemotePlayback() {
@@ -276,7 +313,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let mediaQueueItemBuilder = GCKMediaQueueItemBuilder()
             mediaQueueItemBuilder.mediaInformation = mediaInfo
             mediaQueueItemBuilder.autoplay = !paused
-            //        mediaQueueItemBuilder.preloadTime = TimeInterval(UserDefaults.standard.integer(forKey: kPrefPreloadTime))
+            mediaQueueItemBuilder.preloadTime = TimeInterval()
             mediaQueueItemBuilder.startTime = playerView.streamPosition ?? 0
             let mediaQueueItem = mediaQueueItemBuilder.build()
             
@@ -331,6 +368,38 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func close(duration:Double){
         self.dismiss(animated: true, completion: nil);
         delegate?.getDuration(duration: duration)
+    }
+    
+    func loadMediaToCast() {
+        GCKCastContext.sharedInstance().presentDefaultExpandedMediaControls()
+        
+        /*GCKMediaMetadata configuration*/
+        var metadata = GCKMediaMetadata()
+        metadata.setString("Big Buck Bunny (2008)", forKey: kGCKMetadataKeyTitle)
+        metadata.setString("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than " +
+                           "himself. When one sunny day three rodents rudely harass him, something " +
+                           "snaps... and the rabbit ain't no bunny anymore! In the typical cartoon " +
+                           "tradition he prepares the nasty rodents a comical revenge.",
+                           forKey: kGCKMetadataKeySubtitle)
+        metadata.addImage(GCKImage(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg")!,
+                                   width: 480,
+                                   height: 360))
+        
+        /*Loading media to cast by creating a media request*/
+        let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
+                                                                            "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/ElephantsDream.mp4")!)
+        mediaInfoBuilder.streamType = GCKMediaStreamType.none
+        mediaInfoBuilder.contentType = "video/mp4"
+        mediaInfoBuilder.metadata = metadata
+        mediaInfo = mediaInfoBuilder.build()
+        
+        /*Configuring the media request*/
+        let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
+        mediaLoadRequestDataBuilder.mediaInformation = mediaInfo
+        
+        if let request = sessionManager.currentSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build()) {
+            request.delegate = self
+        }
     }
     
     func changeOrientation(){

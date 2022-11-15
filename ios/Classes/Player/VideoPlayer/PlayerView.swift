@@ -49,6 +49,11 @@ class PlayerView: UIView {
     ///
     private(set) var media: GCKMediaInformation?
     private(set) var playerState = LocalPlayerState.stopped
+    // If there is a pending request to seek to a new position.
+    private var pendingPlayPosition = TimeInterval()
+    // If there is a pending request to start playback.
+    var pendingPlay: Bool = false
+    var seeking: Bool = false
     
     private var videoView: UIView = {
         let view = UIView()
@@ -217,6 +222,7 @@ class PlayerView: UIView {
     var castButton: GCKUICastButton = {
         let button = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
                                                    width: CGFloat(24), height: CGFloat(24)))
+        button.tintColor = .white
         return button
     }()
     
@@ -235,7 +241,16 @@ class PlayerView: UIView {
         overlayView.isHidden = isPiP
     }
     
-    func loadMedia(area:UILayoutGuide) {
+    func loadMedia(_ media: GCKMediaInformation?,autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
+        if self.media?.contentURL != nil && (self.media?.contentURL == media?.contentURL) {
+          print("Don't reinit if media already set")
+          return
+        }
+        self.media = media
+        if media == nil {
+          purgeMediaPlayer()
+          return
+        }
         translatesAutoresizingMaskIntoConstraints = false
         uiSetup()
         addSubviews()
@@ -246,9 +261,13 @@ class PlayerView: UIView {
         addGestures()
         playButton.alpha = 0.0
         activityIndicatorView.startAnimating()
-        loadMediaPlayer(urlString: playerConfiguration.url)
+        pendingPlayPosition = playPosition
+        pendingPlay = autoPlay
+        
+        loadMediaPlayer()
         runPlayer(startAt: playerConfiguration.lastPosition)
     }
+
     
     private func uiSetup(){
         episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
@@ -264,7 +283,6 @@ class PlayerView: UIView {
             timeSlider.thumbTintColor = Colors.moreColor
         }
         setTitle(title: playerConfiguration.title)
-        
     }
     
     fileprivate func makeCircleWith(size: CGSize, backgroundColor: UIColor) -> UIImage? {
@@ -286,17 +304,45 @@ class PlayerView: UIView {
         timeSlider.setThumbImage(circleImage, for: .normal)
         timeSlider.setThumbImage(circleImage, for: .highlighted)
     }
+
+    /* Config the UIView controls container based on the state of the view. */
+    func configureControls() {
+      print("configureControls \(playerState)")
+//      if playerState == .stopped {
+////        playButton.setImage(playImage, for: .normal)
+////        splashPlayButton.isHidden = false
+////        splashImage.layer.isHidden = false
+//        playerLayer.isHidden = true
+//        overlayView.isHidden = true
+//      } else if playerState == .playing || playerState == .paused || playerState == .starting {
+//        // Play or Pause button based on state.
+////        let image: UIImage? = playerState == .paused ? playImage : pauseImage
+////        playButton.setImage(image, for: .normal)
+//        playButton.isHidden = false
+////        splashPlayButton.isHidden = true
+////        playerLayer.isHidden = false
+//        splashImage.layer.isHidden = true
+////        overlayView.isHidden = false
+//      }
+////      didTouchControl(nil)
+//      setNeedsLayout()
+    }
     
-    func loadMediaPlayer(urlString : String?){
-        guard let urlString = urlString, let url = URL(string: urlString) else {
+    func loadMediaPlayer(){
+        guard let url = media?.contentURL else {
             return
         }
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
+//        playerLayer.frame = fullFrame()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
+//        playerLayer.backgroundColor = UIColor.green.cgColor
+//        addSubview(videoView)
+        videoView.layer.addSublayer(playerLayer)
         layer.insertSublayer(playerLayer, above: videoView.layer)
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
+        player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         if !playerConfiguration.isLive{
             NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
@@ -481,10 +527,13 @@ class PlayerView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        let frame: CGRect = UIScreen.main.bounds
-        videoView.frame = frame
-        playerLayer.frame = frame
-        overlayView.frame = frame
+        videoView.frame = fullFrame()
+        overlayView.frame = fullFrame()
+        playerLayer.frame = fullFrame()
+    }
+    
+    func fullFrame() -> CGRect {
+      return bounds
     }
     
     override func updateConstraints() {
@@ -675,6 +724,11 @@ class PlayerView: UIView {
         if keyPath == "duration", let duration = player.currentItem?.duration.seconds, duration > 0.0 {
             self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
         }
+        if keyPath == "status" {
+          if player.status == .readyToPlay {
+            handleMediaPlayerReady()
+          }
+        }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
             if newValue != oldValue {
                 DispatchQueue.main.async {[weak self] in
@@ -699,6 +753,57 @@ class PlayerView: UIView {
             }
         }
     }
+    
+//    func loadMediaPlayer() {
+//        print("loadMediaPlayer")
+//        if let contentURL = media?.contentURL {
+//          player = AVPlayer(url: contentURL)
+////          playerLayer = AVPlayerLayer(player: player)
+////          if let mediaPlayerLayer = playerLayer {
+////            playerLayer.frame = fullFrame()
+////            layer.insertSublayer(playerLayer, above: videoView.layer)
+////          }
+////          addMediaPlayerObservers()
+//        }
+//
+//    }
+    
+    func handleMediaPlayerReady() {
+      print("handleMediaPlayerReady \(pendingPlay)")
+      if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
+        // Loading has failed, try it again.
+        purgeMediaPlayer()
+        loadMediaPlayer()
+        return
+      }
+      if streamDuration == nil {
+        if let duration = player.currentItem?.duration {
+          streamDuration = CMTimeGetSeconds(duration)
+          if let streamDuration = streamDuration {
+              timeSlider.maximumValue = Float(streamDuration)
+              timeSlider.minimumValue = 0
+              timeSlider.isEnabled = true
+//            totalTime.text = GCKUIUtils.timeInterval(asString: streamDuration)
+          }
+        }
+      }
+      if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
+        print("seeking to pending position \(pendingPlayPosition)")
+//        performSeek(toTime: pendingPlayPosition)
+        pendingPlayPosition = kGCKInvalidTimeInterval
+        return
+      } else {
+        activityIndicatorView.stopAnimating()
+      }
+      if pendingPlay {
+        pendingPlay = false
+        player.play()
+        playerState = .playing
+      } else {
+        playerState = .paused
+      }
+    }
+
     
     @objc func playerEndedPlaying(_ notification: Notification) {
         DispatchQueue.main.async {[weak self] in
@@ -892,9 +997,9 @@ class PlayerView: UIView {
     
     //MARK: - Time logic
     func addTimeObserver() {
+        if(!playerConfiguration.isLive){
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
-        if(!playerConfiguration.isLive){
             player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
                 guard let currentItem = self?.player.currentItem else {return}
                 
@@ -905,8 +1010,9 @@ class PlayerView: UIView {
                 self?.timeSlider.minimumValue = 0
                 self?.timeSlider.value = Float(currentItem.currentTime().seconds)
                 self?.currentTimeLabel.text = VGPlayerUtils.getTimeString(from: currentItem.currentTime())
+                self?.streamPosition = CMTimeGetSeconds(time)
             })
-        } else{
+        } else {
             self.timeSlider.value = 1
         }
     }
@@ -924,6 +1030,21 @@ class PlayerView: UIView {
 //      pendingPlayPosition = kGCKInvalidTimeInterval
 //      pendingPlay = true
 //      seeking = false
+    }
+    
+    func notifyStreamPositionChanged(_ time: CMTime) {
+      if (player.currentItem?.status != .readyToPlay) || seeking {
+        return
+      }
+      streamPosition = CMTimeGetSeconds(time)
+      guard let streamDuration = streamDuration, let streamPosition = streamPosition else { return }
+      timeSlider.value = Float(streamPosition)
+      var remainingTime: TimeInterval = (Float(streamDuration) > Float(streamPosition)) ?
+        (streamDuration - streamPosition) : 0
+      if remainingTime > 0 {
+        remainingTime = -remainingTime
+      }
+      durationTimeLabel.text = GCKUIUtils.timeInterval(asString: remainingTime)
     }
    
 
