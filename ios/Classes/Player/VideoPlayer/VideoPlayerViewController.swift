@@ -17,9 +17,9 @@ import GoogleCast
 
 /* The player state. */
 enum PlaybackMode: Int {
-  case none = 0
-  case local
-  case remote
+    case none = 0
+    case local
+    case remote
 }
 
 class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, GCKSessionManagerListener, GCKRemoteMediaClientListener, GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate, PlayerViewDelegate {
@@ -33,7 +33,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var sessionManager: GCKSessionManager!
     private var castMediaController: GCKUIMediaController!
     private var volumeController: GCKUIDeviceVolumeController!
-  
+    private var streamPositionSliderMoving: Bool = false
+    private var playbackMode = PlaybackMode.none
+    private var queueButton: UIBarButtonItem!
+    private var showStreamTimeRemaining: Bool = false
+    private var localPlaybackImplicitlyPaused: Bool = false
+    //    private var actionSheet: ActionSheet?
+    private var queueAdded: Bool = false
+    ///
     weak var delegate: VideoPlayerDelegate?
     var qualityLabelText = ""
     var speedLabelText = ""
@@ -60,6 +67,23 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var portraitConstraints = Constraints()
     private var landscapeConstraints = Constraints()
     
+    var mediaInfo: GCKMediaInformation? {
+        didSet {
+            print("setMediaInfo: \(String(describing: mediaInfo))")
+        }
+    }
+    
+    init() {
+        sessionManager = GCKCastContext.sharedInstance().sessionManager
+        castMediaController = GCKUIMediaController()
+        volumeController = GCKUIDeviceVolumeController()
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func setupPictureInPicture() {
         // Ensure PiP is supported by current device.
         if AVPictureInPictureController.isPictureInPictureSupported() {
@@ -81,7 +105,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         playerView.isHiddenPiP(isPiP: true)
     }
-
+    
     func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         playerView.isHiddenPiP(isPiP: false)
     }
@@ -102,26 +126,48 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
         view.backgroundColor = .black
         setNeedsUpdateOfHomeIndicatorAutoHidden()
-        NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
-                                               name: NSNotification.Name.gckCastStateDidChange,
-                                               object: GCKCastContext.sharedInstance())
         playerView.delegate = self
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
         playerView.edgesToSuperview()
         playerView.loadMedia(area: view.safeAreaLayoutGuide)
         setupPictureInPicture()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
+                                               name: NSNotification.Name.gckCastStateDidChange,
+                                               object: GCKCastContext.sharedInstance())
     }
     
     @objc func castDeviceDidChange(_: Notification) {
-//      if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
-//        // You can present the instructions on how to use Google Cast on
-//        // the first time the user uses you app
-//        GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: castButton)
-//      }
+        if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
+            // You can present the instructions on how to use Google Cast on
+            // the first time the user uses you app
+            GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: playerView.castButton)
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        
+        print("viewWillAppear; mediaInfo is \(String(describing: mediaInfo)), mode is \(playbackMode)")
+        //        appDelegate?.isCastControlBarsEnabled = true
+        if playbackMode == .local, localPlaybackImplicitlyPaused {
+            playerView.runPlayer(startAt: playerConfiguration.lastPosition)
+            localPlaybackImplicitlyPaused = false
+        }
+        // If we're in remote playback but no longer have a session, then switch to local playback
+        // mode. If we're in local mode but now have a session, then switch to remote playback mode.
+        let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
+        if hasConnectedSession, (playbackMode != .remote) {
+            populateMediaInfo(false, playPosition: 0)
+            switchToRemotePlayback()
+        } else if sessionManager.currentSession == nil, (playbackMode != .local) {
+            switchToLocalPlayback()
+        }
+        
+        sessionManager.add(self)
+        
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        super.viewWillAppear(animated)
         if (selectedSpeedText == speedList[1]) {
             isRegular = true
         }
@@ -169,19 +215,101 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
         return [.bottom]
     }
-   
-    func addVideosLandscapeConstraints() {
+    
+    func setQueueButtonVisible(_ visible: Bool) {
+        if visible, !queueAdded {
+            var barItems = navigationItem.rightBarButtonItems
+            barItems?.append(queueButton)
+            navigationItem.rightBarButtonItems = barItems
+            queueAdded = true
+        } else if !visible, queueAdded {
+            var barItems = navigationItem.rightBarButtonItems
+            let index = barItems?.firstIndex(of: queueButton) ?? -1
+            barItems?.remove(at: index)
+            navigationItem.rightBarButtonItems = barItems
+            queueAdded = false
+        }
+    }
+    
+    func switchToLocalPlayback() {
+        print("switchToLocalPlayback")
+        if playbackMode == .local {
+            return
+        }
+        setQueueButtonVisible(false)
+        var playPosition: TimeInterval = 0
+        var paused: Bool = false
+        var ended: Bool = false
+        if playbackMode == .remote {
+            playPosition = castMediaController.lastKnownStreamPosition
+            paused = (castMediaController.lastKnownPlayerState == .paused)
+            ended = (castMediaController.lastKnownPlayerState == .idle)
+            print("last player state: \(castMediaController.lastKnownPlayerState), ended: \(ended)")
+        }
+        populateMediaInfo((!paused && !ended), playPosition: playPosition)
+        sessionManager.currentCastSession?.remoteMediaClient?.remove(self)
+        playbackMode = .local
+    }
+    
+    func populateMediaInfo(_ autoPlay: Bool, playPosition: TimeInterval) {
+        print("populateMediaInfo")
+        //      _titleLabel.text = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyTitle)
+        var subtitle = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyArtist)
+        if subtitle == nil {
+            subtitle = mediaInfo?.metadata?.string(forKey: kGCKMetadataKeyStudio)
+        }
+        playerView.setTitle(title: subtitle)
+        let description = mediaInfo?.metadata?.string(forKey: kMediaKeyDescription)
+        //      _descriptionTextView.text = description?.replacingOccurrences(of: "\\n", with: "\n")
+        //      playerView.loadMedia(mediaInfo, autoPlay: autoPlay, playPosition: playPosition)
+    }
+    
+    func switchToRemotePlayback() {
+        print("switchToRemotePlayback; mediaInfo is \(String(describing: mediaInfo))")
+        if playbackMode == .remote {
+            return
+        }
+        // If we were playing locally, load the local media on the remote player
+        if playbackMode == .local, (playerView.playerState != .stopped) {
+            print("loading media: \(String(describing: mediaInfo))")
+            let paused: Bool = (playerView.playerState == .paused)
+            let mediaQueueItemBuilder = GCKMediaQueueItemBuilder()
+            mediaQueueItemBuilder.mediaInformation = mediaInfo
+            mediaQueueItemBuilder.autoplay = !paused
+            //        mediaQueueItemBuilder.preloadTime = TimeInterval(UserDefaults.standard.integer(forKey: kPrefPreloadTime))
+            mediaQueueItemBuilder.startTime = playerView.streamPosition ?? 0
+            let mediaQueueItem = mediaQueueItemBuilder.build()
+            
+            let queueDataBuilder = GCKMediaQueueDataBuilder(queueType: .generic)
+            queueDataBuilder.items = [mediaQueueItem]
+            queueDataBuilder.repeatMode = .off
+            
+            let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
+            mediaLoadRequestDataBuilder.mediaInformation = mediaInfo
+            mediaLoadRequestDataBuilder.queueData = queueDataBuilder.build()
+            
+            let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
+            request?.delegate = self
+        }
+        playerView.stop()
+        //      _localPlayerView.showSplashScreen()
+        setQueueButtonVisible(true)
+        sessionManager.currentCastSession?.remoteMediaClient?.add(self)
+        playbackMode = .remote
+    }
+    
+    private func addVideosLandscapeConstraints() {
         portraitConstraints.deActivate()
         landscapeConstraints.append(contentsOf: playerView.edgesToSuperview())
     }
     
-    func addVideoPortaitConstraints() {
+    private func addVideoPortaitConstraints() {
         landscapeConstraints.deActivate()
         portraitConstraints.append(contentsOf: playerView.center(in: view))
         portraitConstraints.append(contentsOf: playerView.edgesToSuperview())
     }
     
-    func configureVolume() {
+    private func configureVolume() {
         let volumeView = MPVolumeView()
         for view in volumeView.subviews {
             if let slider = view as? UISlider {
@@ -253,7 +381,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         self.present(vc, animated: true, completion: nil)
     }
     
-   func togglePictureInPictureMode() {
+    func togglePictureInPictureMode() {
         if pipController.isPictureInPictureActive {
             pipController.stopPictureInPicture()
         } else {
@@ -265,9 +393,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         if keyPath == "pip" {
             if self.pipController.isPictureInPictureActive {
                 self.playerView.isHiddenPiP(isPiP: true)
-           }else {
-               self.playerView.isHiddenPiP(isPiP: false)
-           }
+            }else {
+                self.playerView.isHiddenPiP(isPiP: false)
+            }
         }
     }
     
@@ -307,7 +435,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.playerView.changeSpeed(rate: self.playerRate)
             break
         case .subtitle:
-
+            
             break
         case .audio:
             break
@@ -465,3 +593,44 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     }
 }
 // 1170
+
+/** A key for the URL of the media item's poster (large image). */
+let kMediaKeyPosterURL = "posterUrl"
+/** A key for the media item's extended description. */
+let kMediaKeyDescription = "description"
+let kKeyCategories = "categories"
+let kKeyHlsBaseURL = "hls"
+let kKeyImagesBaseURL = "images"
+let kKeyTracksBaseURL = "tracks"
+let kKeySources = "sources"
+let kKeyVideos = "videos"
+let kKeyArtist = "artist"
+let kKeyBaseURL = "baseUrl"
+let kKeyContentID = "contentId"
+let kKeyDescription = "description"
+let kKeyID = "id"
+let kKeyImageURL = "image-480x270"
+let kKeyItems = "items"
+let kKeyLanguage = "language"
+let kKeyMimeType = "mime"
+let kKeyName = "name"
+let kKeyPosterURL = "image-780x1200"
+let kKeyStreamType = "streamType"
+let kKeyStudio = "studio"
+let kKeySubtitle = "subtitle"
+let kKeySubtype = "subtype"
+let kKeyTitle = "title"
+let kKeyTracks = "tracks"
+let kKeyType = "type"
+let kKeyURL = "url"
+let kKeyDuration = "duration"
+let kDefaultVideoMimeType = "application/x-mpegurl"
+let kDefaultTrackMimeType = "text/vtt"
+let kTypeAudio = "audio"
+let kTypePhoto = "photos"
+let kTypeVideo = "videos"
+let kTypeLive = "live"
+let kThumbnailWidth = 480
+let kThumbnailHeight = 720
+let kPosterWidth = 780
+let kPosterHeight = 1200
