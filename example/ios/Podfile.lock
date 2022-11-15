@@ -12,9 +12,9 @@ PODS:
     - NVActivityIndicatorView/Base (= 5.1.1)
   - NVActivityIndicatorView/Base (5.1.1)
   - Protobuf (3.21.9)
-  - SDWebImage (5.14.1):
-    - SDWebImage/Core (= 5.14.1)
-  - SDWebImage/Core (5.14.1)
+  - SDWebImage (5.14.2):
+    - SDWebImage/Core (= 5.14.2)
+  - SDWebImage/Core (5.14.2)
   - SnapKit (4.2.0)
   - SVGKit (3.0.0):
     - CocoaLumberjack (~> 3.0)
@@ -60,7 +60,7 @@ SPEC CHECKSUMS:
   google-cast-sdk: 6731e9a206ce43e0f4433d15598ad8a19f0371d5
   NVActivityIndicatorView: 1f6c5687f1171810aa27a3296814dc2d7dec3667
   Protobuf: 02524ec14183fe08fb259741659e79683788158b
-  SDWebImage: e1b3c38f170c6100130fce6856e423ed9e5f4fce
+  SDWebImage: b9a731e1d6307f44ca703b3976d18c24ca561e84
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   SVGKit: 1ad7513f8c74d9652f94ed64ddecda1a23864dea
   TinyConstraints: 7b7ccc0c485bb3bb47082138ff28bc33cd49897f

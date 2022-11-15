@@ -1,12 +1,9 @@
 import Flutter
+import AVFoundation
 import AVFAudio
 import UIKit
 
-public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
-    
-    func getDuration(duration: Double) {
-        flutterResult!("\(duration)")
-    }
+public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate, AVAssetDownloadDelegate {
     
     public static var viewController = FlutterViewController()
     private var flutterResult: FlutterResult?
@@ -20,11 +17,12 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         flutterResult = result
-        if (call.method == "closePlayer" ) {
+        switch call.method  {
+        case "closePlayer": do {
             SwiftUdevsVideoPlayerPlugin.viewController.dismiss(animated:true)
             return
         }
-        if (call.method == "playVideo"){
+        case "playVideo": do {
             guard let args = call.arguments else {
                 return
             }
@@ -46,8 +44,64 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             vc.selectedQualityText = playerConfiguration.autoText
             vc.seasons  = playerConfiguration.seasons
             SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
-        } else {
-            result("iOS " + UIDevice.current.systemVersion);
+            return
+        }
+        default: do {
+            result("Not Implemented")
+            return
+          }
         }
     }
+    
+    func getDuration(duration: Double) {
+        flutterResult!("\(duration)")
+    }
+    
+    public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
+        var percentComplete = 0.0
+        // Iterate through the loaded time ranges
+        for value in loadedTimeRanges {
+            // Unwrap the CMTimeRange from the NSValue
+            let loadedTimeRange = value.timeRangeValue
+            // Calculate the percentage of the total expected asset duration
+            percentComplete += loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
+        }
+        percentComplete *= 100
+        // Update UI state: post notification, update KVO state, invoke callback, etc.
+    }
+    
+    public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didFinishDownloadingTo location: URL) {
+        // Do not move the asset from the download location
+        UserDefaults.standard.set(location.relativePath, forKey: "testVideoPath")
+    }
 }
+
+//struct Download  {
+////    var configuration: URLSessionConfiguration?
+////    var downloadSession: AVAssetDownloadURLSession?
+//    var downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
+//    weak var delegate: VideoPlayerDelegate?
+//    
+//    mutating func setupAssetDownload(videoUrl: String) {
+//        // Create new background session configuration.
+//       var configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+//
+//        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
+//        var downloadSession = AVAssetDownloadURLSession(configuration: configuration,
+//                                                        assetDownloadDelegate: delegate,
+//                                                        delegateQueue: OperationQueue.main)
+//
+//        if let url = URL(string: videoUrl){
+//            let asset = AVURLAsset(url: url)
+//
+//            // Create new AVAssetDownloadTask for the desired asset
+//            let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
+//                                                                     assetTitle: "Some Title",
+//                                                                     assetArtworkData: nil,
+//                                                                     options: nil)
+//            // Start task and begin download
+//            downloadTask?.resume()
+//        }
+//    }//end method
+//    
+//}

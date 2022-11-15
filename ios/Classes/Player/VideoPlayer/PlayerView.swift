@@ -20,6 +20,13 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func togglePictureInPictureMode()
 }
 
+enum LocalPlayerState: Int {
+  case stopped
+  case starting
+  case playing
+  case paused
+}
+
 class PlayerView: UIView {
     
     private var player = AVPlayer()
@@ -36,6 +43,12 @@ class PlayerView: UIView {
     private var panDirection = SwipeDirection.vertical
     private var isVolume = false
     private var volumeViewSlider: UISlider!
+    ///
+    private(set) var streamPosition: TimeInterval?
+    private(set) var streamDuration: TimeInterval?
+    ///
+    private(set) var media: GCKMediaInformation?
+    private(set) var playerState = LocalPlayerState.stopped
     
     private var videoView: UIView = {
         let view = UIView()
@@ -201,7 +214,11 @@ class PlayerView: UIView {
         return activityView
     }()
     
-    private var castButton: GCKUICastButton!
+    var castButton: GCKUICastButton = {
+        let button = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
+                                                   width: CGFloat(24), height: CGFloat(24)))
+        return button
+    }()
     
     private var playerRate = 1.0
     private var enableGesture = true
@@ -247,8 +264,7 @@ class PlayerView: UIView {
             timeSlider.thumbTintColor = Colors.moreColor
         }
         setTitle(title: playerConfiguration.title)
-        castButton = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
-                                                   width: CGFloat(24), height: CGFloat(24)))
+        
     }
     
     fileprivate func makeCircleWith(size: CGSize, backgroundColor: UIColor) -> UIImage? {
@@ -279,7 +295,6 @@ class PlayerView: UIView {
         player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
-        videoView.layer.addSublayer(playerLayer)
         layer.insertSublayer(playerLayer, above: videoView.layer)
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
@@ -290,7 +305,7 @@ class PlayerView: UIView {
         addTimeObserver()
     }
     
-    private func runPlayer(startAt: Int){
+    func runPlayer(startAt: Int){
         player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
         player.automaticallyWaitsToMinimizeStalling = true;
         player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
@@ -302,8 +317,7 @@ class PlayerView: UIView {
             return
         }
         self.setTitle(title: title)
-        let playerItem = AVPlayerItem(asset: AVURLAsset(url: videoURL))
-        self.player.replaceCurrentItem(with: playerItem)
+        self.player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: videoURL)))
         self.player.seek(to: CMTime.zero)
         self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
         self.player.automaticallyWaitsToMinimizeStalling = true
@@ -339,7 +353,7 @@ class PlayerView: UIView {
     }
     
     @objc func togglePictureInPictureMode(_ sender: UIButton){
-        delegate?.close(duration: player.currentTime().seconds)
+        delegate?.togglePictureInPictureMode()
     }
     
     @objc func settingPressed(_ sender: UIButton){
@@ -468,9 +482,9 @@ class PlayerView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         let frame: CGRect = UIScreen.main.bounds
-        overlayView.frame = frame
         videoView.frame = frame
         playerLayer.frame = frame
+        overlayView.frame = frame
     }
     
     override func updateConstraints() {
@@ -896,5 +910,22 @@ class PlayerView: UIView {
             self.timeSlider.value = 1
         }
     }
+    
+    func stop() {
+      purgeMediaPlayer()
+      playerState = .stopped
+    }
+    
+    func purgeMediaPlayer() {
+//      removeMediaPlayerObservers()
+//      player.
+      playerLayer.removeFromSuperlayer()
+      player.pause()
+//      pendingPlayPosition = kGCKInvalidTimeInterval
+//      pendingPlay = true
+//      seeking = false
+    }
+   
+
     
 }
