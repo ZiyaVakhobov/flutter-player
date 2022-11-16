@@ -70,6 +70,6 @@ android {
 
         implementation 'org.checkerframework:checker-qual:3.13.0'
         implementation 'com.google.android.gms:play-services-cronet:18.0.1'
-        implementation 'androidx.media3:extension-cronet:2.18.1'
+        implementation "androidx.media3:media3-datasource-cronet:$media3_version"
     }
 }

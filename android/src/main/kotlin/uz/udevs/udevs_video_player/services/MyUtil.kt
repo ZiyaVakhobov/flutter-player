@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.offline.DownloadManager
@@ -20,27 +22,26 @@ import java.net.CookieManager
 import java.net.CookiePolicy
 import java.util.concurrent.Executors
 
-class MyUtil {
+object MyUtil {
+
     private var downloadCache: @MonotonicNonNull Cache? = null
     private var databaseProvider: @MonotonicNonNull DatabaseProvider? = null
     private var downloadManager: @MonotonicNonNull DownloadManager? = null
     private var downloadNotificationHelper: @MonotonicNonNull DownloadNotificationHelper? = null
+    private var dataSourceFactory: @MonotonicNonNull DataSource.Factory? = null
     private var httpDataSourceFactory: @MonotonicNonNull DataSource.Factory? = null
     private var downloadTracker: @MonotonicNonNull DownloadTracker? = null
     private var downloadDirectory: @MonotonicNonNull File? = null
 
-    companion object {
-        val DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel"
-    }
-
+    val DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel"
     private val DOWNLOAD_CONTENT_DIRECTORY = "downloads"
     private val USE_CRONET_FOR_NETWORKING = true
 
 
     @Synchronized
-    fun getDownloadTracker(context: Context): DownloadTracker? {
+    fun getDownloadTracker(context: Context): DownloadTracker {
         ensureDownloadManagerInitialized(context)
-        return downloadTracker
+        return downloadTracker!!
     }
 
     @Synchronized
@@ -109,6 +110,24 @@ class MyUtil {
     }
 
 
+    /** Returns a [DataSource.Factory].  */
+    @Synchronized
+    fun getDataSourceFactory(context: Context): DataSource.Factory {
+        if (dataSourceFactory == null) {
+            val context1 = context.applicationContext
+            val upstreamFactory: DefaultDataSource.Factory = DefaultDataSource.Factory(
+                context,
+                getHttpDataSourceFactory(context1)
+            )
+            dataSourceFactory =
+                buildReadOnlyCacheDataSource(
+                    upstreamFactory,
+                    getDownloadCache(context1)
+                )
+        }
+        return dataSourceFactory!!
+    }
+
     @Synchronized
     fun getHttpDataSourceFactory(context: Context): DataSource.Factory {
         var context = context
@@ -143,6 +162,17 @@ class MyUtil {
             }
         }
         return downloadDirectory
+    }
+
+
+    private fun buildReadOnlyCacheDataSource(
+        upstreamFactory: DataSource.Factory, cache: Cache
+    ): CacheDataSource.Factory {
+        return CacheDataSource.Factory()
+            .setCache(cache)
+            .setUpstreamDataSourceFactory(upstreamFactory)
+            .setCacheWriteDataSinkFactory(null)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
     }
 
 }

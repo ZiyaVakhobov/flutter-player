@@ -23,7 +23,7 @@ class _MyAppState extends State<MyApp> {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(
             url:
-                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
+                'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
           )) ??
           'nothing';
       if (kDebugMode) {

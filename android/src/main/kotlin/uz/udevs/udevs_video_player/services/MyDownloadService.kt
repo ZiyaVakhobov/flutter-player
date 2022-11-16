@@ -21,9 +21,9 @@ class MyDownloadService : DownloadService(1) {
 
         // This will only happen once, because getDownloadManager is guaranteed to be called only once
         // in the life cycle of the process.
-        val downloadManager: DownloadManager = MyUtil().getDownloadManager(this)
+        val downloadManager: DownloadManager = MyUtil.getDownloadManager(this)
         val downloadNotificationHelper: DownloadNotificationHelper =
-            MyUtil().getDownloadNotificationHelper(this)
+            MyUtil.getDownloadNotificationHelper(this)
         downloadManager.addListener(
             TerminalStateNotificationHelper(
                 this,
@@ -45,7 +45,7 @@ class MyDownloadService : DownloadService(1) {
         downloads: MutableList<Download>,
         notMetRequirements: Int
     ): Notification {
-        return MyUtil().getDownloadNotificationHelper(this)
+        return MyUtil.getDownloadNotificationHelper(this)
             .buildProgressNotification(
                 this,
                 R.drawable.ic_download,

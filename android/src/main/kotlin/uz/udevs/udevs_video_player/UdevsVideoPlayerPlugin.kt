@@ -1,7 +1,9 @@
 package uz.udevs.udevs_video_player
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.offline.DownloadService
 import com.google.gson.Gson
@@ -37,6 +39,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
         channel.setMethodCallHandler(this)
+        downloadTracker = MyUtil.getDownloadTracker(flutterPluginBinding.applicationContext)
+        startDownloadService(flutterPluginBinding.applicationContext)
+        downloadTracker!!.addListener(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -54,12 +59,12 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         } else if (call.method == "downloadVideo") {
             if (call.hasArgument("downloadConfigJsonString")) {
-                val playerConfigJsonString = call.argument("downloadConfigJsonString") as String?
+                val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
                 val gson = Gson()
                 val downloadConfiguration =
-                    gson.fromJson(playerConfigJsonString, DownloadConfiguration::class.java)
+                    gson.fromJson(downloadConfigJsonString, DownloadConfiguration::class.java)
+                downloadTracker?.toggleDownload(MediaItem.fromUri(Uri.parse(downloadConfiguration.url)))
                 downloadResult = result
-                downloadTracker!!.toggleDownload(MediaItem.fromUri(downloadConfiguration.url))
             }
         } else if (call.method == "checkIsDownloadedVideo") {
             if (call.hasArgument("downloadConfigJsonString")) {
@@ -84,9 +89,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         activity = binding.activity as FlutterActivity
         binding.addOnNewIntentListener(this)
         binding.addActivityResultListener(this)
-        downloadTracker = MyUtil().getDownloadTracker( /* context= */activity!!.applicationContext)
-        startDownloadService()
-        downloadTracker!!.addListener(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -100,6 +102,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onDetachedFromActivity() {
         activity = null
+        downloadTracker!!.removeListener(this)
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
@@ -115,22 +118,21 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
 
     /** Start the download service if it should be running but it's not currently.  */
-    private fun startDownloadService() {
+    private fun startDownloadService(context: Context) {
         // Starting the service in the foreground causes notification flicker if there is no scheduled
         // action. Starting it in the background throws an exception if the app is in the background too
         // (e.g. if device screen is locked).
         try {
-            DownloadService.start(activity!!.applicationContext, MyDownloadService::class.java)
+            DownloadService.start(context, MyDownloadService::class.java)
         } catch (e: IllegalStateException) {
             DownloadService.startForeground(
-                activity!!.applicationContext,
+                context,
                 MyDownloadService::class.java
             )
         }
     }
 
     override fun onDownloadsChanged() {
-
+        // TODO onDownloaded all
     }
-
 }
