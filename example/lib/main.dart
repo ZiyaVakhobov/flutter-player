@@ -17,6 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
+  int _progress = 0;
 
   download() async {
     try {
@@ -25,8 +26,8 @@ class _MyAppState extends State<MyApp> {
             url:
                 // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-                // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-                // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -35,6 +36,49 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException {
       debugPrint('Failed to get platform version.');
     }
+  }
+
+  Future<bool> checkIsDownloaded() async {
+    bool isDownloaded = false;
+    try {
+      isDownloaded = await _udevsVideoPlayerPlugin.isDownloadVideo(
+          downloadConfig: DownloadConfiguration(
+        url:
+            // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+        // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+        // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+      ));
+      if (kDebugMode) {
+        print('result: $isDownloaded');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+    return isDownloaded;
+  }
+
+  getCurrentProgressDownload() async {
+    int progress = 0;
+    try {
+      progress = await _udevsVideoPlayerPlugin.getCurrentProgressDownload(
+              downloadConfig: DownloadConfiguration(
+            url:
+                // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
+            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
+          )) ??
+          0;
+      if (kDebugMode) {
+        print('result: $progress');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+    setState(() {
+      _progress = progress;
+    });
   }
 
   playVideo() async {
@@ -164,6 +208,25 @@ class _MyAppState extends State<MyApp> {
                 onPressed: download,
                 child: const Text('Download'),
               ),
+              ElevatedButton(
+                onPressed: getCurrentProgressDownload,
+                child: const Text('Get Current Progress'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {});
+                },
+                child: const Text('Update UI'),
+              ),
+              FutureBuilder(
+                initialData: false,
+                future: checkIsDownloaded(),
+                builder: (context, snapshot) {
+                  var res = snapshot.data as bool;
+                  return Text(res ? 'Downloaded' : 'Not Downloaded');
+                },
+              ),
+              Text(_progress.toString()),
             ],
           ),
         ),

@@ -71,7 +71,7 @@ class DownloadTracker(
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
         if (download != null && download.state != Download.STATE_FAILED) {
             DownloadService.sendRemoveDownload(
-                context, MyDownloadService::class.java, download.request.id,false
+                context, MyDownloadService::class.java, download.request.id, false
             )
         } else {
             this.mediaItem = mediaItem
@@ -90,7 +90,7 @@ class DownloadTracker(
     }
 
     fun pauseAllDownloading() {
-        DownloadService.sendPauseDownloads(context, MyDownloadService::class.java,false)
+        DownloadService.sendPauseDownloads(context, MyDownloadService::class.java, false)
     }
 
     private fun loadDownloads() {
@@ -113,13 +113,18 @@ class DownloadTracker(
             downloadManager.currentDownloads.find { it.request.uri == uri }?.percentDownloaded
         return callbackFlow {
             while (percent != null) {
-                percent = downloadManager.currentDownloads.find { it.request.uri == uri }?.percentDownloaded
+                percent =
+                    downloadManager.currentDownloads.find { it.request.uri == uri }?.percentDownloaded
                 trySend(percent).isSuccess
                 withContext(Dispatchers.IO) {
                     delay(1000)
                 }
             }
         }
+    }
+
+    fun getCurrentProgressDownload(mediaItem: MediaItem): Float? {
+        return downloadManager.currentDownloads.find { it.request.uri == mediaItem.localConfiguration?.uri }?.percentDownloaded
     }
 
     override fun onPrepared(helper: DownloadHelper) {
@@ -143,6 +148,7 @@ class DownloadTracker(
             .getDownloadRequest(Util.getUtf8Bytes(Preconditions.checkNotNull(mediaItem!!.mediaMetadata.title.toString())))
             .copyWithKeySetId(keySetId)
     }
+
     inner class DownloadManagerListener : DownloadManager.Listener {
 
         override fun onDownloadChanged(

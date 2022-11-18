@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="uz.udevs.udevs_video_player_example">
 
    <application
         android:label="udevs_video_player_example"

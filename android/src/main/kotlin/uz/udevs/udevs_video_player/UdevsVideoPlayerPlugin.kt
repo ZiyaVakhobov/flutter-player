@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -28,6 +30,7 @@ import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.services.DownloadTracker
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.MyDownloadService
+import kotlin.math.roundToInt
 
 const val EXTRA_ARGUMENT = "uz.udevs.udevs_video_player.ARGUMENT"
 const val EXTRA_ARGUMENT1 = "uz.udevs.udevs_video_player.ARGUMENT1"
@@ -40,10 +43,8 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
     private var resultMethod: Result? = null
-    private var downloadResult: Result? = null
     private var downloadTracker: DownloadTracker? = null
     lateinit var renderersFactory: RenderersFactory
-    lateinit var playerViewModel: PlayerViewModel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
@@ -53,15 +54,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         downloadTracker!!.addListener(this)
         renderersFactory =
             DownloadUtil.buildRenderersFactory(flutterPluginBinding.applicationContext, false)
-//        playerViewModel = ViewModelProvider(this)[PlayerViewModel::class.java]
-//        val viewModel: PlayerViewModel by viewModels()
-//        lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                viewModel.uiState.collect {
-//                     Update UI elements
-//                }
-//            }
-//        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -77,7 +69,8 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 activity?.startActivityForResult(intent, PLAYER_ACTIVITY)
                 resultMethod = result
             }
-        } else if (call.method == "downloadVideo") {
+        } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" ||
+                call.method == "getCurrentProgressDownload") {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
                 val gson = Gson()
@@ -90,18 +83,21 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     .setUri(uri)
                     .setMediaMetadata(MediaMetadata.Builder().setTitle("My title").build())
                     .setMimeType(adaptiveMimeType).build()
-                downloadTracker?.toggleDownload(mediaItem, renderersFactory)
-                downloadResult = result
-            }
-        } else if (call.method == "checkIsDownloadedVideo") {
-            if (call.hasArgument("downloadConfigJsonString")) {
-                val playerConfigJsonString = call.argument("downloadConfigJsonString") as String?
-                val gson = Gson()
-                val downloadConfiguration =
-                    gson.fromJson(playerConfigJsonString, DownloadConfiguration::class.java)
-                val isDownloaded =
-                    downloadTracker!!.isDownloaded(MediaItem.fromUri(downloadConfiguration.url))
-                result.success(isDownloaded)
+                when(call.method) {
+                    "downloadVideo" -> {
+                        downloadTracker?.toggleDownload(mediaItem, renderersFactory)
+                    }
+                    "checkIsDownloadedVideo" -> {
+                        val isDownloaded =
+                            downloadTracker!!.isDownloaded(mediaItem)
+                        result.success(isDownloaded)
+                    }
+                    "getCurrentProgressDownload" -> {
+                        val progressDownload =
+                            downloadTracker?.getCurrentProgressDownload(mediaItem)
+                        result.success(progressDownload?.roundToInt().toString())
+                    }
+                }
             }
         } else {
             result.notImplemented()

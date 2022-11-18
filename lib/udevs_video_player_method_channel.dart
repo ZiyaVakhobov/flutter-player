@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -17,7 +14,7 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     required String playerConfigJsonString,
   }) async {
     final res =
-        await methodChannel.invokeMethod<String>('playVideo', <String, dynamic>{
+        await methodChannel.invokeMethod<String?>('playVideo', <String, dynamic>{
       'playerConfigJsonString': playerConfigJsonString,
     });
     return res;
@@ -28,10 +25,32 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     required String downloadConfigJsonString,
   }) async {
     final res =
-        await methodChannel.invokeMethod<String>('downloadVideo', <String, dynamic>{
+        await methodChannel.invokeMethod<String?>('downloadVideo', <String, dynamic>{
       'downloadConfigJsonString': downloadConfigJsonString,
     });
     return res;
+  }
+
+  @override
+  Future<bool> isDownloadVideo({
+    required String downloadConfigJsonString,
+  }) async {
+    final res =
+        await methodChannel.invokeMethod<bool?>('checkIsDownloadedVideo', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString,
+    });
+    return res ?? false;
+  }
+
+  @override
+  Future<int?> getCurrentProgressDownload({
+    required String downloadConfigJsonString,
+  }) async {
+    final res =
+        await methodChannel.invokeMethod<String?>('getCurrentProgressDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString,
+    });
+    return res != null ? int.parse(res) : null;
   }
 
   @override

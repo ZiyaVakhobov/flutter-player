@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
 import uz.udevs.udevs_video_player.services.DownloadUtil
 
-class PlayerViewModel : ViewModel() {
+class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _downloadPercent = MutableLiveData<Float>()
     val downloadPercent: LiveData<Float>
