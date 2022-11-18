@@ -95,7 +95,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     "getCurrentProgressDownload" -> {
                         val progressDownload =
                             downloadTracker?.getCurrentProgressDownload(mediaItem)
-                        result.success(progressDownload?.roundToInt().toString())
+                        result.success(progressDownload)
                     }
                 }
             }

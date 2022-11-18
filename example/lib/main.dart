@@ -24,10 +24,7 @@ class _MyAppState extends State<MyApp> {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(
             url:
-                // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -44,10 +41,7 @@ class _MyAppState extends State<MyApp> {
       isDownloaded = await _udevsVideoPlayerPlugin.isDownloadVideo(
           downloadConfig: DownloadConfiguration(
         url:
-            // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
             'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-        // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-        // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
       ));
       if (kDebugMode) {
         print('result: $isDownloaded');
@@ -64,10 +58,7 @@ class _MyAppState extends State<MyApp> {
       progress = await _udevsVideoPlayerPlugin.getCurrentProgressDownload(
               downloadConfig: DownloadConfiguration(
             url:
-                // 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-            // 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
           )) ??
           0;
       if (kDebugMode) {
@@ -81,56 +72,15 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Stream<int?> getCurrentProgressDownloadAsStream() {
+    return _udevsVideoPlayerPlugin.getCurrentProgressDownloadAsStream(
+        downloadConfig: DownloadConfiguration(
+      url:
+          'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+    ));
+  }
+
   playVideo() async {
-    List<Season> seasons = [];
-    List<Movie> movies1 = [];
-    movies1.add(Movie(
-      id: '22109',
-      title: 'Женщина-Халк: Адвокат',
-      description:
-          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
-      image:
-          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
-      duration: 2122,
-      resolutions: {
-        'Автонастройка':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8',
-        '1080p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8',
-        '720p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8',
-        '480p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8',
-        '360p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8',
-        '240p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-      },
-    ));
-    movies1.add(Movie(
-      id: '22110',
-      title: 'Женщина-Халк: Адвокат',
-      description:
-          'После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей.',
-      image:
-          'https://cdn.uzd.udevs.io/uzdigital/images/ec80c248-ddb8-4b68-98b1-0d59e9a1acdd.jpg',
-      duration: 1669,
-      resolutions: {
-        'Автонастройка':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/master.m3u8',
-        '1080p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/1080p/index.m3u8',
-        '720p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/720p/index.m3u8',
-        '480p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/480p/index.m3u8',
-        '360p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/360p/index.m3u8',
-        '240p':
-            'https://cdn.uzd.udevs.io/uzdigital/videos/a298d71ece9105727c7c2e3bc219ef86/240p/index.m3u8',
-      },
-    ));
-    seasons.add(Season(title: '1 Season', movies: movies1));
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
               playerConfig: PlayerConfiguration(
@@ -157,10 +107,10 @@ class _MyAppState extends State<MyApp> {
             speedText: 'Скорость',
             lastPosition: 0,
             title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
-            isSerial: true,
+            isSerial: false,
             episodeButtonText: 'Эпизоды',
             nextButtonText: 'След.эпизод',
-            seasons: seasons,
+            seasons: [],
             isLive: false,
             tvProgramsText: 'Телеканалы',
             programsInfoList: [],
@@ -224,6 +174,12 @@ class _MyAppState extends State<MyApp> {
                 builder: (context, snapshot) {
                   var res = snapshot.data as bool;
                   return Text(res ? 'Downloaded' : 'Not Downloaded');
+                },
+              ),
+              StreamBuilder(
+                stream: getCurrentProgressDownloadAsStream(),
+                builder: (context, snapshot) {
+                  return Text(snapshot.data == null ? 'Not downloading' : snapshot.data.toString());
                 },
               ),
               Text(_progress.toString()),

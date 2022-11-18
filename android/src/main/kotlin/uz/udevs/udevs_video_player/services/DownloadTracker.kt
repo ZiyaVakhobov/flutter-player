@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlin.math.roundToInt
 
 class DownloadTracker(
     context: Context,
@@ -123,8 +124,14 @@ class DownloadTracker(
         }
     }
 
-    fun getCurrentProgressDownload(mediaItem: MediaItem): Float? {
-        return downloadManager.currentDownloads.find { it.request.uri == mediaItem.localConfiguration?.uri }?.percentDownloaded
+    fun getCurrentProgressDownload(mediaItem: MediaItem): Int? {
+        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
+        if (download != null) {
+            return 100
+        }
+        return downloadManager.currentDownloads.find{
+            it.request.uri == mediaItem.localConfiguration?.uri
+        }?.percentDownloaded?.roundToInt()
     }
 
     override fun onPrepared(helper: DownloadHelper) {

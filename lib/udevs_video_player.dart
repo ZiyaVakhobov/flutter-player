@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:udevs_video_player/models/download_configuration.dart';
@@ -38,6 +39,31 @@ class UdevsVideoPlayer {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
     return UdevsVideoPlayerPlatform.instance
         .getCurrentProgressDownload(downloadConfigJsonString: jsonStringConfig);
+  }
+
+  Stream<int?> getCurrentProgressDownloadAsStream(
+      {Duration? duration, required DownloadConfiguration downloadConfig}) {
+    final controller = StreamController<int?>();
+
+    Timer? timer;
+    controller.onListen = () {
+      timer = Timer.periodic(
+        duration ?? const Duration(seconds: 2),
+        (timer) => getCurrentProgressDownload(downloadConfig: downloadConfig)
+            .then((data) {
+          if (data == 100) {
+            controller.onCancel;
+          }
+          if (!controller.isClosed) {
+            controller.add(data);
+          }
+        }),
+      );
+    };
+    controller.onCancel = () {
+      timer?.cancel();
+    };
+    return controller.stream;
   }
 
   Future<dynamic> closeVideo() {

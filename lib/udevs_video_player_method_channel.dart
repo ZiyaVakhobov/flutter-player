@@ -13,8 +13,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   Future<String?> playVideo({
     required String playerConfigJsonString,
   }) async {
-    final res =
-        await methodChannel.invokeMethod<String?>('playVideo', <String, dynamic>{
+    final res = await methodChannel
+        .invokeMethod<String?>('playVideo', <String, dynamic>{
       'playerConfigJsonString': playerConfigJsonString,
     });
     return res;
@@ -24,8 +24,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   Future<String?> downloadVideo({
     required String downloadConfigJsonString,
   }) async {
-    final res =
-        await methodChannel.invokeMethod<String?>('downloadVideo', <String, dynamic>{
+    final res = await methodChannel
+        .invokeMethod<String?>('downloadVideo', <String, dynamic>{
       'downloadConfigJsonString': downloadConfigJsonString,
     });
     return res;
@@ -35,8 +35,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   Future<bool> isDownloadVideo({
     required String downloadConfigJsonString,
   }) async {
-    final res =
-        await methodChannel.invokeMethod<bool?>('checkIsDownloadedVideo', <String, dynamic>{
+    final res = await methodChannel
+        .invokeMethod<bool?>('checkIsDownloadedVideo', <String, dynamic>{
       'downloadConfigJsonString': downloadConfigJsonString,
     });
     return res ?? false;
@@ -46,11 +46,11 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   Future<int?> getCurrentProgressDownload({
     required String downloadConfigJsonString,
   }) async {
-    final res =
-        await methodChannel.invokeMethod<String?>('getCurrentProgressDownload', <String, dynamic>{
+    final res = await methodChannel
+        .invokeMethod<int>('getCurrentProgressDownload', <String, dynamic>{
       'downloadConfigJsonString': downloadConfigJsonString,
     });
-    return res != null ? int.parse(res) : null;
+    return res;
   }
 
   @override
