@@ -20,6 +20,7 @@ import static uz.udevs.udevs_video_player.services.DownloadUtil.DOWNLOAD_NOTIFIC
 import android.app.Notification;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.media3.common.util.NotificationUtil;
 import androidx.media3.common.util.Util;
@@ -36,94 +37,87 @@ import java.util.List;
 
 import uz.udevs.udevs_video_player.R;
 
-/** A service for downloading media. */
 public class MyDownloadService extends DownloadService {
 
-  private static final int JOB_ID = 1;
-  private static final int FOREGROUND_NOTIFICATION_ID = 1;
+    private static final int JOB_ID = 1;
+    private static final int FOREGROUND_NOTIFICATION_ID = 1;
 
-  public MyDownloadService() {
-    super(
-        FOREGROUND_NOTIFICATION_ID,
-        DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
-        DOWNLOAD_NOTIFICATION_CHANNEL_ID,
-        R.string.exo_download_notification_channel_name,
-        /* channelDescriptionResourceId= */ 0);
-  }
+    public MyDownloadService() {
+        super(
+                FOREGROUND_NOTIFICATION_ID,
+                DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
+                DOWNLOAD_NOTIFICATION_CHANNEL_ID,
+                R.string.exo_download_notification_channel_name,
+                0);
+    }
 
-  @Override
-  protected DownloadManager getDownloadManager() {
-    // This will only happen once, because getDownloadManager is guaranteed to be called only once
-    // in the life cycle of the process.
-    DownloadManager downloadManager = DownloadUtil.getDownloadManager(/* context= */ this);
-    DownloadNotificationHelper downloadNotificationHelper =
-        DownloadUtil.getDownloadNotificationHelper(/* context= */ this);
-    downloadManager.addListener(
-        new TerminalStateNotificationHelper(
-            this, downloadNotificationHelper, FOREGROUND_NOTIFICATION_ID + 1));
-    return downloadManager;
-  }
-
-  @Override
-  protected Scheduler getScheduler() {
-    return Util.SDK_INT >= 21 ? new PlatformScheduler(this, JOB_ID) : null;
-  }
-
-  @Override
-  protected Notification getForegroundNotification(
-          List<Download> downloads, @Requirements.RequirementFlags int notMetRequirements) {
-    return DownloadUtil.getDownloadNotificationHelper(/* context= */ this)
-        .buildProgressNotification(
-            /* context= */ this,
-            R.drawable.ic_download,
-            /* contentIntent= */ null,
-            /* message= */ null,
-            downloads,
-            notMetRequirements);
-  }
-
-  /**
-   * Creates and displays notifications for downloads when they complete or fail.
-   *
-   * <p>This helper will outlive the lifespan of a single instance of {@link MyDownloadService}.
-   * It is static to avoid leaking the first {@link MyDownloadService} instance.
-   */
-  private static final class TerminalStateNotificationHelper implements DownloadManager.Listener {
-
-    private final Context context;
-    private final DownloadNotificationHelper notificationHelper;
-
-    private int nextNotificationId;
-
-    public TerminalStateNotificationHelper(
-        Context context, DownloadNotificationHelper notificationHelper, int firstNotificationId) {
-      this.context = context.getApplicationContext();
-      this.notificationHelper = notificationHelper;
-      nextNotificationId = firstNotificationId;
+    @NonNull
+    @Override
+    protected DownloadManager getDownloadManager() {
+        DownloadManager downloadManager = DownloadUtil.getDownloadManager(this);
+        DownloadNotificationHelper downloadNotificationHelper =
+                DownloadUtil.getDownloadNotificationHelper(this);
+        downloadManager.addListener(
+                new TerminalStateNotificationHelper(
+                        this, downloadNotificationHelper, FOREGROUND_NOTIFICATION_ID + 1));
+        return downloadManager;
     }
 
     @Override
-    public void onDownloadChanged(
-        DownloadManager downloadManager, Download download, @Nullable Exception finalException) {
-      Notification notification;
-      if (download.state == Download.STATE_COMPLETED) {
-        notification =
-            notificationHelper.buildDownloadCompletedNotification(
-                context,
-                R.drawable.ic_download_done,
-                /* contentIntent= */ null,
-                Util.fromUtf8Bytes(download.request.data));
-      } else if (download.state == Download.STATE_FAILED) {
-        notification =
-            notificationHelper.buildDownloadFailedNotification(
-                context,
-                R.drawable.ic_download_done,
-                /* contentIntent= */ null,
-                Util.fromUtf8Bytes(download.request.data));
-      } else {
-        return;
-      }
-      NotificationUtil.setNotification(context, nextNotificationId++, notification);
+    protected Scheduler getScheduler() {
+        return Util.SDK_INT >= 21 ? new PlatformScheduler(this, JOB_ID) : null;
     }
-  }
+
+    @NonNull
+    @Override
+    protected Notification getForegroundNotification(
+            @NonNull List<Download> downloads, @Requirements.RequirementFlags int notMetRequirements) {
+        return DownloadUtil.getDownloadNotificationHelper(this)
+                .buildProgressNotification(
+                        this,
+                        R.drawable.ic_download,
+                        null,
+                        null,
+                        downloads,
+                        notMetRequirements);
+    }
+
+    private static final class TerminalStateNotificationHelper implements DownloadManager.Listener {
+
+        private final Context context;
+        private final DownloadNotificationHelper notificationHelper;
+
+        private int nextNotificationId;
+
+        public TerminalStateNotificationHelper(
+                Context context, DownloadNotificationHelper notificationHelper, int firstNotificationId) {
+            this.context = context.getApplicationContext();
+            this.notificationHelper = notificationHelper;
+            nextNotificationId = firstNotificationId;
+        }
+
+        @Override
+        public void onDownloadChanged(
+                @NonNull DownloadManager downloadManager, Download download, @Nullable Exception finalException) {
+            Notification notification;
+            if (download.state == Download.STATE_COMPLETED) {
+                notification =
+                        notificationHelper.buildDownloadCompletedNotification(
+                                context,
+                                R.drawable.ic_download_done,
+                                /* contentIntent= */ null,
+                                Util.fromUtf8Bytes(download.request.data));
+            } else if (download.state == Download.STATE_FAILED) {
+                notification =
+                        notificationHelper.buildDownloadFailedNotification(
+                                context,
+                                R.drawable.ic_download_done,
+                                /* contentIntent= */ null,
+                                Util.fromUtf8Bytes(download.request.data));
+            } else {
+                return;
+            }
+            NotificationUtil.setNotification(context, nextNotificationId++, notification);
+        }
+    }
 }

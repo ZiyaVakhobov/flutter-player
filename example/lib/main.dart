@@ -35,6 +35,38 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  pauseDownload() async {
+    try {
+      var s = await _udevsVideoPlayerPlugin.pauseDownload(
+              downloadConfig: DownloadConfiguration(
+            url:
+                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+          )) ??
+          'nothing';
+      if (kDebugMode) {
+        print('result: $s');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+  }
+
+  resumeDownload() async {
+    try {
+      var s = await _udevsVideoPlayerPlugin.resumeDownload(
+              downloadConfig: DownloadConfiguration(
+            url:
+                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+          )) ??
+          'nothing';
+      if (kDebugMode) {
+        print('result: $s');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+  }
+
   Future<bool> checkIsDownloaded() async {
     bool isDownloaded = false;
     try {
@@ -157,6 +189,14 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: download,
                 child: const Text('Download'),
+              ),
+              ElevatedButton(
+                onPressed: pauseDownload,
+                child: const Text('Pause Download'),
+              ),
+              ElevatedButton(
+                onPressed: resumeDownload,
+                child: const Text('Resume Download'),
               ),
               ElevatedButton(
                 onPressed: getCurrentProgressDownload,

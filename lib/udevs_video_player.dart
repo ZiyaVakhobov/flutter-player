@@ -27,6 +27,20 @@ class UdevsVideoPlayer {
         .downloadVideo(downloadConfigJsonString: jsonStringConfig);
   }
 
+  Future<dynamic> pauseDownload(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance
+        .pauseDownload(downloadConfigJsonString: jsonStringConfig);
+  }
+
+  Future<dynamic> resumeDownload(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance
+        .resumeDownload(downloadConfigJsonString: jsonStringConfig);
+  }
+
   Future<bool> isDownloadVideo(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());

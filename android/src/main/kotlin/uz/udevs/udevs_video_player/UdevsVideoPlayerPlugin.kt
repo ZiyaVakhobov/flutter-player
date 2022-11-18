@@ -4,9 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Util
@@ -23,14 +20,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import uz.udevs.udevs_video_player.activities.PlayerViewModel
 import uz.udevs.udevs_video_player.activities.UdevsVideoPlayerActivity
 import uz.udevs.udevs_video_player.models.DownloadConfiguration
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.services.DownloadTracker
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.MyDownloadService
-import kotlin.math.roundToInt
 
 const val EXTRA_ARGUMENT = "uz.udevs.udevs_video_player.ARGUMENT"
 const val EXTRA_ARGUMENT1 = "uz.udevs.udevs_video_player.ARGUMENT1"
@@ -70,7 +65,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 resultMethod = result
             }
         } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" ||
-                call.method == "getCurrentProgressDownload") {
+            call.method == "getCurrentProgressDownload" || call.method == "pauseDownload" ||
+            call.method == "resumeDownload"
+        ) {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
                 val gson = Gson()
@@ -83,7 +80,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     .setUri(uri)
                     .setMediaMetadata(MediaMetadata.Builder().setTitle("My title").build())
                     .setMimeType(adaptiveMimeType).build()
-                when(call.method) {
+                when (call.method) {
                     "downloadVideo" -> {
                         downloadTracker?.toggleDownload(mediaItem, renderersFactory)
                     }
@@ -96,6 +93,12 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         val progressDownload =
                             downloadTracker?.getCurrentProgressDownload(mediaItem)
                         result.success(progressDownload)
+                    }
+                    "pauseDownload" -> {
+                        downloadTracker?.pauseAllDownloading()
+                    }
+                    "resumeDownload" -> {
+                        downloadTracker?.resumeAllDownload()
                     }
                 }
             }

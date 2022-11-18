@@ -31,6 +31,14 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('downloadVideo() has not been implemented.');
   }
 
+  Future<String?> pauseDownload({required String downloadConfigJsonString}) {
+    throw UnimplementedError('pauseDownload() has not been implemented.');
+  }
+
+  Future<String?> resumeDownload({required String downloadConfigJsonString}) {
+    throw UnimplementedError('resumeDownload() has not been implemented.');
+  }
+
   Future<bool> isDownloadVideo({required String downloadConfigJsonString}) {
     throw UnimplementedError('isDownloadVideo() has not been implemented.');
   }

@@ -19,6 +19,7 @@ import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.roundToInt
 
+
 class DownloadTracker(
     context: Context,
     dataSourceFactory: DataSource.Factory,
