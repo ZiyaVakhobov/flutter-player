@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".activities.ExampleActivity">
+
+    <TextView
+        android:id="@+id/percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 %"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Download"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/removeAll"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Remove all"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/pauseAll"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Pause all"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/resumeAll"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:text="Resume all"
+        tools:ignore="HardcodedText" />
+
+</LinearLayout>

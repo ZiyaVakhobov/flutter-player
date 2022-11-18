@@ -4,7 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.Util
+import androidx.media3.exoplayer.RenderersFactory
+import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadService
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
@@ -16,14 +21,16 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import uz.udevs.udevs_video_player.activities.PlayerViewModel
 import uz.udevs.udevs_video_player.activities.UdevsVideoPlayerActivity
 import uz.udevs.udevs_video_player.models.DownloadConfiguration
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.services.DownloadTracker
+import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.MyDownloadService
-import uz.udevs.udevs_video_player.services.MyUtil
 
 const val EXTRA_ARGUMENT = "uz.udevs.udevs_video_player.ARGUMENT"
+const val EXTRA_ARGUMENT1 = "uz.udevs.udevs_video_player.ARGUMENT1"
 const val PLAYER_ACTIVITY = 111
 const val PLAYER_ACTIVITY_FINISH = 222
 
@@ -35,13 +42,26 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var resultMethod: Result? = null
     private var downloadResult: Result? = null
     private var downloadTracker: DownloadTracker? = null
+    lateinit var renderersFactory: RenderersFactory
+    lateinit var playerViewModel: PlayerViewModel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
         channel.setMethodCallHandler(this)
-        downloadTracker = MyUtil.getDownloadTracker(flutterPluginBinding.applicationContext)
+        downloadTracker = DownloadUtil.getDownloadTracker(flutterPluginBinding.applicationContext)
         startDownloadService(flutterPluginBinding.applicationContext)
         downloadTracker!!.addListener(this)
+        renderersFactory =
+            DownloadUtil.buildRenderersFactory(flutterPluginBinding.applicationContext, false)
+//        playerViewModel = ViewModelProvider(this)[PlayerViewModel::class.java]
+//        val viewModel: PlayerViewModel by viewModels()
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.uiState.collect {
+//                     Update UI elements
+//                }
+//            }
+//        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -63,7 +83,14 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val gson = Gson()
                 val downloadConfiguration =
                     gson.fromJson(downloadConfigJsonString, DownloadConfiguration::class.java)
-                downloadTracker?.toggleDownload(MediaItem.fromUri(Uri.parse(downloadConfiguration.url)))
+                val uri = Uri.parse(downloadConfiguration.url)
+                val adaptiveMimeType: String? =
+                    Util.getAdaptiveMimeTypeForContentType(Util.inferContentType(uri))
+                val mediaItem = MediaItem.Builder()
+                    .setUri(uri)
+                    .setMediaMetadata(MediaMetadata.Builder().setTitle("My title").build())
+                    .setMimeType(adaptiveMimeType).build()
+                downloadTracker?.toggleDownload(mediaItem, renderersFactory)
                 downloadResult = result
             }
         } else if (call.method == "checkIsDownloadedVideo") {
@@ -132,7 +159,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
-    override fun onDownloadsChanged() {
+    override fun onDownloadsChanged(download: Download) {
         // TODO onDownloaded all
     }
 }
