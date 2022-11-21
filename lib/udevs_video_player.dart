@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:udevs_video_player/models/download_configuration.dart';

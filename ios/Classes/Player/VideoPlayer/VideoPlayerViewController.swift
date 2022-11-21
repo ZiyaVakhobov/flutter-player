@@ -22,7 +22,7 @@ enum PlaybackMode: Int {
     case remote
 }
 
-class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate, GCKSessionManagerListener, GCKRemoteMediaClientListener, GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate, PlayerViewDelegate {
+class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate,  GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate, PlayerViewDelegate {
     
     private var speedList = ["2.0","1.5","1.25","1.0","0.5"].sorted()
     
@@ -42,6 +42,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var queueAdded: Bool = false
     ///
     weak var delegate: VideoPlayerDelegate?
+    private var url: String?
     var qualityLabelText = ""
     var speedLabelText = ""
     var selectedSeason: Int = 0
@@ -66,12 +67,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     private var portraitConstraints = Constraints()
     private var landscapeConstraints = Constraints()
-    
-    var mediaInfo: GCKMediaInformation? {
-        didSet {
-            print("setMediaInfo: \(String(describing: mediaInfo))")
-        }
-    }
     
     init() {
         sessionManager = GCKCastContext.sharedInstance().sessionManager
@@ -112,6 +107,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        url = playerConfiguration.url
         let resList = resolutions ?? ["480p":playerConfiguration.url]
         sortedResolutions = Array(resList.keys).sorted().reversed()
         Array(resList.keys).sorted().reversed().forEach { quality in
@@ -125,39 +121,16 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             UIDevice.current.setValue(value, forKey: "orientation")
         }
         view.backgroundColor = .black
-        setNeedsUpdateOfHomeIndicatorAutoHidden()
-        castMedio()
+        
         playerView.delegate = self
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
         playerView.edgesToSuperview()
-//        playerView.loadMedia(mediaInfo, area: view.safeAreaLayoutGuide)
         setupPictureInPicture()
         
         NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
                                                name: NSNotification.Name.gckCastStateDidChange,
                                                object: GCKCastContext.sharedInstance())
-    }
-    
-    private func castMedio(){
-        let metadata = GCKMediaMetadata()
-            metadata.setString("Big Buck Bunny (2008)", forKey: kGCKMetadataKeyTitle)
-            metadata.setString("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than " +
-              "himself. When one sunny day three rodents rudely harass him, something " +
-              "snaps... and the rabbit ain't no bunny anymore! In the typical cartoon " +
-              "tradition he prepares the nasty rodents a comical revenge.",
-                               forKey: kGCKMetadataKeySubtitle)
-            metadata.addImage(GCKImage(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg")!,
-                                       width: 480,
-                                       height: 360))
-            
-            /*Loading media to cast by creating a media request*/
-            let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
-                                                                                playerConfiguration.url)!)
-            mediaInfoBuilder.streamType = GCKMediaStreamType.none
-            mediaInfoBuilder.contentType = "video/mp4"
-            mediaInfoBuilder.metadata = metadata
-           mediaInfo = mediaInfoBuilder.build()
     }
     
     @objc func castDeviceDidChange(_: Notification) {
@@ -169,16 +142,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        
-        print("viewWillAppear; mediaInfo is \(String(describing: mediaInfo)), mode is \(playbackMode)")
-        //        appDelegate?.isCastControlBarsEnabled = true
         if playbackMode == .local, localPlaybackImplicitlyPaused {
-            playerView.runPlayer(startAt: playerConfiguration.lastPosition)
             localPlaybackImplicitlyPaused = false
         }
         // If we're in remote playback but no longer have a session, then switch to local playback
         // mode. If we're in local mode but now have a session, then switch to remote playback mode.
         let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
+        print("hasConnectedSession")
+        print(hasConnectedSession)
+        print(playbackMode)
         if hasConnectedSession, (playbackMode != .remote) {
             populateMediaInfo(false, playPosition: 0)
             switchToRemotePlayback()
@@ -187,9 +159,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         } else {
             populateMediaInfo(false, playPosition: 0)
         }
-        
         sessionManager.add(self)
-        
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         super.viewWillAppear(animated)
     }
@@ -208,9 +178,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
+        playerView.stop()
+        playerView.removeMediaPlayerObservers()
         NotificationCenter.default.removeObserver(self)
-        let value = UIInterfaceOrientationMask.portrait.rawValue
-        UIDevice.current.setValue(value, forKey: "orientation")
+        UIDevice.current.setValue(UIInterfaceOrientationMask.portrait.rawValue, forKey: "orientation")
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -237,43 +208,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         return [.bottom]
     }
     
-    // MARK: - GCKSessionManagerListener
-
-    func sessionManager(_: GCKSessionManager, didStart session: GCKSession) {
-      print("MediaViewController: sessionManager didStartSession \(session)")
-      setQueueButtonVisible(true)
-      switchToRemotePlayback()
-    }
-
-    func sessionManager(_: GCKSessionManager, didResumeSession session: GCKSession) {
-      print("MediaViewController: sessionManager didResumeSession \(session)")
-      setQueueButtonVisible(true)
-      switchToRemotePlayback()
-    }
-
-    func sessionManager(_: GCKSessionManager, didEnd _: GCKSession, withError error: Error?) {
-      print("session ended with error: \(String(describing: error))")
-      let message = "The Casting session has ended.\n\(String(describing: error))"
-//      if let window = appDelegate?.window {
-//        Toast.displayMessage(message, for: 3, in: window)
-//      }
-      setQueueButtonVisible(false)
-      switchToLocalPlayback()
-    }
-    
-    func setQueueButtonVisible(_ visible: Bool) {
-        if visible, !queueAdded {
-            var barItems = navigationItem.rightBarButtonItems
-            barItems?.append(queueButton)
-            navigationItem.rightBarButtonItems = barItems
-            queueAdded = true
-        } else if !visible, queueAdded {
-            var barItems = navigationItem.rightBarButtonItems
-            let index = barItems?.firstIndex(of: queueButton) ?? -1
-            barItems?.remove(at: index)
-            navigationItem.rightBarButtonItems = barItems
-            queueAdded = false
-        }
+    func populateMediaInfo(_ autoPlay: Bool, playPosition: TimeInterval) {
+        print("populateMediaInfo")
+        playerView.loadMedia(buildMediaInfo(position: playerView.streamPosition ?? 0, url: playerConfiguration.url), autoPlay: autoPlay, playPosition: playPosition, area: view.safeAreaLayoutGuide)
     }
     
     func switchToLocalPlayback() {
@@ -281,7 +218,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         if playbackMode == .local {
             return
         }
-        setQueueButtonVisible(false)
         var playPosition: TimeInterval = 0
         var paused: Bool = false
         var ended: Bool = false
@@ -296,43 +232,55 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         playbackMode = .local
     }
     
-    func populateMediaInfo(_ autoPlay: Bool, playPosition: TimeInterval) {
-        print("populateMediaInfo")
-        playerView.loadMedia(mediaInfo, autoPlay: autoPlay, playPosition: playPosition, area: view.safeAreaLayoutGuide)
-    }
-    
     func switchToRemotePlayback() {
-        print("switchToRemotePlayback; mediaInfo is \(String(describing: mediaInfo))")
         if playbackMode == .remote {
             return
         }
         // If we were playing locally, load the local media on the remote player
         if playbackMode == .local, (playerView.playerState != .stopped) {
-            print("loading media: \(String(describing: mediaInfo))")
-            let paused: Bool = (playerView.playerState == .paused)
-            let mediaQueueItemBuilder = GCKMediaQueueItemBuilder()
-            mediaQueueItemBuilder.mediaInformation = mediaInfo
-            mediaQueueItemBuilder.autoplay = !paused
-            mediaQueueItemBuilder.preloadTime = TimeInterval()
-            mediaQueueItemBuilder.startTime = playerView.streamPosition ?? 0
-            let mediaQueueItem = mediaQueueItemBuilder.build()
-            
-            let queueDataBuilder = GCKMediaQueueDataBuilder(queueType: .generic)
-            queueDataBuilder.items = [mediaQueueItem]
-            queueDataBuilder.repeatMode = .off
-            
             let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
-            mediaLoadRequestDataBuilder.mediaInformation = mediaInfo
-            mediaLoadRequestDataBuilder.queueData = queueDataBuilder.build()
+            mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: playerConfiguration.url)
+            mediaLoadRequestDataBuilder.autoplay = true
+            mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
+            mediaLoadRequestDataBuilder.credentials = "user-credentials"
+            mediaLoadRequestDataBuilder.atvCredentials = "atv-user-credentials"
             
             let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
             request?.delegate = self
         }
         playerView.stop()
-        //      _localPlayerView.showSplashScreen()
-        setQueueButtonVisible(true)
         sessionManager.currentCastSession?.remoteMediaClient?.add(self)
         playbackMode = .remote
+    }
+    
+    private func loadRemoteMedia(position: Double){
+        if sessionManager == nil {
+            return
+        }
+        let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
+        mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: url ?? "")
+        mediaLoadRequestDataBuilder.autoplay = true
+        mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
+        mediaLoadRequestDataBuilder.credentials = "user-credentials"
+        mediaLoadRequestDataBuilder.atvCredentials = "atv-user-credentials"
+        
+        let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
+        request?.delegate = self
+    }
+    
+    func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
+        /*GCKMediaMetadata configuration*/
+        var metadata = GCKMediaMetadata()
+        metadata.setString(playerConfiguration.title, forKey: kGCKMetadataKeyTitle)
+        
+        /*Loading media to cast by creating a media request*/
+        let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
+                                                                            url)!)
+        mediaInfoBuilder.streamType = GCKMediaStreamType.buffered
+        mediaInfoBuilder.contentType = "videos/m3u8"
+        mediaInfoBuilder.metadata = metadata
+        mediaInfoBuilder.streamDuration = position
+        return mediaInfoBuilder.build()
     }
     
     private func addVideosLandscapeConstraints() {
@@ -368,38 +316,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func close(duration:Double){
         self.dismiss(animated: true, completion: nil);
         delegate?.getDuration(duration: duration)
-    }
-    
-    func loadMediaToCast() {
-        GCKCastContext.sharedInstance().presentDefaultExpandedMediaControls()
-        
-        /*GCKMediaMetadata configuration*/
-        var metadata = GCKMediaMetadata()
-        metadata.setString("Big Buck Bunny (2008)", forKey: kGCKMetadataKeyTitle)
-        metadata.setString("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than " +
-                           "himself. When one sunny day three rodents rudely harass him, something " +
-                           "snaps... and the rabbit ain't no bunny anymore! In the typical cartoon " +
-                           "tradition he prepares the nasty rodents a comical revenge.",
-                           forKey: kGCKMetadataKeySubtitle)
-        metadata.addImage(GCKImage(url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg")!,
-                                   width: 480,
-                                   height: 360))
-        
-        /*Loading media to cast by creating a media request*/
-        let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
-                                                                            "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/ElephantsDream.mp4")!)
-        mediaInfoBuilder.streamType = GCKMediaStreamType.none
-        mediaInfoBuilder.contentType = "video/mp4"
-        mediaInfoBuilder.metadata = metadata
-        mediaInfo = mediaInfoBuilder.build()
-        
-        /*Configuring the media request*/
-        let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
-        mediaLoadRequestDataBuilder.mediaInformation = mediaInfo
-        
-        if let request = sessionManager.currentSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build()) {
-            request.delegate = self
-        }
     }
     
     func changeOrientation(){
@@ -597,16 +513,47 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 return
             }
             if self.playerConfiguration.url != videoUrl!{
-                self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
+                if playbackMode == .local{
+                    self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
+                    self.url = videoUrl
+                } else {
+                    self.url = videoUrl
+                    loadRemoteMedia(position: 0)
+                }
             } else {
                 print("ERROR")
             }
             return
         } else if !self.resolutions!.isEmpty {
-            let videoUrl = Array(resolutions!.values)[0]
-            self.playerView.changeUrl(url: videoUrl, title: title)
+            if playbackMode == .local {
+                let videoUrl = Array(resolutions!.values)[0]
+                self.playerView.changeUrl(url: videoUrl, title: title)
+                self.url = videoUrl
+            } else {
+                let videoUrl = Array(resolutions!.values)[0]
+                self.url = videoUrl
+                loadRemoteMedia(position: playerView.streamPosition ?? 0)
+            }
             return
         }
+    }
+}
+
+extension VideoPlayerViewController: GCKSessionManagerListener, GCKRemoteMediaClientListener {
+    // MARK: - GCKSessionManagerListener
+    func sessionManager(_: GCKSessionManager, didStart session: GCKSession) {
+        print("MediaViewController: sessionManager didStartSession \(session)")
+        self.switchToRemotePlayback()
+    }
+    
+    func sessionManager(_: GCKSessionManager, didResumeSession session: GCKSession) {
+        print("MediaViewController: sessionManager didResumeSession \(session)")
+        self.switchToRemotePlayback()
+    }
+    
+    func sessionManager(_: GCKSessionManager, didEnd _: GCKSession, withError error: Error?) {
+        print("session ended with error: \(String(describing: error))")
+        self.switchToLocalPlayback()
     }
 }
 

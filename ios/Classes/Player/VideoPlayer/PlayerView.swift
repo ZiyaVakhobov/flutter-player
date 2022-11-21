@@ -31,6 +31,8 @@ class PlayerView: UIView {
     
     private var player = AVPlayer()
     var playerLayer =  AVPlayerLayer()
+    private var mediaTimeObserver: Any?
+    private var observingMediaPlayer: Bool = false
     var playerConfiguration: PlayerConfiguration!
     weak var delegate: PlayerViewDelegate?
     
@@ -241,7 +243,7 @@ class PlayerView: UIView {
         overlayView.isHidden = isPiP
     }
     
-    func loadMedia(_ media: GCKMediaInformation?,autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
+    func loadMedia(_ media: GCKMediaInformation?, autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
         if self.media?.contentURL != nil && (self.media?.contentURL == media?.contentURL) {
           print("Don't reinit if media already set")
           return
@@ -265,7 +267,6 @@ class PlayerView: UIView {
         pendingPlay = autoPlay
         
         loadMediaPlayer()
-        runPlayer(startAt: playerConfiguration.lastPosition)
     }
 
     
@@ -334,28 +335,14 @@ class PlayerView: UIView {
         }
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
-//        playerLayer.frame = fullFrame()
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
-//        playerLayer.backgroundColor = UIColor.green.cgColor
-//        addSubview(videoView)
         videoView.layer.addSublayer(playerLayer)
         layer.insertSublayer(playerLayer, above: videoView.layer)
-        player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
-        player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
-        player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         if !playerConfiguration.isLive{
             NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
         }
-        setTitle(title: playerConfiguration.title)
         addTimeObserver()
-    }
-    
-    func runPlayer(startAt: Int){
-        player.currentItem?.preferredForwardBufferDuration = TimeInterval(40000)
-        player.automaticallyWaitsToMinimizeStalling = true;
-        player.seek(to:CMTimeMakeWithSeconds(Float64(Float(startAt)),preferredTimescale: 1000))
-        player.play()
     }
     
     func changeUrl(url:String?, title: String?){
@@ -754,20 +741,6 @@ class PlayerView: UIView {
         }
     }
     
-//    func loadMediaPlayer() {
-//        print("loadMediaPlayer")
-//        if let contentURL = media?.contentURL {
-//          player = AVPlayer(url: contentURL)
-////          playerLayer = AVPlayerLayer(player: player)
-////          if let mediaPlayerLayer = playerLayer {
-////            playerLayer.frame = fullFrame()
-////            layer.insertSublayer(playerLayer, above: videoView.layer)
-////          }
-////          addMediaPlayerObservers()
-//        }
-//
-//    }
-    
     func handleMediaPlayerReady() {
       print("handleMediaPlayerReady \(pendingPlay)")
       if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
@@ -997,6 +970,9 @@ class PlayerView: UIView {
     
     //MARK: - Time logic
     func addTimeObserver() {
+        player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
+        player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
+        player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         if(!playerConfiguration.isLive){
         let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         let mainQueue = DispatchQueue.main
@@ -1017,9 +993,27 @@ class PlayerView: UIView {
         }
     }
     
+    func removeMediaPlayerObservers() {
+      print("removeMediaPlayerObservers")
+      if observingMediaPlayer {
+        if let mediaTimeObserverToRemove = mediaTimeObserver {
+          player.removeTimeObserver(mediaTimeObserverToRemove)
+          mediaTimeObserver = nil
+        }
+          if player.currentItem != nil {
+          NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                    object: player.currentItem)
+        }
+        player.currentItem?.removeObserver(self, forKeyPath: "duration")
+        player.currentItem?.removeObserver(self, forKeyPath: "timeControlStatus")
+        player.currentItem?.removeObserver(self, forKeyPath: "status")
+        observingMediaPlayer = false
+      }
+    }
+    
     func stop() {
-      purgeMediaPlayer()
       playerState = .stopped
+      player.pause()
     }
     
     func purgeMediaPlayer() {
@@ -1031,22 +1025,6 @@ class PlayerView: UIView {
 //      pendingPlay = true
 //      seeking = false
     }
-    
-    func notifyStreamPositionChanged(_ time: CMTime) {
-      if (player.currentItem?.status != .readyToPlay) || seeking {
-        return
-      }
-      streamPosition = CMTimeGetSeconds(time)
-      guard let streamDuration = streamDuration, let streamPosition = streamPosition else { return }
-      timeSlider.value = Float(streamPosition)
-      var remainingTime: TimeInterval = (Float(streamDuration) > Float(streamPosition)) ?
-        (streamDuration - streamPosition) : 0
-      if remainingTime > 0 {
-        remainingTime = -remainingTime
-      }
-      durationTimeLabel.text = GCKUIUtils.timeInterval(asString: remainingTime)
-    }
    
-
     
 }

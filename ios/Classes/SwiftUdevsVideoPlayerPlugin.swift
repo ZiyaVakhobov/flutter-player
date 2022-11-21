@@ -54,7 +54,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     func getDuration(duration: Double) {
-        flutterResult!("\(duration)")
+        flutterResult!("\(Int(duration))")
     }
     
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
