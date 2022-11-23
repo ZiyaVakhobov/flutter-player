@@ -13,6 +13,10 @@ export 'package:udevs_video_player/models/programs_info.dart';
 export 'package:udevs_video_player/models/download_configuration.dart';
 
 class UdevsVideoPlayer {
+  UdevsVideoPlayer._();
+  static final UdevsVideoPlayer _instance = UdevsVideoPlayer();
+  factory UdevsVideoPlayer() => _instance;
+
   Future<String?> playVideo({required PlayerConfiguration playerConfig}) {
     String jsonStringConfig = jsonEncode(playerConfig.toJson());
     return UdevsVideoPlayerPlatform.instance.playVideo(
