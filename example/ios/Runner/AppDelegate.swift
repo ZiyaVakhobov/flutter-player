@@ -11,6 +11,7 @@ let kPrefSDKVersion = "sdk_version"
 let kPrefEnableMediaNotifications = "enable_media_notifications"
 
 let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
     
@@ -20,6 +21,29 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
     fileprivate var mediaNotificationsEnabled = false
     fileprivate var firstUserDefaultsSync = false
     fileprivate var useCastContainerViewController = false
+    
+    var isCastControlBarsEnabled: Bool {
+        get {
+          if useCastContainerViewController {
+            let castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
+            return castContainerVC!.miniMediaControlsItemEnabled
+          } else {
+            let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+            return rootContainerVC!.miniMediaControlsViewEnabled
+          }
+        }
+        set(notificationsEnabled) {
+          if useCastContainerViewController {
+            var castContainerVC: GCKUICastContainerViewController?
+            castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
+            castContainerVC?.miniMediaControlsItemEnabled = notificationsEnabled
+          } else {
+            var rootContainerVC: RootContainerViewController?
+            rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+            rootContainerVC?.miniMediaControlsViewEnabled = notificationsEnabled
+          }
+        }
+      }
     
     override func application(
         _ application: UIApplication,
@@ -33,14 +57,17 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         }
         populateRegistrationDomain()
 
+        // We are forcing a custom container view controller, but the Cast Container is also available.
+        useCastContainerViewController = false
+
         // Set your receiver application ID.
         let options = GCKCastOptions(discoveryCriteria: GCKDiscoveryCriteria(applicationID: kReceiverAppID))
         options.physicalVolumeButtonsWillControlDeviceVolume = true
         
         /** Following code enables CastConnect */
-        let launchOptions1 = GCKLaunchOptions()
-        launchOptions1.androidReceiverCompatible = true
-        options.launchOptions = launchOptions1
+        let launchOption = GCKLaunchOptions()
+        launchOption.androidReceiverCompatible = true
+        options.launchOptions = launchOption
         
         GCKCastContext.setSharedInstanceWith(options)
         GCKCastContext.sharedInstance().useDefaultExpandedMediaControls = true
@@ -51,6 +78,21 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         window?.clipsToBounds = true
         setupCastLogging()
 
+        if useCastContainerViewController {
+          let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
+          guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
+                  as? UINavigationController else { return false }
+          let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
+                  as GCKUICastContainerViewController
+          castContainerVC.miniMediaControlsItemEnabled = true
+          window = UIWindow(frame: UIScreen.main.bounds)
+          window?.rootViewController = castContainerVC
+          window?.makeKeyAndVisible()
+        } else {
+          let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+          rootContainerVC?.miniMediaControlsViewEnabled = true
+        }
+
         NotificationCenter.default.addObserver(self, selector: #selector(syncWithUserDefaults),
                                                name: UserDefaults.didChangeNotification,
                                                object: nil)
@@ -60,6 +102,18 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
+    
+//    private func setupMini() -> Bool {
+//        let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
+//         guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
+//           as? UINavigationController else { return false }
+//         let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
+//           as GCKUICastContainerViewController
+//         castContainerVC.miniMediaControlsItemEnabled = true
+//         window = UIWindow(frame: UIScreen.main.bounds)
+//         window?.rootViewController = castContainerVC
+//         window?.makeKeyAndVisible()
+//    }
     
     func setupCastLogging() {
       let logFilter = GCKLoggerFilter()

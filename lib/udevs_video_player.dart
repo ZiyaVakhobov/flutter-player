@@ -79,7 +79,14 @@ class UdevsVideoPlayer {
     return controller.stream;
   }
 
+
   Future<dynamic> closeVideo() {
     return UdevsVideoPlayerPlatform.instance.closeVideo();
   }
+
+  Future<dynamic> download(String url) {
+    return UdevsVideoPlayerPlatform.instance.download(url);
+  }
+
+  Stream<int> get percent => UdevsVideoPlayerPlatform.instance.percent();
 }

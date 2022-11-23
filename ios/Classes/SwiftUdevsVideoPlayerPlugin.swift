@@ -3,16 +3,22 @@ import AVFoundation
 import AVFAudio
 import UIKit
 
-public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate, AVAssetDownloadDelegate {
+public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate, AVAssetDownloadDelegate, AVAssetResourceLoaderDelegate {
     
     public static var viewController = FlutterViewController()
     private var flutterResult: FlutterResult?
+    private static var channel : FlutterMethodChannel?
+    
+    var configuration: URLSessionConfiguration?
+    var downloadSession: AVAssetDownloadURLSession?
+    var downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
+    var totalDownloadedBytes: Int64 = 0
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
-        let channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
+        channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
         let instance = SwiftUdevsVideoPlayerPlugin()
-        registrar.addMethodCallDelegate(instance, channel: channel)
+        registrar.addMethodCallDelegate(instance, channel: channel!)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -20,6 +26,20 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         switch call.method  {
         case "closePlayer": do {
             SwiftUdevsVideoPlayerPlugin.viewController.dismiss(animated:true)
+            return
+        }
+        case "download": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = args as? [String: String]else {
+                return
+            }
+            guard let url = json["url"] else {
+                return
+            }
+            print("Download URL \(url)")
+            setupAssetDownload(videoUrl: url)
             return
         }
         case "playVideo": do {
@@ -49,7 +69,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         default: do {
             result("Not Implemented")
             return
-          }
+        }
         }
     }
     
@@ -57,8 +77,14 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         flutterResult!("\(Int(duration))")
     }
     
+    private func getPercentComplete(percent: Int){
+        SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: Int(percent))
+    }
+    
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
+        
         var percentComplete = 0.0
+        print("percentComplete \(percentComplete)")
         // Iterate through the loaded time ranges
         for value in loadedTimeRanges {
             // Unwrap the CMTimeRange from the NSValue
@@ -67,14 +93,57 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             percentComplete += loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
         }
         percentComplete *= 100
-        // Update UI state: post notification, update KVO state, invoke callback, etc.
+        print("percentComplete \(percentComplete)")
+        getPercentComplete(percent :Int(percentComplete))
+        let params = ["percent": percentComplete]
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "completion"), object: nil, userInfo: params)
     }
     
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didFinishDownloadingTo location: URL) {
+        
+        print("percentComplete \(100)")
         // Do not move the asset from the download location
         UserDefaults.standard.set(location.relativePath, forKey: "testVideoPath")
     }
+    
+    
+    func setupAssetDownload(videoUrl: String) {
+        // Create new background session configuration.
+        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+        
+        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
+        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
+                                                    assetDownloadDelegate: self,
+                                                    delegateQueue: OperationQueue.main)
+        
+        if let url = URL(string: videoUrl){
+            let options = [AVURLAssetAllowsCellularAccessKey: false]
+            let asset = AVURLAsset(url: url, options: options)
+            asset.resourceLoader.setDelegate(self, queue: DispatchQueue(label: "uz.udevs.udevsVideoPlayer"))
+            // Create new AVAssetDownloadTask for the desired asset
+            let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
+                                                                      assetTitle: "Some Title",
+                                                                      assetArtworkData: nil,
+                                                                      options: nil)
+            
+            print("Download URL \(url)")
+            
+
+//            downloadSession?.makeAssetDownloadTask(
+//                  asset: asset,
+//                  assetTitle: "My Video",
+//                  assetArtworkData: nil,
+//                  options: nil
+//               )?.resume()
+            // Start task and begin download
+            downloadTask?.resume()
+        }
+    }
+    
+    
+    
 }
+
 
 //struct Download  {
 ////    var configuration: URLSessionConfiguration?

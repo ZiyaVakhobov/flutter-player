@@ -50,4 +50,12 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
   Future<dynamic> closeVideo() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<dynamic> download(String url) {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Stream<int> percent() {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
 }
