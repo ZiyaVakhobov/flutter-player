@@ -85,17 +85,6 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
-  Future<dynamic> download(String url) async {
-    final res = await methodChannel.invokeMethod<dynamic>(
-      'download',
-      <String, String>{
-        'url': url,
-      },
-    );
-    return res;
-  }
-
-  @override
   Stream<int> currentProgressDownloadAsStream() {
     methodChannel.setMethodCallHandler((call) async {
       if (call.method == 'percent') {

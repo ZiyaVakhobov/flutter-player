@@ -92,7 +92,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         }
         percentComplete *= 100
         print("percentComplete \(percentComplete)")
-        getPercentComplete(percent :Int(percentComplete))
+        getPercentComplete(percent : Int(percentComplete))
         let params = ["percent": percentComplete]
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "completion"), object: nil, userInfo: params)
     }
