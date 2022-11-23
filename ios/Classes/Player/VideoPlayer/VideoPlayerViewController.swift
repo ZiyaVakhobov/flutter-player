@@ -142,6 +142,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
+//        self?.isCastControlBarsEnabled = true
         if playbackMode == .local, localPlaybackImplicitlyPaused {
             localPlaybackImplicitlyPaused = false
         }
@@ -230,6 +231,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         populateMediaInfo((!paused && !ended), playPosition: playPosition)
         sessionManager.currentCastSession?.remoteMediaClient?.remove(self)
         playbackMode = .local
+        playerView.playbackMode = playbackMode
     }
     
     func switchToRemotePlayback() {
@@ -248,12 +250,13 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
             request?.delegate = self
         }
-        playerView.stop()
         sessionManager.currentCastSession?.remoteMediaClient?.add(self)
         playbackMode = .remote
+        playerView.playbackMode = playbackMode
+        playerView.stop()
     }
     
-    private func loadRemoteMedia(position: Double){
+    private func loadRemoteMedia(){
         if sessionManager == nil {
             return
         }
@@ -263,7 +266,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
         mediaLoadRequestDataBuilder.credentials = "user-credentials"
         mediaLoadRequestDataBuilder.atvCredentials = "atv-user-credentials"
-        
         let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
         request?.delegate = self
     }
@@ -301,6 +303,19 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 self.volumeViewSlider = slider
             }
         }
+    }
+    func skipForwardButtonPressed() {
+        
+    }
+    
+    func playButtonPressed() {
+        GCKCastContext.sharedInstance().presentDefaultExpandedMediaControls()
+//        var remoteMediaClient =  !.
+//        if (remoteMediaClient?.isPlaying == true) {
+//            remoteMediaClient.pause()
+//        } else {
+//            remoteMediaClient?.play()
+//        }
     }
     
     func showPressed() {
@@ -518,7 +533,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                     self.url = videoUrl
                 } else {
                     self.url = videoUrl
-                    loadRemoteMedia(position: 0)
+                    loadRemoteMedia()
                 }
             } else {
                 print("ERROR")
@@ -532,7 +547,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             } else {
                 let videoUrl = Array(resolutions!.values)[0]
                 self.url = videoUrl
-                loadRemoteMedia(position: playerView.streamPosition ?? 0)
+                loadRemoteMedia()
             }
             return
         }

@@ -18,6 +18,8 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func showPressed()
     func changeOrientation()
     func togglePictureInPictureMode()
+    func skipForwardButtonPressed()
+    func playButtonPressed()
 }
 
 enum LocalPlayerState: Int {
@@ -51,6 +53,7 @@ class PlayerView: UIView {
     ///
     private(set) var media: GCKMediaInformation?
     private(set) var playerState = LocalPlayerState.stopped
+    var playbackMode = PlaybackMode.none
     // If there is a pending request to seek to a new position.
     private var pendingPlayPosition = TimeInterval()
     // If there is a pending request to start playback.
@@ -265,7 +268,6 @@ class PlayerView: UIView {
         activityIndicatorView.startAnimating()
         pendingPlayPosition = playPosition
         pendingPlay = autoPlay
-        
         loadMediaPlayer()
     }
 
@@ -416,27 +418,35 @@ class PlayerView: UIView {
     }
     
     @objc func skipForwardButtonPressed(_ sender: UIButton){
-        self.forwardTouches += 1
-        self.seekForwardTo(10.0 * Double(self.forwardTouches))
-        self.forwardGestureTimer?.invalidate()
-        self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            self.forwardTouches = 0
+        if playbackMode == .local {
+            self.forwardTouches += 1
+            self.seekForwardTo(10.0 * Double(self.forwardTouches))
+            self.forwardGestureTimer?.invalidate()
+            self.forwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                self.forwardTouches = 0
+            }
+            resetTimer()
+        } else {
+            delegate?.skipForwardButtonPressed()
         }
-        resetTimer()
     }
     
     @objc func playButtonPressed(_ sender: UIButton){
-        if !player.isPlaying {
-            player.play()
-            playButton.setImage(Svg.pause.uiImage, for: .normal)
-            self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
-            self.player.rate = Float(self.playerRate)
-            resetTimer()
+        if playbackMode == .local {
+            if !player.isPlaying {
+                player.play()
+                playButton.setImage(Svg.pause.uiImage, for: .normal)
+                self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
+                self.player.rate = Float(self.playerRate)
+                resetTimer()
+            } else {
+                playButton.setImage(Svg.play.uiImage, for: .normal)
+                player.pause()
+                timer?.invalidate()
+                showControls()
+            }
         } else {
-            playButton.setImage(Svg.play.uiImage, for: .normal)
-            player.pause()
-            timer?.invalidate()
-            showControls()
+            delegate?.playButtonPressed()
         }
     }
     
@@ -720,21 +730,27 @@ class PlayerView: UIView {
             if newValue != oldValue {
                 DispatchQueue.main.async {[weak self] in
                     if newValue == 2 {
-                        self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
-                        self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
-                        self?.activityIndicatorView.stopAnimating()
-                        self?.enableGesture = true
+                        if self?.playbackMode == .local {
+                            self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
+                            self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
+                            self?.activityIndicatorView.stopAnimating()
+                            self?.enableGesture = true
+                        }
                     } else if newValue == 0 {
-                        self?.playButton.setImage(Svg.play.uiImage, for: .normal)
-                        self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
-                        self?.activityIndicatorView.stopAnimating()
-                        self?.enableGesture = true
-                        self?.timer?.invalidate()
-                        self?.showControls()
+                        if self?.playbackMode == .local {
+                            self?.playButton.setImage(Svg.play.uiImage, for: .normal)
+                            self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
+                            self?.activityIndicatorView.stopAnimating()
+                            self?.enableGesture = true
+                            self?.timer?.invalidate()
+                            self?.showControls()
+                        }
                     } else {
-                        self?.playButton.alpha = 0.0
-                        self?.activityIndicatorView.startAnimating()
-                        self?.enableGesture = false
+                        if self?.playbackMode == .local {
+                            self?.playButton.alpha = 0.0
+                            self?.activityIndicatorView.startAnimating()
+                            self?.enableGesture = false
+                        }
                     }
                 }
             }

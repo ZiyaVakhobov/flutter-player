@@ -348,6 +348,21 @@ class _MyAppState extends State<MyApp> {
                 onPressed: playTV,
                 child: const Text('Play TV'),
               ),
+              ElevatedButton(
+                onPressed: (){
+                  _udevsVideoPlayerPlugin.download("https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8");
+                },
+                child: const Text('Download'),
+              ),
+              StreamBuilder<int>(
+                stream: _udevsVideoPlayerPlugin.percent,
+                builder: (_,t) {
+                  return Text(
+                    'Running on: ${t.data}%',
+                  );
+                }
+              ),
+
             ],
           ),
         ),
