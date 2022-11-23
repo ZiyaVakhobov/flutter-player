@@ -10,6 +10,7 @@ import GoogleCast
 import AVFoundation
 import TinyConstraints
 import NVActivityIndicatorView
+import MediaPlayer
 
 protocol PlayerViewDelegate: NSObjectProtocol {
     func close(duration: Double)
@@ -19,7 +20,9 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func changeOrientation()
     func togglePictureInPictureMode()
     func skipForwardButtonPressed()
+    func skipBackButtonPressed()
     func playButtonPressed()
+    func sliderValueChanged(value: Float)
 }
 
 enum LocalPlayerState: Int {
@@ -122,7 +125,7 @@ class PlayerView: UIView {
         return button
     }()
     
-    private var currentTimeLabel: UILabel = {
+    var currentTimeLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
         label.textColor = .white
@@ -231,6 +234,15 @@ class PlayerView: UIView {
         return button
     }()
     
+    private func configureVolume() {
+        let volumeView = MPVolumeView()
+        for view in volumeView.subviews {
+            if let slider = view as? UISlider {
+                self.volumeViewSlider = slider
+            }
+        }
+    }
+    
     private var playerRate = 1.0
     private var enableGesture = true
     private var backwardGestureTimer: Timer?
@@ -268,11 +280,11 @@ class PlayerView: UIView {
         activityIndicatorView.startAnimating()
         pendingPlayPosition = playPosition
         pendingPlay = autoPlay
-        loadMediaPlayer()
+        playOfflineAsset()
     }
-
     
     private func uiSetup(){
+        configureVolume()
         episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
         showsBtn.setTitle(" "+playerConfiguration.tvProgramsText, for: .normal)
         if playerConfiguration.isLive {
@@ -347,6 +359,34 @@ class PlayerView: UIView {
         addTimeObserver()
     }
     
+    
+    func playOfflineAsset() {
+        guard let assetPath = UserDefaults.standard.value(forKey: "\(String(describing: media?.contentURL)).cache") as? String else {
+            loadMediaPlayer()
+            return
+        }
+        let baseURL = URL(fileURLWithPath: NSHomeDirectory())
+        let assetURL = baseURL.appendingPathComponent(assetPath)
+        let asset = AVURLAsset(url: assetURL)
+        if let cache = asset.assetCache, cache.isPlayableOffline {
+            guard (media?.contentURL) != nil else {
+                return
+            }
+            player.automaticallyWaitsToMinimizeStalling = true
+            player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
+            playerLayer = AVPlayerLayer(player: player)
+            playerLayer.videoGravity = .resizeAspect
+            videoView.layer.addSublayer(playerLayer)
+            layer.insertSublayer(playerLayer, above: videoView.layer)
+            if !playerConfiguration.isLive{
+                NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
+            }
+            addTimeObserver()
+        } else {
+            // Present Error: No playable version of this asset exists offline
+        }
+    }
+    
     func changeUrl(url:String?, title: String?){
         guard let videoURL = URL(string: url ?? "") else {
             return
@@ -408,13 +448,17 @@ class PlayerView: UIView {
     }
     
     @objc func skipBackButtonPressed(_ sender: UIButton){
-        self.backwardTouches += 1
-        self.seekBackwardTo(10.0 * Double(self.backwardTouches))
-        self.backwardGestureTimer?.invalidate()
-        self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-            self.backwardTouches = 0
+        if playbackMode == .local {
+            self.backwardTouches += 1
+            self.seekBackwardTo(10.0 * Double(self.backwardTouches))
+            self.backwardGestureTimer?.invalidate()
+            self.backwardGestureTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                self.backwardTouches = 0
+            }
+            resetTimer()
+        } else {
+            delegate?.skipBackButtonPressed()
         }
-        resetTimer()
     }
     
     @objc func skipForwardButtonPressed(_ sender: UIButton){
@@ -792,7 +836,20 @@ class PlayerView: UIView {
         playerState = .paused
       }
     }
-
+    
+    func setPlayButton(isPlay: Bool){
+        if isPlay {
+            playButton.setImage(Svg.pause.uiImage, for: .normal)
+        } else {
+            playButton.setImage(Svg.play.uiImage, for: .normal)
+        }
+    }
+    
+    func setDuration(position: Float){
+        timeSlider.value = position
+        currentTimeLabel.text = VGPlayerUtils.getTimeString(from : CMTimeMake(value: Int64(position), timescale: 1))
+//        durationTimeLabel.text = VGPlayerUtils.getTimeString(from : CMTimeMake(value: Int64(duration), timescale: 1))
+    }
     
     @objc func playerEndedPlaying(_ notification: Notification) {
         DispatchQueue.main.async {[weak self] in
@@ -808,7 +865,6 @@ class PlayerView: UIView {
         
         switch swipeGesture.state {
         case .began:
-            
             let x = abs(velocityPoint.x)
             let y = abs(velocityPoint.y)
             
@@ -948,9 +1004,7 @@ class PlayerView: UIView {
 
     
     @objc func tapGestureControls() {
-        
         let location = tapGesture.location(in: overlayView)
-        
         if location.x > overlayView.bounds.width / 2 + 50 {
             self.fastForward()
         } else if location.x <= overlayView.bounds.width / 2 - 50 {
@@ -981,7 +1035,11 @@ class PlayerView: UIView {
     }
     
     @objc func sliderValueChanged(_ sender: UISlider) {
-        player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
+        if playbackMode == .local {
+            player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
+        } else {
+            delegate?.sliderValueChanged(value: sender.value)
+        }
     }
     
     //MARK: - Time logic

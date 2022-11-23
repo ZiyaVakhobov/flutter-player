@@ -22,6 +22,14 @@ enum PlaybackMode: Int {
     case remote
 }
 
+enum CastSessionStatus {
+    case started
+    case resumed
+    case ended
+    case failedToStart
+    case alreadyConnected
+}
+
 class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerDelegate,  GCKRequestDelegate, SettingsBottomSheetCellDelegate, BottomSheetCellDelegate, PlayerViewDelegate {
     
     private var speedList = ["2.0","1.5","1.25","1.0","0.5"].sorted()
@@ -142,7 +150,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
-//        self?.isCastControlBarsEnabled = true
+        //        self?.isCastControlBarsEnabled = true
         if playbackMode == .local, localPlaybackImplicitlyPaused {
             localPlaybackImplicitlyPaused = false
         }
@@ -172,7 +180,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        configureVolume()
         self.shouldHideHomeIndicator = true
         setNeedsUpdateOfHomeIndicatorAutoHidden()
     }
@@ -251,6 +258,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             request?.delegate = self
         }
         sessionManager.currentCastSession?.remoteMediaClient?.add(self)
+        sessionManager.currentSession?.remoteMediaClient?.add(self)
         playbackMode = .remote
         playerView.playbackMode = playbackMode
         playerView.stop()
@@ -272,7 +280,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
         /*GCKMediaMetadata configuration*/
-        var metadata = GCKMediaMetadata()
+        let metadata = GCKMediaMetadata()
         metadata.setString(playerConfiguration.title, forKey: kGCKMetadataKeyTitle)
         
         /*Loading media to cast by creating a media request*/
@@ -296,28 +304,58 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         portraitConstraints.append(contentsOf: playerView.edgesToSuperview())
     }
     
-    private func configureVolume() {
-        let volumeView = MPVolumeView()
-        for view in volumeView.subviews {
-            if let slider = view as? UISlider {
-                self.volumeViewSlider = slider
+    
+    func skipForwardButtonPressed() {
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteClient = castSession?.remoteMediaClient
+            if let position = remoteClient?.approximateStreamPosition() {
+                let options = GCKMediaSeekOptions()
+                options.interval = position + 10
+                remoteClient?.seek(with: options)
             }
+        } else {
+            
         }
     }
-    func skipForwardButtonPressed() {
-        
+    
+    func skipBackButtonPressed() {
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteClient = castSession?.remoteMediaClient
+            if let position = remoteClient?.approximateStreamPosition() {
+                let options = GCKMediaSeekOptions()
+                options.interval = position - 10
+                remoteClient?.seek(with: options)
+            }
+        } else {
+            
+        }
+    }
+    
+    func sliderValueChanged(value: Float) {
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteClient = castSession?.remoteMediaClient
+            let options = GCKMediaSeekOptions()
+            options.interval = TimeInterval(value)
+            remoteClient?.seek(with: options)
+        }
     }
     
     func playButtonPressed() {
-        GCKCastContext.sharedInstance().presentDefaultExpandedMediaControls()
-//        var remoteMediaClient =  !.
-//        if (remoteMediaClient?.isPlaying == true) {
-//            remoteMediaClient.pause()
-//        } else {
-//            remoteMediaClient?.play()
-//        }
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+            if (remoteMediaClient?.mediaStatus?.playerState == .playing) {
+                remoteMediaClient?.pause()
+            } else {
+                remoteMediaClient?.play()
+            }
+            playerView.setPlayButton(isPlay: remoteMediaClient?.mediaStatus?.playerState != .playing)
+        }
     }
-    
+   
     func showPressed() {
         let vc = ProgramViewController()
         vc.modalPresentationStyle = .custom
@@ -435,7 +473,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.playerView.changeSpeed(rate: self.playerRate)
             break
         case .subtitle:
-            
             break
         case .audio:
             break
@@ -554,11 +591,43 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
 }
 
-extension VideoPlayerViewController: GCKSessionManagerListener, GCKRemoteMediaClientListener {
+extension VideoPlayerViewController : GCKRemoteMediaClientListener{
+    func remoteMediaClient(remoteMedia: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
+        self.refreshContentInformation()
+    }
+    
+    func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaMetadata: GCKMediaMetadata?) {
+        
+    }
+    
+    func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
+        self.refreshContentInformation()
+    }
+    
+    func remoteMediaClient(_ client: GCKRemoteMediaClient, didReceive queueItems: [GCKMediaQueueItem]) {
+        
+    }
+    
+    fileprivate func refreshContentInformation(){
+        let position = Float( self.sessionManager?.currentSession?.remoteMediaClient?.approximateStreamPosition() ?? 0)
+        self.playerView.setDuration(position: position)
+    }
+
+}
+
+extension VideoPlayerViewController: GCKSessionManagerListener {
+    func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) {
+
+    }
+    
     // MARK: - GCKSessionManagerListener
     func sessionManager(_: GCKSessionManager, didStart session: GCKSession) {
+        
         print("MediaViewController: sessionManager didStartSession \(session)")
         self.switchToRemotePlayback()
+    }
+    
+    func sessionManager(_ sessionManager: GCKSessionManager, didFailToStart session: GCKCastSession, withError error: Error) {
     }
     
     func sessionManager(_: GCKSessionManager, didResumeSession session: GCKSession) {
@@ -569,6 +638,10 @@ extension VideoPlayerViewController: GCKSessionManagerListener, GCKRemoteMediaCl
     func sessionManager(_: GCKSessionManager, didEnd _: GCKSession, withError error: Error?) {
         print("session ended with error: \(String(describing: error))")
         self.switchToLocalPlayback()
+    }
+    
+    func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
+        session.remoteMediaClient?.remove(self)
     }
 }
 

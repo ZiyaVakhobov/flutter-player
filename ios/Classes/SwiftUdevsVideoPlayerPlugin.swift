@@ -28,18 +28,16 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             SwiftUdevsVideoPlayerPlugin.viewController.dismiss(animated:true)
             return
         }
-        case "download": do {
+        case "downloadVideo": do {
             guard let args = call.arguments else {
                 return
             }
-            guard let json = args as? [String: String]else {
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
                 return
             }
-            guard let url = json["url"] else {
-                return
-            }
-            print("Download URL \(url)")
-            setupAssetDownload(videoUrl: url)
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            print("Download URL \(download.url)")
+            setupAssetDownload(videoUrl: download.url)
             return
         }
         case "playVideo": do {
@@ -103,7 +101,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         
         print("percentComplete \(100)")
         // Do not move the asset from the download location
-        UserDefaults.standard.set(location.relativePath, forKey: "testVideoPath")
+        UserDefaults.standard.set(location.relativePath, forKey: "\(location.relativePath).cache")
     }
     
     

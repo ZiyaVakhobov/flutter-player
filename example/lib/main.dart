@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -177,9 +179,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
+        appBar: AppBar(title: const Text('Plugin example app')),
         body: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -211,16 +211,18 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text('Update UI'),
               ),
-              FutureBuilder(
-                initialData: false,
-                future: checkIsDownloaded(),
-                builder: (context, snapshot) {
-                  var res = snapshot.data as bool;
-                  return Text(res ? 'Downloaded' : 'Not Downloaded');
-                },
-              ),
+              // FutureBuilder(
+              //   initialData: false,
+              //   future: checkIsDownloaded(),
+              //   builder: (context, snapshot) {
+              //     var res = snapshot.data as bool;
+              //     return Text(res ? 'Downloaded' : 'Not Downloaded');
+              //   },
+              // ),
               StreamBuilder(
-                stream: getCurrentProgressDownloadAsStream(),
+                stream: Platform.isIOS
+                    ? currentProgressDownloadAsStream()
+                    : getCurrentProgressDownloadAsStream(),
                 builder: (context, snapshot) {
                   return Text(snapshot.data == null
                       ? 'Not downloading'
