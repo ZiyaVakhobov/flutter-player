@@ -96,12 +96,9 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
-  Stream<int> percent() {
+  Stream<int> currentProgressDownloadAsStream() {
     methodChannel.setMethodCallHandler((call) async {
       if (call.method == 'percent') {
-        print("call.arguments");
-        print(call.arguments);
-
         _streamController.add(int.parse(call.arguments.toString()));
       }
     });

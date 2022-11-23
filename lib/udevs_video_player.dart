@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:udevs_video_player/models/download_configuration.dart';
@@ -57,7 +58,6 @@ class UdevsVideoPlayer {
   Stream<int?> getCurrentProgressDownloadAsStream(
       {Duration? duration, required DownloadConfiguration downloadConfig}) {
     final controller = StreamController<int?>();
-
     Timer? timer;
     controller.onListen = () {
       timer = Timer.periodic(
@@ -79,7 +79,6 @@ class UdevsVideoPlayer {
     return controller.stream;
   }
 
-
   Future<dynamic> closeVideo() {
     return UdevsVideoPlayerPlatform.instance.closeVideo();
   }
@@ -88,5 +87,6 @@ class UdevsVideoPlayer {
     return UdevsVideoPlayerPlatform.instance.download(url);
   }
 
-  Stream<int> get percent => UdevsVideoPlayerPlatform.instance.percent();
+  Stream<int> get currentProgressDownloadAsStream =>
+      UdevsVideoPlayerPlatform.instance.currentProgressDownloadAsStream();
 }

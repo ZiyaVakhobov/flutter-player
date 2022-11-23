@@ -55,7 +55,7 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Stream<int> percent() {
+  Stream<int> currentProgressDownloadAsStream() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

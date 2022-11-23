@@ -112,6 +112,9 @@ class _MyAppState extends State<MyApp> {
     ));
   }
 
+  Stream<int> currentProgressDownloadAsStream() =>
+      _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
+
   playVideo() async {
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
@@ -219,7 +222,9 @@ class _MyAppState extends State<MyApp> {
               StreamBuilder(
                 stream: getCurrentProgressDownloadAsStream(),
                 builder: (context, snapshot) {
-                  return Text(snapshot.data == null ? 'Not downloading' : snapshot.data.toString());
+                  return Text(snapshot.data == null
+                      ? 'Not downloading'
+                      : snapshot.data.toString());
                 },
               ),
               Text(_progress.toString()),
