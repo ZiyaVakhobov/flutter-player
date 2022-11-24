@@ -23,6 +23,8 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func skipBackButtonPressed()
     func playButtonPressed()
     func sliderValueChanged(value: Float)
+    func volumeChanged(value: Float)
+    func isCheckPlay()
 }
 
 enum LocalPlayerState: Int {
@@ -243,7 +245,7 @@ class PlayerView: UIView {
         }
     }
     
-    private var playerRate = 1.0
+    private var playerRate : Float = 1.0
     private var enableGesture = true
     private var backwardGestureTimer: Timer?
     private var forwardGestureTimer: Timer?
@@ -319,29 +321,6 @@ class PlayerView: UIView {
         timeSlider.setThumbImage(circleImage, for: .normal)
         timeSlider.setThumbImage(circleImage, for: .highlighted)
     }
-
-    /* Config the UIView controls container based on the state of the view. */
-    func configureControls() {
-      print("configureControls \(playerState)")
-//      if playerState == .stopped {
-////        playButton.setImage(playImage, for: .normal)
-////        splashPlayButton.isHidden = false
-////        splashImage.layer.isHidden = false
-//        playerLayer.isHidden = true
-//        overlayView.isHidden = true
-//      } else if playerState == .playing || playerState == .paused || playerState == .starting {
-//        // Play or Pause button based on state.
-////        let image: UIImage? = playerState == .paused ? playImage : pauseImage
-////        playButton.setImage(image, for: .normal)
-//        playButton.isHidden = false
-////        splashPlayButton.isHidden = true
-////        playerLayer.isHidden = false
-//        splashImage.layer.isHidden = true
-////        overlayView.isHidden = false
-//      }
-////      didTouchControl(nil)
-//      setNeedsLayout()
-    }
     
     func loadMediaPlayer(){
         guard let url = media?.contentURL else {
@@ -353,7 +332,7 @@ class PlayerView: UIView {
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
         layer.insertSublayer(playerLayer, above: videoView.layer)
-        if !playerConfiguration.isLive{
+        if !playerConfiguration.isLive {
             NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
         }
         addTimeObserver()
@@ -412,9 +391,9 @@ class PlayerView: UIView {
         self.player.automaticallyWaitsToMinimizeStalling = true
     }
     
-    func changeSpeed(rate: Double){
+    func changeSpeed(rate: Float){
         self.playerRate = rate
-        self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
+        self.player.preroll(atRate: self.playerRate, completionHandler: nil)
         self.player.rate = Float(self.playerRate)
     }
     
@@ -650,7 +629,7 @@ class PlayerView: UIView {
         landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
-    func addControlButtonConstraints(){
+    private func addControlButtonConstraints(){
         playButton.centerX(to: overlayView)
         playButton.centerY(to: overlayView)
         playButton.width(Constants.controlButtonSize)
@@ -675,7 +654,7 @@ class PlayerView: UIView {
         }
     }
     
-    func addBottomViewConstraints(area:UILayoutGuide) {
+    private func addBottomViewConstraints(area:UILayoutGuide) {
         overlayView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -733,7 +712,7 @@ class PlayerView: UIView {
         }
     }
     
-    func addTopViewConstraints(area:UILayoutGuide) {
+    private func addTopViewConstraints(area:UILayoutGuide) {
         topView.leading(to: area, offset: 0)
         topView.trailing(to: area, offset: 0)
         topView.top(to: area, offset: 0)
@@ -815,6 +794,7 @@ class PlayerView: UIView {
           if let streamDuration = streamDuration {
               timeSlider.maximumValue = Float(streamDuration)
               timeSlider.minimumValue = 0
+              timeSlider.value = Float(pendingPlayPosition)
               timeSlider.isEnabled = true
 //            totalTime.text = GCKUIUtils.timeInterval(asString: streamDuration)
           }
@@ -835,6 +815,7 @@ class PlayerView: UIView {
       } else {
         playerState = .paused
       }
+        delegate?.isCheckPlay()
     }
     
     func setPlayButton(isPlay: Bool){
@@ -848,7 +829,6 @@ class PlayerView: UIView {
     func setDuration(position: Float){
         timeSlider.value = position
         currentTimeLabel.text = VGPlayerUtils.getTimeString(from : CMTimeMake(value: Int64(position), timescale: 1))
-//        durationTimeLabel.text = VGPlayerUtils.getTimeString(from : CMTimeMake(value: Int64(duration), timescale: 1))
     }
     
     @objc func playerEndedPlaying(_ notification: Notification) {
@@ -904,7 +884,11 @@ class PlayerView: UIView {
     
     func verticalMoved(_ value: CGFloat) {
         if isVolume {
-            self.volumeViewSlider.value -= Float(value / 10000)
+            if playbackMode == .local {
+                self.volumeViewSlider.value -= Float(value / 10000)
+            } else {
+                delegate?.volumeChanged(value: Float(value / 10000))
+            }
         }
         else{
             UIScreen.main.brightness -= value / 10000
@@ -1044,6 +1028,7 @@ class PlayerView: UIView {
     
     //MARK: - Time logic
     func addTimeObserver() {
+        print("add time observer")
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)

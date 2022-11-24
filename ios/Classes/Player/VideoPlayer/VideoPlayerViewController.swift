@@ -36,18 +36,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     private var pipController: AVPictureInPictureController!
     private var pipPossibleObservation: NSKeyValueObservation?
-    private var playerItemContext = 0
     /// chrome cast
     private var sessionManager: GCKSessionManager!
     private var castMediaController: GCKUIMediaController!
     private var volumeController: GCKUIDeviceVolumeController!
-    private var streamPositionSliderMoving: Bool = false
     private var playbackMode = PlaybackMode.none
-    private var queueButton: UIBarButtonItem!
-    private var showStreamTimeRemaining: Bool = false
     private var localPlaybackImplicitlyPaused: Bool = false
-    //    private var actionSheet: ActionSheet?
-    private var queueAdded: Bool = false
     ///
     weak var delegate: VideoPlayerDelegate?
     private var url: String?
@@ -65,7 +59,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var playerConfiguration: PlayerConfiguration!
     private var isVolume = false
     private var volumeViewSlider: UISlider!
-    private var playerRate = 1.0
+    private var playerRate: Float = 1.0
     private var selectedSpeedText = "1.0x"
     var selectedQualityText = "Auto"
     
@@ -143,23 +137,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     @objc func castDeviceDidChange(_: Notification) {
         if GCKCastContext.sharedInstance().castState != .noDevicesAvailable {
-            // You can present the instructions on how to use Google Cast on
-            // the first time the user uses you app
             GCKCastContext.sharedInstance().presentCastInstructionsViewControllerOnce(with: playerView.castButton)
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         //        self?.isCastControlBarsEnabled = true
-        if playbackMode == .local, localPlaybackImplicitlyPaused {
-            localPlaybackImplicitlyPaused = false
-        }
-        // If we're in remote playback but no longer have a session, then switch to local playback
-        // mode. If we're in local mode but now have a session, then switch to remote playback mode.
+
         let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
-        print("hasConnectedSession")
-        print(hasConnectedSession)
-        print(playbackMode)
         if hasConnectedSession, (playbackMode != .remote) {
             populateMediaInfo(false, playPosition: 0)
             switchToRemotePlayback()
@@ -217,7 +202,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func populateMediaInfo(_ autoPlay: Bool, playPosition: TimeInterval) {
-        print("populateMediaInfo")
         playerView.loadMedia(buildMediaInfo(position: playerView.streamPosition ?? 0, url: playerConfiguration.url), autoPlay: autoPlay, playPosition: playPosition, area: view.safeAreaLayoutGuide)
     }
     
@@ -242,6 +226,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func switchToRemotePlayback() {
+        print("switchToRemotePlayback")
         if playbackMode == .remote {
             return
         }
@@ -265,24 +250,41 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     private func loadRemoteMedia(){
+        print("LOAD REMOTE MEDIA")
         if sessionManager == nil {
             return
         }
         let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
-        mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: url ?? "")
+        if playbackMode == .local {
+            mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: url ?? "")
+            mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
+        } else {
+            let castSession = sessionManager.currentCastSession
+            if castSession != nil {
+                let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+                mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: remoteMediaClient?.approximateStreamPosition() ?? 0, url: url ?? "")
+                mediaLoadRequestDataBuilder.startTime = remoteMediaClient?.approximateStreamPosition() ?? 0
+            }
+        }
         mediaLoadRequestDataBuilder.autoplay = true
-        mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
         mediaLoadRequestDataBuilder.credentials = "user-credentials"
         mediaLoadRequestDataBuilder.atvCredentials = "atv-user-credentials"
         let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(with: mediaLoadRequestDataBuilder.build())
         request?.delegate = self
     }
     
+    private func playbackRateRemote(playbackRate: Float){
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+            remoteMediaClient?.setPlaybackRate(-Float(playbackRate))
+        }
+    }
+    
     func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
         /*GCKMediaMetadata configuration*/
         let metadata = GCKMediaMetadata()
         metadata.setString(playerConfiguration.title, forKey: kGCKMetadataKeyTitle)
-        
         /*Loading media to cast by creating a media request*/
         let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
                                                                             url)!)
@@ -302,6 +304,18 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         landscapeConstraints.deActivate()
         portraitConstraints.append(contentsOf: playerView.center(in: view))
         portraitConstraints.append(contentsOf: playerView.edgesToSuperview())
+    }
+    
+    func isCheckPlay(){
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            print("IS PLAY CHECK")
+            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+            playerRate = remoteMediaClient?.mediaStatus?.playbackRate ?? 1.0
+            playerView.setPlayButton(isPlay: remoteMediaClient?.mediaStatus?.playerState == .playing)
+            let position = Float(remoteMediaClient?.approximateStreamPosition() ?? 0)
+            self.playerView.setDuration(position: position)
+        }
     }
     
     
@@ -343,6 +357,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
+    func volumeChanged(value: Float){
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteClient = castSession?.remoteMediaClient
+            remoteClient?.setStreamVolume(value)
+        }
+    }
+    
     func playButtonPressed() {
         let castSession = sessionManager.currentCastSession
         if castSession != nil {
@@ -355,7 +377,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             playerView.setPlayButton(isPlay: remoteMediaClient?.mediaStatus?.playerState != .playing)
         }
     }
-   
+    
     func showPressed() {
         let vc = ProgramViewController()
         vc.modalPresentationStyle = .custom
@@ -466,11 +488,17 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.selectedQualityText = sortedResolutions[index]
             let url = resList[sortedResolutions[index]]
             self.playerView.changeQuality(url: url)
+            self.url = url
+            self.loadRemoteMedia()
             break
         case .speed:
-            self.playerRate = Double(speedList[index])!
+            self.playerRate = Float(speedList[index])!
             self.selectedSpeedText = isRegular  ? "\(self.playerRate)x(Обычный)" : "\(self.playerRate)x"
-            self.playerView.changeSpeed(rate: self.playerRate)
+            if playbackMode == .local {
+                self.playerView.changeSpeed(rate: self.playerRate)
+            } else {
+                self.playbackRateRemote(playbackRate: self.playerRate)
+            }
             break
         case .subtitle:
             break
@@ -514,7 +542,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
     }
-    
     
     func getMegogoStream(parameters:[String:String], id:String) -> MegogoStreamResponse? {
         var megogoResponse:MegogoStreamResponse?
@@ -570,7 +597,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                     self.url = videoUrl
                 } else {
                     self.url = videoUrl
-                    loadRemoteMedia()
+                    self.loadRemoteMedia()
                 }
             } else {
                 print("ERROR")
@@ -584,14 +611,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             } else {
                 let videoUrl = Array(resolutions!.values)[0]
                 self.url = videoUrl
-                loadRemoteMedia()
+                self.loadRemoteMedia()
             }
             return
         }
     }
 }
 
-extension VideoPlayerViewController : GCKRemoteMediaClientListener{
+// MARK: - GCKRemoteMediaClientListener
+extension VideoPlayerViewController : GCKRemoteMediaClientListener {
     func remoteMediaClient(remoteMedia: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
         self.refreshContentInformation()
     }
@@ -609,20 +637,20 @@ extension VideoPlayerViewController : GCKRemoteMediaClientListener{
     }
     
     fileprivate func refreshContentInformation(){
-        let position = Float( self.sessionManager?.currentSession?.remoteMediaClient?.approximateStreamPosition() ?? 0)
+        let remoteMedia = self.sessionManager?.currentSession?.remoteMediaClient
+        let position = Float(remoteMedia?.approximateStreamPosition() ?? 0)
         self.playerView.setDuration(position: position)
     }
-
+    
 }
 
+// MARK: - GCKSessionManagerListener
 extension VideoPlayerViewController: GCKSessionManagerListener {
     func sessionManager(_ sessionManager: GCKSessionManager, willStart session: GCKCastSession) {
-
+        
     }
     
-    // MARK: - GCKSessionManagerListener
     func sessionManager(_: GCKSessionManager, didStart session: GCKSession) {
-        
         print("MediaViewController: sessionManager didStartSession \(session)")
         self.switchToRemotePlayback()
     }
@@ -641,7 +669,7 @@ extension VideoPlayerViewController: GCKSessionManagerListener {
     }
     
     func sessionManager(_ sessionManager: GCKSessionManager, willEnd session: GCKCastSession) {
-        session.remoteMediaClient?.remove(self)
+        
     }
 }
 
@@ -697,44 +725,3 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     }
 }
 // 1170
-
-/** A key for the URL of the media item's poster (large image). */
-let kMediaKeyPosterURL = "posterUrl"
-/** A key for the media item's extended description. */
-let kMediaKeyDescription = "description"
-let kKeyCategories = "categories"
-let kKeyHlsBaseURL = "hls"
-let kKeyImagesBaseURL = "images"
-let kKeyTracksBaseURL = "tracks"
-let kKeySources = "sources"
-let kKeyVideos = "videos"
-let kKeyArtist = "artist"
-let kKeyBaseURL = "baseUrl"
-let kKeyContentID = "contentId"
-let kKeyDescription = "description"
-let kKeyID = "id"
-let kKeyImageURL = "image-480x270"
-let kKeyItems = "items"
-let kKeyLanguage = "language"
-let kKeyMimeType = "mime"
-let kKeyName = "name"
-let kKeyPosterURL = "image-780x1200"
-let kKeyStreamType = "streamType"
-let kKeyStudio = "studio"
-let kKeySubtitle = "subtitle"
-let kKeySubtype = "subtype"
-let kKeyTitle = "title"
-let kKeyTracks = "tracks"
-let kKeyType = "type"
-let kKeyURL = "url"
-let kKeyDuration = "duration"
-let kDefaultVideoMimeType = "application/x-mpegurl"
-let kDefaultTrackMimeType = "text/vtt"
-let kTypeAudio = "audio"
-let kTypePhoto = "photos"
-let kTypeVideo = "videos"
-let kTypeLive = "live"
-let kThumbnailWidth = 480
-let kThumbnailHeight = 720
-let kPosterWidth = 780
-let kPosterHeight = 1200

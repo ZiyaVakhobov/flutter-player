@@ -4,8 +4,8 @@ import AVFoundation
 import GoogleCast
 import Flutter
 
-let kPrefPreloadTime = "preload_time_sec"
-let kPrefEnableAnalyticsLogging = "enable_analytics_logging"
+//let kPrefPreloadTime = "preload_time_sec"
+//let kPrefEnableAnalyticsLogging = "enable_analytics_logging"
 let kPrefAppVersion = "app_version"
 let kPrefSDKVersion = "sdk_version"
 let kPrefEnableMediaNotifications = "enable_media_notifications"
@@ -102,18 +102,6 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    
-//    private func setupMini() -> Bool {
-//        let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
-//         guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
-//           as? UINavigationController else { return false }
-//         let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
-//           as GCKUICastContainerViewController
-//         castContainerVC.miniMediaControlsItemEnabled = true
-//         window = UIWindow(frame: UIScreen.main.bounds)
-//         window?.rootViewController = castContainerVC
-//         window?.makeKeyAndVisible()
-//    }
     
     func setupCastLogging() {
       let logFilter = GCKLoggerFilter()
