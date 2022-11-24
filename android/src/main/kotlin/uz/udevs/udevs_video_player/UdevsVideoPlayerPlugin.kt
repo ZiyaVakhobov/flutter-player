@@ -11,7 +11,6 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.offline.Download
-import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadService
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
@@ -169,19 +168,19 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     try {
                         val percent = download.percentDownloaded.roundToInt()
                         if(percent == 100) {
-                            handler.removeCallbacks(this);
+                            handler.removeCallbacks(this)
                         } else {
                             val toJson =
                                 gson.toJson(DownloadConfiguration(download.request.id, percent))
                             channel.invokeMethod("percent", toJson)
-                            handler.postDelayed(this, 1000)
+                            handler.postDelayed(this, 2000)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
             }
-            handler.postDelayed(runnable, 1000)
+            handler.postDelayed(runnable, 2000)
         }
     }
 }
