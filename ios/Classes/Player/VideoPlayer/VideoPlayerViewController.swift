@@ -110,6 +110,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     override func viewDidLoad() {
         super.viewDidLoad()
         url = playerConfiguration.url
+        title = playerConfiguration.title
         let resList = resolutions ?? ["480p":playerConfiguration.url]
         sortedResolutions = Array(resList.keys).sorted().reversed()
         Array(resList.keys).sorted().reversed().forEach { quality in
@@ -249,21 +250,21 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         playerView.stop()
     }
     
-    private func loadRemoteMedia(){
+    private func loadRemoteMedia(position: TimeInterval){
         print("LOAD REMOTE MEDIA")
         if sessionManager == nil {
             return
         }
         let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
         if playbackMode == .local {
-            mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: url ?? "")
-            mediaLoadRequestDataBuilder.startTime = playerView.streamPosition ?? 0
+            mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: position, url: url ?? "")
+            mediaLoadRequestDataBuilder.startTime = position
         } else {
             let castSession = sessionManager.currentCastSession
             if castSession != nil {
                 let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
-                mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: remoteMediaClient?.approximateStreamPosition() ?? 0, url: url ?? "")
-                mediaLoadRequestDataBuilder.startTime = remoteMediaClient?.approximateStreamPosition() ?? 0
+                mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: position, url: url ?? "")
+                mediaLoadRequestDataBuilder.startTime = position
             }
         }
         mediaLoadRequestDataBuilder.autoplay = true
@@ -284,7 +285,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
         /*GCKMediaMetadata configuration*/
         let metadata = GCKMediaMetadata()
-        metadata.setString(playerConfiguration.title, forKey: kGCKMetadataKeyTitle)
+        metadata.setString(title ?? "", forKey: kGCKMetadataKeyTitle)
         /*Loading media to cast by creating a media request*/
         let mediaInfoBuilder = GCKMediaInformationBuilder(contentURL: URL(string:
                                                                             url)!)
@@ -489,7 +490,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let url = resList[sortedResolutions[index]]
             self.playerView.changeQuality(url: url)
             self.url = url
-            self.loadRemoteMedia()
+            if playbackMode == .remote {
+                self.loadRemoteMedia(position: sessionManager.currentSession?.remoteMediaClient?.approximateStreamPosition() ?? 0)
+            }
             break
         case .speed:
             self.playerRate = Float(speedList[index])!
@@ -596,8 +599,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                     self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
                     self.url = videoUrl
                 } else {
+                    self.title = "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}"
                     self.url = videoUrl
-                    self.loadRemoteMedia()
+                    self.loadRemoteMedia(position: TimeInterval(0))
                 }
             } else {
                 print("ERROR")
@@ -611,7 +615,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             } else {
                 let videoUrl = Array(resolutions!.values)[0]
                 self.url = videoUrl
-                self.loadRemoteMedia()
+                self.loadRemoteMedia(position: TimeInterval(0))
             }
             return
         }
