@@ -14,7 +14,9 @@ export 'package:udevs_video_player/models/download_configuration.dart';
 
 class UdevsVideoPlayer {
   UdevsVideoPlayer._();
+
   static final UdevsVideoPlayer _instance = UdevsVideoPlayer._();
+
   factory UdevsVideoPlayer() => _instance;
 
   Future<String?> playVideo({required PlayerConfiguration playerConfig}) {
@@ -59,34 +61,12 @@ class UdevsVideoPlayer {
         .getCurrentProgressDownload(downloadConfigJsonString: jsonStringConfig);
   }
 
-  Stream<int?> getCurrentProgressDownloadAsStream(
-      {Duration? duration, required DownloadConfiguration downloadConfig}) {
-    final controller = StreamController<int?>();
-    Timer? timer;
-    controller.onListen = () {
-      timer = Timer.periodic(
-        duration ?? const Duration(seconds: 2),
-        (timer) => getCurrentProgressDownload(downloadConfig: downloadConfig)
-            .then((data) {
-          if (data == 100) {
-            controller.onCancel;
-          }
-          if (!controller.isClosed) {
-            controller.add(data);
-          }
-        }),
-      );
-    };
-    controller.onCancel = () {
-      timer?.cancel();
-    };
-    return controller.stream;
-  }
-
   Future<dynamic> closeVideo() {
     return UdevsVideoPlayerPlatform.instance.closeVideo();
   }
 
-  Stream<int> get currentProgressDownloadAsStream =>
+  Stream<DownloadConfiguration> get currentProgressDownloadAsStream =>
       UdevsVideoPlayerPlatform.instance.currentProgressDownloadAsStream();
+
+  void dispose() => UdevsVideoPlayerPlatform.instance.dispose();
 }

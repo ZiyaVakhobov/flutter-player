@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'models/download_configuration.dart';
 import 'udevs_video_player_platform_interface.dart';
 
 /// An implementation of [UdevsVideoPlayerPlatform] that uses method channels.
@@ -10,7 +12,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('udevs_video_player');
-  final StreamController<int> _streamController = StreamController<int>();
+  final StreamController<DownloadConfiguration> _streamController =
+      StreamController<DownloadConfiguration>();
 
   @override
   Future<String?> playVideo({
@@ -85,12 +88,20 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
-  Stream<int> currentProgressDownloadAsStream() {
+  Stream<DownloadConfiguration> currentProgressDownloadAsStream() {
     methodChannel.setMethodCallHandler((call) async {
       if (call.method == 'percent') {
-        _streamController.add(int.parse(call.arguments.toString()));
+        var json = call.arguments as String;
+        var decode = jsonDecode(json);
+        _streamController.add(DownloadConfiguration(
+            url: decode['url'], percent: decode['percent']));
       }
     });
     return _streamController.stream;
+  }
+
+  @override
+  void dispose() {
+    _streamController.onCancel;
   }
 }

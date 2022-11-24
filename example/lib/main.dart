@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -106,15 +104,7 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Stream<int?> getCurrentProgressDownloadAsStream() {
-    return _udevsVideoPlayerPlugin.getCurrentProgressDownloadAsStream(
-        downloadConfig: DownloadConfiguration(
-      url:
-          'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-    ));
-  }
-
-  Stream<int> currentProgressDownloadAsStream() =>
+  Stream<DownloadConfiguration> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
   playVideo() async {
@@ -211,22 +201,13 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text('Update UI'),
               ),
-              // FutureBuilder(
-              //   initialData: false,
-              //   future: checkIsDownloaded(),
-              //   builder: (context, snapshot) {
-              //     var res = snapshot.data as bool;
-              //     return Text(res ? 'Downloaded' : 'Not Downloaded');
-              //   },
-              // ),
               StreamBuilder(
-                stream: Platform.isIOS
-                    ? currentProgressDownloadAsStream()
-                    : getCurrentProgressDownloadAsStream(),
+                stream: currentProgressDownloadAsStream(),
                 builder: (context, snapshot) {
-                  return Text(snapshot.data == null
+                  var data = snapshot.data as DownloadConfiguration?;
+                  return Text(data == null
                       ? 'Not downloading'
-                      : snapshot.data.toString());
+                      : data.percent.toString());
                 },
               ),
               Text(_progress.toString()),
@@ -235,5 +216,11 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _udevsVideoPlayerPlugin.dispose();
+    super.dispose();
   }
 }

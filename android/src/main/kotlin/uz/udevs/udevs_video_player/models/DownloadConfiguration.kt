@@ -6,4 +6,6 @@ import java.io.Serializable
 data class DownloadConfiguration(
     @SerializedName("url")
     val url: String,
+    @SerializedName("percent")
+    var percent: Int,
 ) : Serializable

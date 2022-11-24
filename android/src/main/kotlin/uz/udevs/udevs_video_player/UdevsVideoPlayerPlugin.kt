@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.offline.Download
+import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadService
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
@@ -26,9 +29,9 @@ import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.services.DownloadTracker
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.MyDownloadService
+import kotlin.math.roundToInt
 
 const val EXTRA_ARGUMENT = "uz.udevs.udevs_video_player.ARGUMENT"
-const val EXTRA_ARGUMENT1 = "uz.udevs.udevs_video_player.ARGUMENT1"
 const val PLAYER_ACTIVITY = 111
 const val PLAYER_ACTIVITY_FINISH = 222
 
@@ -40,6 +43,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var resultMethod: Result? = null
     private var downloadTracker: DownloadTracker? = null
     lateinit var renderersFactory: RenderersFactory
+    val gson = Gson()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
@@ -70,7 +74,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         ) {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
-                val gson = Gson()
                 val downloadConfiguration =
                     gson.fromJson(downloadConfigJsonString, DownloadConfiguration::class.java)
                 val uri = Uri.parse(downloadConfiguration.url)
@@ -159,6 +162,26 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onDownloadsChanged(download: Download) {
-        // TODO onDownloaded all
+        if (download.state == Download.STATE_DOWNLOADING) {
+            val handler = Handler(Looper.getMainLooper())
+            val runnable = object : Runnable {
+                override fun run() {
+                    try {
+                        val percent = download.percentDownloaded.roundToInt()
+                        if(percent == 100) {
+                            handler.removeCallbacks(this);
+                        } else {
+                            val toJson =
+                                gson.toJson(DownloadConfiguration(download.request.id, percent))
+                            channel.invokeMethod("percent", toJson)
+                            handler.postDelayed(this, 1000)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            handler.postDelayed(runnable, 1000)
+        }
     }
 }
