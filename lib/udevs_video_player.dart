@@ -14,7 +14,7 @@ export 'package:udevs_video_player/models/download_configuration.dart';
 
 class UdevsVideoPlayer {
   UdevsVideoPlayer._();
-  static final UdevsVideoPlayer _instance = UdevsVideoPlayer();
+  static final UdevsVideoPlayer _instance = UdevsVideoPlayer._();
   factory UdevsVideoPlayer() => _instance;
 
   Future<String?> playVideo({required PlayerConfiguration playerConfig}) {
