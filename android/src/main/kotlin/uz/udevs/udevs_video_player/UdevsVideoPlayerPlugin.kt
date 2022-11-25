@@ -160,9 +160,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
+    val handler = Handler(Looper.getMainLooper())
+    var runnable: Runnable? = null
     override fun onDownloadsChanged(download: Download) {
-        val handler = Handler(Looper.getMainLooper())
-        var runnable: Runnable? = null
         when (download.state) {
             Download.STATE_DOWNLOADING -> {
                 runnable = object : Runnable {
@@ -182,16 +182,16 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         }
                     }
                 }
-                handler.postDelayed(runnable, 2000)
+                handler.postDelayed(runnable!!, 2000)
             }
             Download.STATE_COMPLETED -> {
                 if (runnable != null) {
-                    handler.removeCallbacks(runnable)
+                    handler.removeCallbacks(runnable!!)
                 }
             }
             Download.STATE_FAILED -> {
                 if (runnable != null) {
-                    handler.removeCallbacks(runnable)
+                    handler.removeCallbacks(runnable!!)
                 }
             }
             Download.STATE_QUEUED -> {}
@@ -199,7 +199,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Download.STATE_RESTARTING -> {}
             Download.STATE_STOPPED -> {
                 if (runnable != null) {
-                    handler.removeCallbacks(runnable)
+                    handler.removeCallbacks(runnable!!)
                 }
             }
         }
