@@ -123,7 +123,7 @@ class _MainPageState extends State<MainPage> {
             baseUrl: "https://api.spec.uzd.udevs.io/v1/",
             initialResolution: {
               "Автонастройка":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8"
+                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
             },
             resolutions: {
               "Автонастройка":
