@@ -161,26 +161,47 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onDownloadsChanged(download: Download) {
-        if (download.state == Download.STATE_DOWNLOADING) {
-            val handler = Handler(Looper.getMainLooper())
-            val runnable = object : Runnable {
-                override fun run() {
-                    try {
-                        val percent = download.percentDownloaded.roundToInt()
-                        if(percent == 100) {
-                            handler.removeCallbacks(this)
-                        } else {
-                            val toJson =
-                                gson.toJson(DownloadConfiguration(download.request.id, percent))
-                            channel.invokeMethod("percent", toJson)
-                            handler.postDelayed(this, 2000)
+        val handler = Handler(Looper.getMainLooper())
+        var runnable: Runnable? = null
+        when (download.state) {
+            Download.STATE_DOWNLOADING -> {
+                runnable = object : Runnable {
+                    override fun run() {
+                        try {
+                            val percent = download.percentDownloaded.roundToInt()
+                            if (percent == 100) {
+                                handler.removeCallbacks(this)
+                            } else {
+                                val toJson =
+                                    gson.toJson(DownloadConfiguration(download.request.id, percent))
+                                channel.invokeMethod("percent", toJson)
+                                handler.postDelayed(this, 2000)
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
+                handler.postDelayed(runnable, 2000)
             }
-            handler.postDelayed(runnable, 2000)
+            Download.STATE_COMPLETED -> {
+                if (runnable != null) {
+                    handler.removeCallbacks(runnable)
+                }
+            }
+            Download.STATE_FAILED -> {
+                if (runnable != null) {
+                    handler.removeCallbacks(runnable)
+                }
+            }
+            Download.STATE_QUEUED -> {}
+            Download.STATE_REMOVING -> {}
+            Download.STATE_RESTARTING -> {}
+            Download.STATE_STOPPED -> {
+                if (runnable != null) {
+                    handler.removeCallbacks(runnable)
+                }
+            }
         }
     }
 }
