@@ -53,7 +53,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var resolutions: [String:String]?
     var sortedResolutions: [String] = []
     var seasons : [Season] = [Season]()
-    var shouldHideHomeIndicator = false
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
     var playerConfiguration: PlayerConfiguration!
@@ -82,19 +81,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func setupPictureInPicture() {
-        // Ensure PiP is supported by current device.
         if AVPictureInPictureController.isPictureInPictureSupported() {
-            // Create a new controller, passing the reference to the AVPlayerLayer.
             pipController = AVPictureInPictureController(playerLayer: playerView.playerLayer)
             pipController.delegate = self
-            
             pipPossibleObservation = pipController.observe(\AVPictureInPictureController.isPictureInPicturePossible,
                                                             options: [.initial, .new]) { [weak self] _, change in
-                // Update the PiP button's enabled state.
                 self?.playerView.setIsPipEnabled(v: change.newValue ?? false)
             }
         } else {
-            // PiP isn't supported by the current device. Disable the PiP button.
             playerView.setIsPipEnabled(v: false)
         }
     }
@@ -129,8 +123,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
         playerView.edgesToSuperview()
-        setupPictureInPicture()
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
                                                name: NSNotification.Name.gckCastStateDidChange,
                                                object: GCKCastContext.sharedInstance())
@@ -143,8 +136,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        //        self?.isCastControlBarsEnabled = true
-
         let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
         if hasConnectedSession, (playbackMode != .remote) {
             populateMediaInfo(false, playPosition: 0)
@@ -155,6 +146,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             populateMediaInfo(false, playPosition: 0)
         }
         sessionManager.add(self)
+        setupPictureInPicture()
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         super.viewWillAppear(animated)
     }
@@ -166,7 +158,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        self.shouldHideHomeIndicator = true
         setNeedsUpdateOfHomeIndicatorAutoHidden()
     }
     
@@ -180,7 +171,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        playerView.updateConstraints()
+        playerView.changeConstraints()
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
             addVideosLandscapeConstraints()
         } else {
@@ -218,7 +209,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             playPosition = castMediaController.lastKnownStreamPosition
             paused = (castMediaController.lastKnownPlayerState == .paused)
             ended = (castMediaController.lastKnownPlayerState == .idle)
-            print("last player state: \(castMediaController.lastKnownPlayerState), ended: \(ended)")
         }
         populateMediaInfo((!paused && !ended), playPosition: playPosition)
         sessionManager.currentCastSession?.remoteMediaClient?.remove(self)
@@ -233,6 +223,8 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
         // If we were playing locally, load the local media on the remote player
         if playbackMode == .local, (playerView.playerState != .stopped) {
+            print("playerView.playerState != .stopped")
+            print(playerView.playerState != .stopped)
             let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
             mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: playerConfiguration.url)
             mediaLoadRequestDataBuilder.autoplay = true
@@ -248,6 +240,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         playbackMode = .remote
         playerView.playbackMode = playbackMode
         playerView.stop()
+        if playbackMode == .remote {
+            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+            playerRate = remoteMediaClient?.mediaStatus?.playbackRate ?? 1.0
+            if remoteMediaClient?.mediaStatus?.mediaInformation?.contentURL != URL(string: url!){
+                print("TOTTOTOTOTTOT")
+                loadRemoteMedia(position: TimeInterval(0))
+            }
+        }
     }
     
     private func loadRemoteMedia(position: TimeInterval){
@@ -274,15 +274,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         request?.delegate = self
     }
     
-    private func playbackRateRemote(playbackRate: Float){
-        let castSession = sessionManager.currentCastSession
-        if castSession != nil {
-            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
-            remoteMediaClient?.setPlaybackRate(-Float(playbackRate))
-        }
-    }
-    
-    func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
+    private func buildMediaInfo(position: Double, url : String)-> GCKMediaInformation {
         /*GCKMediaMetadata configuration*/
         let metadata = GCKMediaMetadata()
         metadata.setString(title ?? "", forKey: kGCKMetadataKeyTitle)
@@ -294,6 +286,14 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         mediaInfoBuilder.metadata = metadata
         mediaInfoBuilder.streamDuration = position
         return mediaInfoBuilder.build()
+    }
+    
+    func playbackRateRemote(playbackRate: Float){
+        let castSession = sessionManager.currentCastSession
+        if castSession != nil {
+            let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+            remoteMediaClient?.setPlaybackRate(-Float(playbackRate))
+        }
     }
     
     private func addVideosLandscapeConstraints() {
@@ -452,9 +452,11 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "pip" {
+            print("PIP PIP PIP")
+            print(self.pipController.isPictureInPictureActive)
             if self.pipController.isPictureInPictureActive {
                 self.playerView.isHiddenPiP(isPiP: true)
-            }else {
+            } else {
                 self.playerView.isHiddenPiP(isPiP: false)
             }
         }
