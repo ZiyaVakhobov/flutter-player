@@ -40,6 +40,28 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             setupAssetDownload(videoUrl: download.url)
             return
         }
+        case "pauseDownload": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            pauseDownload(videoUrl: download.url)
+            return
+        }
+        case "resumeDownload": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            restorePendingDownloads()
+            return
+        }
         case "playVideo": do {
             guard let args = call.arguments else {
                 return
@@ -52,6 +74,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             guard URL(string: playerConfiguration.url) != nil else {
                 return
             }
+            print("Download URL \(playerConfiguration.url)")
             let vc = VideoPlayerViewController()
             vc.modalPresentationStyle = .fullScreen
             vc.delegate = self
@@ -80,9 +103,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
-        
         var percentComplete = 0.0
-        print("percentComplete \(percentComplete)")
         // Iterate through the loaded time ranges
         for value in loadedTimeRanges {
             // Unwrap the CMTimeRange from the NSValue
@@ -90,6 +111,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             // Calculate the percentage of the total expected asset duration
             percentComplete += loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
         }
+        print(assetDownloadTask.state)
         percentComplete *= 100
         print("percentComplete \(percentComplete)")
         getPercentComplete(percent : Int(percentComplete))
@@ -98,77 +120,76 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didFinishDownloadingTo location: URL) {
-        
-        print("percentComplete \(100)")
-        // Do not move the asset from the download location
-        UserDefaults.standard.set(location.relativePath, forKey: "\(location.relativePath).cache")
+        print("Finished \(location.relativePath)")
+        print("Finished \(location.absoluteURL)")
+        print("Finished \(location.absoluteString)")
+        print("Finished \(assetDownloadTask.urlAsset.url)")
+        UserDefaults.standard.set(location.relativePath, forKey: "\(assetDownloadTask.urlAsset.url).cache")
     }
     
-    
     func setupAssetDownload(videoUrl: String) {
-        // Create new background session configuration.
-        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-        
-        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
-        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
-                                                    assetDownloadDelegate: self,
-                                                    delegateQueue: OperationQueue.main)
+        guard UserDefaults.standard.value(forKey: "\(String(describing: videoUrl)).cache") is String else {
+            // Create new background session configuration.
+            configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+            
+            // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
+            downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
+                                                        assetDownloadDelegate: self,
+                                                        delegateQueue: OperationQueue.main)
+            if let url = URL(string: videoUrl){
+                let asset = AVURLAsset(url: url)
+                // Create new AVAssetDownloadTask for the desired asset
+                let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
+                                                                          assetTitle: "Some Title",
+                                                                          assetArtworkData: nil,
+                                                                          options: nil)
+                downloadTask?.resume()
+            }
+            return
+        }
+        print(UserDefaults.standard.value(forKey: "\(String(describing: videoUrl)).cache"))
+        getPercentComplete(percent: 100)
+
+    }
+    
+    private func pauseDownload(videoUrl:String){
+        //        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+        //
+        //        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
+        //        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
+        //                                                    assetDownloadDelegate: self,
+        //                                                    delegateQueue: OperationQueue.main)
         
         if let url = URL(string: videoUrl){
-            let options = [AVURLAssetAllowsCellularAccessKey: false]
-            let asset = AVURLAsset(url: url, options: options)
-            asset.resourceLoader.setDelegate(self, queue: DispatchQueue(label: "uz.udevs.udevsVideoPlayer"))
+            let asset = AVURLAsset(url: url)
             // Create new AVAssetDownloadTask for the desired asset
             let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
                                                                       assetTitle: "Some Title",
                                                                       assetArtworkData: nil,
                                                                       options: nil)
-            
-            print("Download URL \(url)")
-            
-
-//            downloadSession?.makeAssetDownloadTask(
-//                  asset: asset,
-//                  assetTitle: "My Video",
-//                  assetArtworkData: nil,
-//                  options: nil
-//               )?.resume()
-            // Start task and begin download
-            downloadTask?.resume()
+            print("PAUSE -------------")
+            downloadTask?.suspend()
         }
     }
     
-    
+    private func restorePendingDownloads() {
+        // Create session configuration with ORIGINAL download identifier
+        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+        
+        // Create a new AVAssetDownloadURLSession
+        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
+                                                    assetDownloadDelegate: self,
+                                                    delegateQueue: OperationQueue.main)
+        
+        // Grab all the pending tasks associated with the downloadSession
+        downloadSession!.getAllTasks { tasksArray in
+            // For each task, restore the state in the app
+            for task in tasksArray {
+                guard let downloadTask = task as? AVAssetDownloadTask else { break }
+                // Restore asset, progress indicators, state, etc...
+                _ = downloadTask.urlAsset
+            }
+        }
+    }
     
 }
-
-
-//struct Download  {
-////    var configuration: URLSessionConfiguration?
-////    var downloadSession: AVAssetDownloadURLSession?
-//    var downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
-//    weak var delegate: VideoPlayerDelegate?
-//    
-//    mutating func setupAssetDownload(videoUrl: String) {
-//        // Create new background session configuration.
-//       var configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-//
-//        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
-//        var downloadSession = AVAssetDownloadURLSession(configuration: configuration,
-//                                                        assetDownloadDelegate: delegate,
-//                                                        delegateQueue: OperationQueue.main)
-//
-//        if let url = URL(string: videoUrl){
-//            let asset = AVURLAsset(url: url)
-//
-//            // Create new AVAssetDownloadTask for the desired asset
-//            let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
-//                                                                     assetTitle: "Some Title",
-//                                                                     assetArtworkData: nil,
-//                                                                     options: nil)
-//            // Start task and begin download
-//            downloadTask?.resume()
-//        }
-//    }//end method
-//    
-//}

@@ -340,17 +340,23 @@ class PlayerView: UIView {
     
     
     func playOfflineAsset() {
-        guard let assetPath = UserDefaults.standard.value(forKey: "\(String(describing: media?.contentURL)).cache") as? String else {
+        print("TTTTTTTT")
+        guard UserDefaults.standard.value(forKey: "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8.cache") is String else {
+            print("not cache")
             loadMediaPlayer()
             return
         }
+        let assetPath = UserDefaults.standard.value(forKey: "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8.cache") as! String
+        print("TTTTTTTT")
         let baseURL = URL(fileURLWithPath: NSHomeDirectory())
         let assetURL = baseURL.appendingPathComponent(assetPath)
         let asset = AVURLAsset(url: assetURL)
+        print("TTTTTTTT \(asset.url)")
         if let cache = asset.assetCache, cache.isPlayableOffline {
             guard (media?.contentURL) != nil else {
                 return
             }
+            
             player.automaticallyWaitsToMinimizeStalling = true
             player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
             playerLayer = AVPlayerLayer(player: player)
@@ -558,11 +564,26 @@ class PlayerView: UIView {
     
     override func updateConstraints() {
         super.updateConstraints()
+    }
+    
+    func changeConstraints(){
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
-            addVideosLandscapeConstraints()
-        } else {
             addVideoPortaitConstraints()
+        } else {
+            addVideoLandscapeConstraints()
         }
+    }
+    
+    private func addVideoPortaitConstraints() {
+        titleLabelLandacape.isHidden = true
+        titleLabelPortrait.isHidden = false
+        landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
+    }
+    
+    private func addVideoLandscapeConstraints() {
+        titleLabelLandacape.isHidden = false
+        titleLabelPortrait.isHidden = true
+        landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
     func addGestures(){
@@ -615,18 +636,6 @@ class PlayerView: UIView {
         addBottomViewConstraints(area: area)
         addTopViewConstraints(area: area)
         addControlButtonConstraints()
-    }
-    
-    private func addVideoPortaitConstraints() {
-        titleLabelLandacape.isHidden = true
-        titleLabelPortrait.isHidden = false
-        landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
-    }
-    
-    private func addVideosLandscapeConstraints() {
-        titleLabelLandacape.isHidden = false
-        titleLabelPortrait.isHidden = true
-        landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
     private func addControlButtonConstraints(){
@@ -943,6 +952,7 @@ class PlayerView: UIView {
             }
         }
     }
+    
     func fastBackward() {
         self.backwardTouches += 1
         if backwardTouches < 2{
@@ -1084,6 +1094,4 @@ class PlayerView: UIView {
 //      pendingPlay = true
 //      seeking = false
     }
-   
-    
 }
