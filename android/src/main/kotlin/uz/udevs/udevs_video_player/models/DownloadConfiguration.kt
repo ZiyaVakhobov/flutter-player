@@ -8,4 +8,6 @@ data class DownloadConfiguration(
     val url: String,
     @SerializedName("percent")
     var percent: Int,
+    @SerializedName("state")
+    var state: Int,
 ) : Serializable

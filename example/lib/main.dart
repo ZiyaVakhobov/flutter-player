@@ -3,21 +3,34 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
+import 'package:udevs_video_player_example/second_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Plugin example',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MainPage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
-  int _progress = 0;
 
   download() async {
     try {
@@ -84,26 +97,6 @@ class _MyAppState extends State<MyApp> {
     return isDownloaded;
   }
 
-  getCurrentProgressDownload() async {
-    int progress = 0;
-    try {
-      progress = await _udevsVideoPlayerPlugin.getCurrentProgressDownload(
-              downloadConfig: DownloadConfiguration(
-            url:
-                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-          )) ??
-          0;
-      if (kDebugMode) {
-        print('result: $progress');
-      }
-    } on PlatformException {
-      debugPrint('Failed to get platform version.');
-    }
-    setState(() {
-      _progress = progress;
-    });
-  }
-
   Stream<DownloadConfiguration> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
@@ -167,53 +160,52 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Plugin example app')),
-        body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: playVideo,
-                child: const Text('Play Video'),
-              ),
-              ElevatedButton(
-                onPressed: download,
-                child: const Text('Download'),
-              ),
-              ElevatedButton(
-                onPressed: pauseDownload,
-                child: const Text('Pause Download'),
-              ),
-              ElevatedButton(
-                onPressed: resumeDownload,
-                child: const Text('Resume Download'),
-              ),
-              ElevatedButton(
-                onPressed: getCurrentProgressDownload,
-                child: const Text('Get Current Progress'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {});
-                },
-                child: const Text('Update UI'),
-              ),
-              StreamBuilder(
-                stream: currentProgressDownloadAsStream(),
-                builder: (context, snapshot) {
-                  var data = snapshot.data as DownloadConfiguration?;
-                  return Text(data == null
-                      ? 'Not downloading'
-                      : data.percent.toString());
-                },
-              ),
-              Text(_progress.toString()),
-            ],
+    return Scaffold(
+      appBar: AppBar(title: const Text('Plugin example app')),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          ElevatedButton(
+            onPressed: playVideo,
+            child: const Text('Play Video'),
           ),
-        ),
+          ElevatedButton(
+            onPressed: download,
+            child: const Text('Download'),
+          ),
+          ElevatedButton(
+            onPressed: pauseDownload,
+            child: const Text('Pause Download'),
+          ),
+          ElevatedButton(
+            onPressed: resumeDownload,
+            child: const Text('Resume Download'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const SecondPage()));
+            },
+            child: const Text('Got to next page'),
+          ),
+          StreamBuilder(
+            stream: currentProgressDownloadAsStream(),
+            builder: (context, snapshot) {
+              var data = snapshot.data as DownloadConfiguration?;
+              return Text(
+                  data == null ? 'Not downloading' : data.percent.toString());
+            },
+          ),
+          FutureBuilder(
+            future: checkIsDownloaded(),
+            builder: (context, snapshot) {
+              var data = snapshot.data as bool?;
+              return Text((data ?? false) ? 'Downloaded' : 'Not downloaded');
+            },
+          ),
+        ],
       ),
     );
   }

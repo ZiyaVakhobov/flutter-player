@@ -13,77 +13,53 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('udevs_video_player');
   final StreamController<DownloadConfiguration> _streamController =
-      StreamController<DownloadConfiguration>();
+      StreamController<DownloadConfiguration>.broadcast();
 
   @override
-  Future<String?> playVideo({
-    required String playerConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<String?>('playVideo', <String, dynamic>{
-      'playerConfigJsonString': playerConfigJsonString,
-    });
+  Future<String?> playVideo({required String playerConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<String?>('playVideo',
+        <String, dynamic>{'playerConfigJsonString': playerConfigJsonString});
     return res;
   }
 
   @override
-  Future<String?> downloadVideo({
-    required String downloadConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<String?>('downloadVideo', <String, dynamic>{
-      'downloadConfigJsonString': downloadConfigJsonString,
+  Future downloadVideo({required String downloadConfigJsonString}) async {
+    await methodChannel.invokeMethod('downloadVideo', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
     });
-    return res;
   }
 
   @override
-  Future<String?> pauseDownload({
-    required String downloadConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<String?>('pauseDownload', <String, dynamic>{
-      'downloadConfigJsonString': downloadConfigJsonString,
+  Future pauseDownload({required String downloadConfigJsonString}) async {
+    await methodChannel.invokeMethod('pauseDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
     });
-    return res;
   }
 
   @override
-  Future<String?> resumeDownload({
-    required String downloadConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<String?>('resumeDownload', <String, dynamic>{
-      'downloadConfigJsonString': downloadConfigJsonString,
+  Future resumeDownload({required String downloadConfigJsonString}) async {
+    await methodChannel.invokeMethod('resumeDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
     });
-    return res;
   }
 
   @override
-  Future<bool> isDownloadVideo({
-    required String downloadConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<bool?>('checkIsDownloadedVideo', <String, dynamic>{
-      'downloadConfigJsonString': downloadConfigJsonString,
+  Future<bool> isDownloadVideo(
+      {required String downloadConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<bool?>(
+        'checkIsDownloadedVideo', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
     });
     return res ?? false;
   }
 
   @override
-  Future<int?> getCurrentProgressDownload({
-    required String downloadConfigJsonString,
-  }) async {
-    final res = await methodChannel
-        .invokeMethod<int>('getCurrentProgressDownload', <String, dynamic>{
-      'downloadConfigJsonString': downloadConfigJsonString,
+  Future<int?> getCurrentProgressDownload(
+      {required String downloadConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<int>(
+        'getCurrentProgressDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
     });
-    return res;
-  }
-
-  @override
-  Future<dynamic> closeVideo() async {
-    final res = await methodChannel.invokeMethod<dynamic>('closePlayer');
     return res;
   }
 
@@ -93,8 +69,12 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
       if (call.method == 'percent') {
         var json = call.arguments as String;
         var decode = jsonDecode(json);
-        _streamController.add(DownloadConfiguration(
-            url: decode['url'], percent: decode['percent']));
+        _streamController.add(
+          DownloadConfiguration(
+              url: decode['url'],
+              percent: decode['percent'],
+              state: decode['state']),
+        );
       }
     });
     return _streamController.stream;

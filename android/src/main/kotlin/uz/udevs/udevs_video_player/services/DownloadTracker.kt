@@ -83,10 +83,6 @@ class DownloadTracker(
         }
     }
 
-    fun removeAllDownload() {
-        DownloadService.sendResumeDownloads(context, MyDownloadService::class.java, false)
-    }
-
     fun resumeAllDownload() {
         DownloadService.sendResumeDownloads(context, MyDownloadService::class.java, false)
     }
@@ -108,29 +104,12 @@ class DownloadTracker(
         }
     }
 
-
-    @ExperimentalCoroutinesApi
-    suspend fun getCurrentProgressDownload(uri: Uri?): Flow<Float?> {
-        var percent: Float? =
-            downloadManager.currentDownloads.find { it.request.uri == uri }?.percentDownloaded
-        return callbackFlow {
-            while (percent != null) {
-                percent =
-                    downloadManager.currentDownloads.find { it.request.uri == uri }?.percentDownloaded
-                trySend(percent).isSuccess
-                withContext(Dispatchers.IO) {
-                    delay(1000)
-                }
-            }
-        }
-    }
-
     fun getCurrentProgressDownload(mediaItem: MediaItem): Int? {
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
         if (download != null) {
             return 100
         }
-        return downloadManager.currentDownloads.find{
+        return downloadManager.currentDownloads.find {
             it.request.uri == mediaItem.localConfiguration?.uri
         }?.percentDownloaded?.roundToInt()
     }

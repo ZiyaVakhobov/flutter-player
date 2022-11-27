@@ -168,15 +168,8 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 runnable = object : Runnable {
                     override fun run() {
                         try {
-                            val percent = download.percentDownloaded.roundToInt()
-                            if (percent == 100) {
-                                handler.removeCallbacks(this)
-                            } else {
-                                val toJson =
-                                    gson.toJson(DownloadConfiguration(download.request.id, percent))
-                                channel.invokeMethod("percent", toJson)
-                                handler.postDelayed(this, 2000)
-                            }
+                            channel.invokeMethod("percent", toJson(download))
+                            handler.postDelayed(this, 2000)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -186,22 +179,43 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             Download.STATE_COMPLETED -> {
                 if (runnable != null) {
+                    channel.invokeMethod("percent", toJson(download))
                     handler.removeCallbacks(runnable!!)
                 }
             }
             Download.STATE_FAILED -> {
                 if (runnable != null) {
+                    channel.invokeMethod("percent", toJson(download))
                     handler.removeCallbacks(runnable!!)
                 }
             }
-            Download.STATE_QUEUED -> {}
-            Download.STATE_REMOVING -> {}
-            Download.STATE_RESTARTING -> {}
+            Download.STATE_QUEUED -> {
+                channel.invokeMethod("percent", toJson(download))
+            }
+            Download.STATE_REMOVING -> {
+                channel.invokeMethod("percent", toJson(download))
+            }
+            Download.STATE_RESTARTING -> {
+                channel.invokeMethod("percent", toJson(download))
+            }
             Download.STATE_STOPPED -> {
                 if (runnable != null) {
+                    channel.invokeMethod("percent", toJson(download))
                     handler.removeCallbacks(runnable!!)
                 }
             }
         }
     }
+
+    private fun toJson(download: Download): String {
+        val percent = download.percentDownloaded.roundToInt()
+        return gson.toJson(
+            DownloadConfiguration(
+                download.request.id,
+                percent,
+                download.state
+            )
+        )
+    }
+
 }

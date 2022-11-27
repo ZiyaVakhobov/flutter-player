@@ -28,15 +28,15 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<String?> downloadVideo({required String downloadConfigJsonString}) {
+  Future downloadVideo({required String downloadConfigJsonString}) {
     throw UnimplementedError('downloadVideo() has not been implemented.');
   }
 
-  Future<String?> pauseDownload({required String downloadConfigJsonString}) {
+  Future pauseDownload({required String downloadConfigJsonString}) {
     throw UnimplementedError('pauseDownload() has not been implemented.');
   }
 
-  Future<String?> resumeDownload({required String downloadConfigJsonString}) {
+  Future resumeDownload({required String downloadConfigJsonString}) {
     throw UnimplementedError('resumeDownload() has not been implemented.');
   }
 
@@ -46,10 +46,6 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
 
   Future<int?> getCurrentProgressDownload({required String downloadConfigJsonString}) {
     throw UnimplementedError('getCurrentProgressDownload() has not been implemented.');
-  }
-
-  Future<dynamic> closeVideo() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
   Stream<DownloadConfiguration> currentProgressDownloadAsStream() {
