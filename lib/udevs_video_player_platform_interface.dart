@@ -56,6 +56,14 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('getStateDownload() has not been implemented.');
   }
 
+  Future<int?> getBytesDownloaded({required String downloadConfigJsonString}) {
+    throw UnimplementedError('getBytesDownloaded() has not been implemented.');
+  }
+
+  Future<int?> getContentBytesDownload({required String downloadConfigJsonString}) {
+    throw UnimplementedError('getContentBytesDownload() has not been implemented.');
+  }
+
   void dispose() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }

@@ -61,7 +61,6 @@ class UdevsVideoPlayer {
         .getCurrentProgressDownload(downloadConfigJsonString: jsonStringConfig);
   }
 
-
   Stream<DownloadConfiguration> get currentProgressDownloadAsStream =>
       UdevsVideoPlayerPlatform.instance.currentProgressDownloadAsStream();
 
@@ -71,5 +70,20 @@ class UdevsVideoPlayer {
     return UdevsVideoPlayerPlatform.instance
         .getStateDownload(downloadConfigJsonString: jsonStringConfig);
   }
+
+  Future<int?> getBytesDownloaded(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance
+        .getBytesDownloaded(downloadConfigJsonString: jsonStringConfig);
+  }
+
+  Future<int?> getContentBytesDownload(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance
+        .getContentBytesDownload(downloadConfigJsonString: jsonStringConfig);
+  }
+
   void dispose() => UdevsVideoPlayerPlatform.instance.dispose();
 }

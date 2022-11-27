@@ -87,6 +87,14 @@ class DownloadTracker(
         return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.state
     }
 
+    fun getBytesDownloaded(mediaItem: MediaItem) : Long? {
+        return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.bytesDownloaded
+    }
+
+    fun getContentBytesDownload(mediaItem: MediaItem) : Long? {
+        return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.contentLength
+    }
+
     fun resumeAllDownload() {
         DownloadService.sendResumeDownloads(context, MyDownloadService::class.java, false)
     }

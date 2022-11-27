@@ -90,6 +90,26 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     return res;
   }
 
+  @override
+  Future<int?> getBytesDownloaded(
+      {required String downloadConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<int>(
+        'getBytesDownloaded', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
+    });
+    return res;
+  }
+
+  @override
+  Future<int?> getContentBytesDownload(
+      {required String downloadConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<int>(
+        'getContentBytesDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
+    });
+    return res;
+  }
+
 
   @override
   void dispose() {
