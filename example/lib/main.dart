@@ -32,12 +32,28 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
-  download() async {
+  download1() async {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+          )) ??
+          'nothing';
+      if (kDebugMode) {
+        print('result: $s');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+  }
+
+  download2() async {
+    try {
+      var s = await _udevsVideoPlayerPlugin.downloadVideo(
+              downloadConfig: DownloadConfiguration(
+            url:
+                'https://cdn.uzd.udevs.io/uzdigital/videos/a04c9257216b2f2085c88be31a13e5d7/240p/index.m3u8',
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -172,8 +188,12 @@ class _MainPageState extends State<MainPage> {
             child: const Text('Play Video'),
           ),
           ElevatedButton(
-            onPressed: download,
-            child: const Text('Download'),
+            onPressed: download1,
+            child: const Text('Download1'),
+          ),
+          ElevatedButton(
+            onPressed: download2,
+            child: const Text('Download2'),
           ),
           ElevatedButton(
             onPressed: pauseDownload,

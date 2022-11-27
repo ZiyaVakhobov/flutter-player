@@ -81,6 +81,17 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
+  Future<int?> getStateDownload(
+      {required String downloadConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<int>(
+        'getStateDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
+    });
+    return res;
+  }
+
+
+  @override
   void dispose() {
     _streamController.onCancel;
   }

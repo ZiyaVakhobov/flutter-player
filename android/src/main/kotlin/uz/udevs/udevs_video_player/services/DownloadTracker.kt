@@ -83,6 +83,10 @@ class DownloadTracker(
         }
     }
 
+    fun getStateDownload(mediaItem: MediaItem) : Int? {
+        return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.state
+    }
+
     fun resumeAllDownload() {
         DownloadService.sendResumeDownloads(context, MyDownloadService::class.java, false)
     }

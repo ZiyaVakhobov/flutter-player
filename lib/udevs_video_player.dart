@@ -65,5 +65,11 @@ class UdevsVideoPlayer {
   Stream<DownloadConfiguration> get currentProgressDownloadAsStream =>
       UdevsVideoPlayerPlatform.instance.currentProgressDownloadAsStream();
 
+  Future<int?> getStateDownload(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    return UdevsVideoPlayerPlatform.instance
+        .getStateDownload(downloadConfigJsonString: jsonStringConfig);
+  }
   void dispose() => UdevsVideoPlayerPlatform.instance.dispose();
 }

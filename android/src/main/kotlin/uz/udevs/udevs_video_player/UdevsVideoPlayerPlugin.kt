@@ -69,7 +69,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" ||
             call.method == "getCurrentProgressDownload" || call.method == "pauseDownload" ||
-            call.method == "resumeDownload"
+            call.method == "resumeDownload" || call.method == "getStateDownload"
         ) {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
@@ -101,6 +101,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                     "resumeDownload" -> {
                         downloadTracker?.resumeAllDownload()
+                    }
+                    "getStateDownload" -> {
+                        result.success(downloadTracker?.getStateDownload(mediaItem))
                     }
                 }
             }
