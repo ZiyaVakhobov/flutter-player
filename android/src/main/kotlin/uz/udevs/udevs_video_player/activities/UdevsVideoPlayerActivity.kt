@@ -360,7 +360,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         removeProgressListener()
         unregisterCallBack()
         val intent = Intent()
-        intent.putExtra("position", seconds.toString())
+        intent.putExtra("position", seconds)
         setResult(PLAYER_ACTIVITY_FINISH, intent)
         finish()
         super.onBackPressed()
@@ -598,7 +598,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             removeProgressListener()
             unregisterCallBack()
             val intent = Intent()
-            intent.putExtra("position", seconds.toString())
+            intent.putExtra("position", seconds)
             setResult(PLAYER_ACTIVITY_FINISH, intent)
             finish()
         }

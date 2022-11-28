@@ -16,8 +16,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
       StreamController<MediaItemDownload>.broadcast();
 
   @override
-  Future<String?> playVideo({required String playerConfigJsonString}) async {
-    final res = await methodChannel.invokeMethod<String?>('playVideo',
+  Future<int?> playVideo({required String playerConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<int?>('playVideo',
         <String, dynamic>{'playerConfigJsonString': playerConfigJsonString});
     return res;
   }

@@ -150,7 +150,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == PLAYER_ACTIVITY && resultCode == PLAYER_ACTIVITY_FINISH) {
-            resultMethod?.success(data?.getStringExtra("position"))
+            resultMethod?.success(data?.getLongExtra("position",0))
         }
         return true
     }
