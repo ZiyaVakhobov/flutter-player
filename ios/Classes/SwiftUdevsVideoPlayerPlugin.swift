@@ -83,7 +83,29 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
                 return
             }
-            let download : MediaItemDownload = MediaItemDownload.fromMap(map: json)
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            getStateDownload(for: download)
+            return
+        }
+        case "getBytesDownloaded": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            getStateDownload(for: download)
+            return
+        }
+        case "getContentBytesDownload": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
             getStateDownload(for: download)
             return
         }
@@ -155,7 +177,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     /// get state download
-    private func getStateDownload(for download: MediaItemDownload){
+    private func getStateDownload(for download: DownloadConfiguration){
         var task: AVAggregateAssetDownloadTask?
         for (taskKey, assetVal) in activeDownloadsMap where (download.url == assetVal.url) {
             task = taskKey
