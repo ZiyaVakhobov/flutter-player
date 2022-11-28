@@ -14,10 +14,10 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     /// The AVAssetDownloadURLSession to use for managing AVAssetDownloadTasks.
     fileprivate var assetDownloadURLSession: AVAssetDownloadURLSession!
     /// Internal map of AVAggregateAssetDownloadTask to its corresponding Asset.
-    fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: DownloadConfiguration]()
+    fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: MediaItemDownload]()
     
     /// Internal map of AVAggregateAssetDownloadTask to download URL.
-    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: DownloadConfiguration]()
+    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: MediaItemDownload]()
     
     override private init(){
         super.init()
@@ -83,7 +83,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
                 return
             }
-            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            let download : MediaItemDownload = MediaItemDownload.fromMap(map: json)
             getStateDownload(for: download)
             return
         }
@@ -134,28 +134,34 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         flutterResult!(Int(duration))
     }
     
-    private func getPercentComplete(download: DownloadConfiguration){
+    private func getPercentComplete(download: MediaItemDownload){
         SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: download.fromString())
     }
     
     /// is download video
     private func isDownloadVideo(for download: DownloadConfiguration){
-        var task: AVAggregateAssetDownloadTask?
-        for (taskKey, assetVal) in activeDownloadsMap where (download.url == assetVal.url) {
-            task = taskKey
-            break
+        assetDownloadURLSession.getAllTasks { tasksArray in
+            // For each task, restore the state in the app by recreating Asset structs and reusing existing AVURLAsset objects.
+            for task in tasksArray {
+                guard let assetDownloadTask = task as? AVAggregateAssetDownloadTask else { break }
+                let urlAsset = assetDownloadTask.urlAsset
+                if urlAsset.url.absoluteString == download.url {
+                    self.flutterResult!(true)
+                    break
+                }
+            }
         }
-        flutterResult!(task != nil)
+        flutterResult!(false)
     }
     
     /// get state download
-    private func getStateDownload(for download: DownloadConfiguration){
+    private func getStateDownload(for download: MediaItemDownload){
         var task: AVAggregateAssetDownloadTask?
         for (taskKey, assetVal) in activeDownloadsMap where (download.url == assetVal.url) {
             task = taskKey
             break
         }
-        flutterResult!(task?.state ?? DownloadConfiguration.STATE_FAILED)
+        flutterResult!(task?.state ?? MediaItemDownload.STATE_FAILED)
     }
     
     /// download an AVAssetDownloadTask given an Asset.
@@ -173,17 +179,17 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                                                                                             assetArtworkData: nil,
                                                                                             options:  [AVAssetDownloadTaskMinimumRequiredMediaBitrateKey: 265_000]) else { return }
                 downloadTask.taskDescription = asset.description
-                activeDownloadsMap[downloadTask] = download
+                activeDownloadsMap[downloadTask] = MediaItemDownload(url: download.url, percent: 0, state: MediaItemDownload.STATE_RESTARTING)
                 downloadTask.resume()
             }
             return
         }
-        getPercentComplete(download: DownloadConfiguration(url: download.url, percent: 100, state: DownloadConfiguration.STATE_COMPLETED))
+        getPercentComplete(download: MediaItemDownload(url: download.url, percent: 100, state: MediaItemDownload.STATE_COMPLETED))
     }
     
     /// Cancels an AVAssetDownloadTask given an Asset.
     /// - Tag: CancelDownload
-    func cancelDownload(for asset: DownloadConfiguration) {
+    func cancelDownload(for asset: MediaItemDownload) {
         var task: AVAggregateAssetDownloadTask?
         
         for (taskKey, assetVal) in activeDownloadsMap where (asset.url == assetVal.url) {
@@ -202,7 +208,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             task = taskKey
             break
         }
-        
         task?.suspend()
     }
     
@@ -232,7 +237,7 @@ extension SwiftUdevsVideoPlayerPlugin: AVAssetDownloadDelegate {
     public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
                     willDownloadTo location: URL) {
         UserDefaults.standard.set(location.relativePath, forKey: "\(aggregateAssetDownloadTask.urlAsset.url.absoluteURL)")
-        self.getPercentComplete(download: DownloadConfiguration(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: 100, state: DownloadConfiguration.STATE_COMPLETED))
+        self.getPercentComplete(download: MediaItemDownload(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: 100, state: MediaItemDownload.STATE_COMPLETED))
     }
 
     /// Method called when a child AVAssetDownloadTask completes.
@@ -260,7 +265,7 @@ extension SwiftUdevsVideoPlayerPlugin: AVAssetDownloadDelegate {
         }
         percentComplete *= 100
         print(percentComplete)
-        self.getPercentComplete(download: DownloadConfiguration(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: Int(percentComplete), state: DownloadConfiguration.STATE_DOWNLOADING))
+        self.getPercentComplete(download: MediaItemDownload(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: Int(percentComplete), state: MediaItemDownload.STATE_DOWNLOADING))
     }
 }
 
