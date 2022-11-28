@@ -162,18 +162,12 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     
     /// is download video
     private func isDownloadVideo(for download: DownloadConfiguration){
-        assetDownloadURLSession.getAllTasks { tasksArray in
-            // For each task, restore the state in the app by recreating Asset structs and reusing existing AVURLAsset objects.
-            for task in tasksArray {
-                guard let assetDownloadTask = task as? AVAggregateAssetDownloadTask else { break }
-                let urlAsset = assetDownloadTask.urlAsset
-                if urlAsset.url.absoluteString == download.url {
-                    self.flutterResult!(true)
-                    break
-                }
-            }
+        guard UserDefaults.standard.value(forKey: download.url) is String else {
+            flutterResult!(false)
+            return
         }
-        flutterResult!(false)
+        flutterResult!(true)
+        return
     }
     
     /// get state download
