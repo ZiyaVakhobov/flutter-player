@@ -56,4 +56,6 @@ data class PlayerConfiguration(
     val autoText: String,
     @SerializedName("baseUrl")
     val baseUrl: String,
+    @SerializedName("fromCache")
+    val fromCache: Boolean,
 ) : Serializable

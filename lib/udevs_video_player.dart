@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:udevs_video_player/models/download_configuration.dart';
+import 'package:udevs_video_player/models/media_item_download.dart';
 import 'package:udevs_video_player/models/player_configuration.dart';
 
 import 'udevs_video_player_platform_interface.dart';
@@ -61,7 +62,7 @@ class UdevsVideoPlayer {
         .getCurrentProgressDownload(downloadConfigJsonString: jsonStringConfig);
   }
 
-  Stream<DownloadConfiguration> get currentProgressDownloadAsStream =>
+  Stream<MediaItemDownload> get currentProgressDownloadAsStream =>
       UdevsVideoPlayerPlatform.instance.currentProgressDownloadAsStream();
 
   Future<int?> getStateDownload(

@@ -24,6 +24,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import uz.udevs.udevs_video_player.activities.UdevsVideoPlayerActivity
 import uz.udevs.udevs_video_player.models.DownloadConfiguration
+import uz.udevs.udevs_video_player.models.MediaItemDownload
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.services.DownloadTracker
 import uz.udevs.udevs_video_player.services.DownloadUtil
@@ -81,7 +82,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     Util.getAdaptiveMimeTypeForContentType(Util.inferContentType(uri))
                 val mediaItem = MediaItem.Builder()
                     .setUri(uri)
-                    .setMediaMetadata(MediaMetadata.Builder().setTitle("My title").build())
+                    .setMediaMetadata(MediaMetadata.Builder().setTitle(downloadConfiguration.title).build())
                     .setMimeType(adaptiveMimeType).build()
                 when (call.method) {
                     "downloadVideo" -> {
@@ -220,7 +221,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private fun toJson(download: Download): String {
         val percent = download.percentDownloaded.roundToInt()
         return gson.toJson(
-            DownloadConfiguration(
+            MediaItemDownload(
                 download.request.id,
                 percent,
                 download.state

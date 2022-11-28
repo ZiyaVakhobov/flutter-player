@@ -3,9 +3,11 @@ package uz.udevs.udevs_video_player.models
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
-data class DownloadConfiguration(
-    @SerializedName("title")
-    val title: String,
+data class MediaItemDownload(
     @SerializedName("url")
     val url: String,
+    @SerializedName("percent")
+    val percent: Int,
+    @SerializedName("state")
+    val state: Int,
 ) : Serializable

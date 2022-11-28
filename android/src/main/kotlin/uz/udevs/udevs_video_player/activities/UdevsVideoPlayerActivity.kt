@@ -1,7 +1,6 @@
 package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
-import androidx.mediarouter.app.MediaRouteButton
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -39,6 +38,7 @@ import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
+import androidx.mediarouter.app.MediaRouteButton
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
@@ -65,8 +65,10 @@ import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.models.PremierStreamResponse
 import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
+import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
+
 
 class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
@@ -163,10 +165,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 PlaybackLocation.LOCAL
             }
         Log.d(TAG, "onCreate: ${remoteMediaClient?.mediaInfo?.contentUrl}")
-        if(mLocation == PlaybackLocation.REMOTE) {
+        if (mLocation == PlaybackLocation.REMOTE) {
             playerConfiguration.resolutions.values.forEach {
                 Log.d(TAG, "onCreate: $it")
-                if(it == remoteMediaClient?.mediaInfo?.contentUrl) {
+                if (it == remoteMediaClient?.mediaInfo?.contentUrl) {
                     url = it
                     sameWithStreamingContent = true
                 }
@@ -408,7 +410,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun playVideo() {
-        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+        val dataSourceFactory: DataSource.Factory =
+            if (!playerConfiguration.fromCache) DefaultHttpDataSource.Factory()
+            else DownloadUtil.getDataSourceFactory(this)
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
         player = ExoPlayer.Builder(this).build()
@@ -467,8 +471,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (mLocation == PlaybackLocation.LOCAL) {
             player?.playWhenReady = true
         } else {
-            if(!sameWithStreamingContent) {
-               loadRemoteMedia(playerConfiguration.lastPosition)
+            if (!sameWithStreamingContent) {
+                loadRemoteMedia(playerConfiguration.lastPosition)
             }
             registerCallBack()
             listenToProgress()
@@ -832,7 +836,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             title?.visibility = View.VISIBLE
             title1?.text = ""
             title1?.visibility = View.GONE
-            nextButton?.visibility = View.VISIBLE
+            if (playerConfiguration.isSerial)
+                nextButton?.visibility = View.VISIBLE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {

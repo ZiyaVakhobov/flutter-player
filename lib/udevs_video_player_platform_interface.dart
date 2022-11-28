@@ -1,5 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:udevs_video_player/models/download_configuration.dart';
+import 'package:udevs_video_player/models/media_item_download.dart';
 
 import 'udevs_video_player_method_channel.dart';
 
@@ -48,7 +48,7 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('getCurrentProgressDownload() has not been implemented.');
   }
 
-  Stream<DownloadConfiguration> currentProgressDownloadAsStream() {
+  Stream<MediaItemDownload> currentProgressDownloadAsStream() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 

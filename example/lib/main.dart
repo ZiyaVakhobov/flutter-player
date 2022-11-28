@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
+import 'package:udevs_video_player/models/media_item_download.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'package:udevs_video_player_example/second_page.dart';
 
@@ -36,6 +37,7 @@ class _MainPageState extends State<MainPage> {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
           )) ??
@@ -52,6 +54,7 @@ class _MainPageState extends State<MainPage> {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/a04c9257216b2f2085c88be31a13e5d7/240p/index.m3u8',
           )) ??
@@ -68,6 +71,7 @@ class _MainPageState extends State<MainPage> {
     try {
       var s = await _udevsVideoPlayerPlugin.pauseDownload(
               downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
           )) ??
@@ -84,6 +88,7 @@ class _MainPageState extends State<MainPage> {
     try {
       var s = await _udevsVideoPlayerPlugin.resumeDownload(
               downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
           )) ??
@@ -101,6 +106,7 @@ class _MainPageState extends State<MainPage> {
     try {
       isDownloaded = await _udevsVideoPlayerPlugin.isDownloadVideo(
           downloadConfig: DownloadConfiguration(
+        title: 'She-Hulk',
         url:
             'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
       ));
@@ -113,7 +119,7 @@ class _MainPageState extends State<MainPage> {
     return isDownloaded;
   }
 
-  Stream<DownloadConfiguration> currentProgressDownloadAsStream() =>
+  Stream<MediaItemDownload> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
   playVideo() async {
@@ -122,23 +128,10 @@ class _MainPageState extends State<MainPage> {
               playerConfig: PlayerConfiguration(
             baseUrl: "https://api.spec.uzd.udevs.io/v1/",
             initialResolution: {
-              "Автонастройка":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
-            },
-            resolutions: {
-              "Автонастройка":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8",
-              "1080p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/1080p/index.m3u8",
-              "720p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/720p/index.m3u8",
-              "480p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/480p/index.m3u8",
-              "360p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/360p/index.m3u8",
               "240p":
                   "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
             },
+            resolutions: {},
             qualityText: 'Качество',
             speedText: 'Скорость',
             lastPosition: 0,
@@ -157,13 +150,12 @@ class _MainPageState extends State<MainPage> {
             episodeIndex: 0,
             isMegogo: false,
             isPremier: false,
-            videoId: '5178',
-            sessionId: '633fad58c2c2e7a4241ab508',
-            megogoAccessToken:
-                'MToxMTYyNDQ1NDA2OjE2NjUxMTc1NTY6OjY3ZTI2MzVkYzY0Mzk2N2UwMjZhOGVjNWQ5MDA3OGFm',
-            authorization:
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTg1MDEzNDMsImlzcyI6InVzZXIiLCJwaWQiOjEzMDcsInJvbGUiOiJjdXN0b21lciIsInN1YiI6IjYyMDQzMmZmLTc3ZWItNDc0Mi05MmFhLTZmOGU4NDcyMDI0ZCJ9.6SvUCBT0gb6tIRy1PL-C7WS7xHpJXc1PCZky6aH6HtA',
+            videoId: '',
+            sessionId: '',
+            megogoAccessToken: '',
+            authorization: '',
             autoText: 'Автонастройка',
+            fromCache: true,
           )) ??
           'nothing';
       if (kDebugMode) {
@@ -213,7 +205,7 @@ class _MainPageState extends State<MainPage> {
           StreamBuilder(
             stream: currentProgressDownloadAsStream(),
             builder: (context, snapshot) {
-              var data = snapshot.data as DownloadConfiguration?;
+              var data = snapshot.data as MediaItemDownload?;
               return Text(
                   data == null ? 'Not downloading' : data.percent.toString());
             },

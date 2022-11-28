@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:udevs_video_player/models/media_item_download.dart';
 
-import 'models/download_configuration.dart';
 import 'udevs_video_player_platform_interface.dart';
 
 /// An implementation of [UdevsVideoPlayerPlatform] that uses method channels.
@@ -12,8 +12,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('udevs_video_player');
-  final StreamController<DownloadConfiguration> _streamController =
-      StreamController<DownloadConfiguration>.broadcast();
+  final StreamController<MediaItemDownload> _streamController =
+      StreamController<MediaItemDownload>.broadcast();
 
   @override
   Future<String?> playVideo({required String playerConfigJsonString}) async {
@@ -64,16 +64,17 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
-  Stream<DownloadConfiguration> currentProgressDownloadAsStream() {
+  Stream<MediaItemDownload> currentProgressDownloadAsStream() {
     methodChannel.setMethodCallHandler((call) async {
       if (call.method == 'percent') {
         var json = call.arguments as String;
         var decode = jsonDecode(json);
         _streamController.add(
-          DownloadConfiguration(
-              url: decode['url'],
-              percent: decode['percent'],
-              state: decode['state']),
+          MediaItemDownload(
+            url: decode['url'],
+            percent: decode['percent'],
+            state: decode['state'],
+          ),
         );
       }
     });
@@ -109,7 +110,6 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     });
     return res;
   }
-
 
   @override
   void dispose() {

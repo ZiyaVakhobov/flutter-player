@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:udevs_video_player/models/media_item_download.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'extensions.dart';
 
@@ -12,7 +13,7 @@ class SecondPage extends StatefulWidget {
 class _SecondPageState extends State<SecondPage> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
-  Stream<DownloadConfiguration> currentProgressDownloadAsStream() =>
+  Stream<MediaItemDownload> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
   @override
@@ -27,7 +28,7 @@ class _SecondPageState extends State<SecondPage> {
             StreamBuilder(
               stream: currentProgressDownloadAsStream(),
               builder: (context, snapshot) {
-                var data = snapshot.data as DownloadConfiguration?;
+                var data = snapshot.data as MediaItemDownload?;
                 return Text(
                     data == null ? 'Not downloading' : '${data.percent}\n${data.state.toState()}');
               },
