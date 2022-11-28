@@ -98,6 +98,10 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         flutterResult!("\(Int(duration))")
     }
     
+    func successDownload(){
+        flutterResult!("Success")
+    }
+    
     private func getPercentComplete(percent: Int){
         SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: Int(percent))
     }
@@ -116,19 +120,18 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         print("percentComplete \(percentComplete)")
         getPercentComplete(percent : Int(percentComplete))
         let params = ["percent": percentComplete]
+        if percentComplete == 100 {
+            successDownload()
+        }
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "completion"), object: nil, userInfo: params)
     }
     
     public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didFinishDownloadingTo location: URL) {
-        print("Finished \(location.relativePath)")
-        print("Finished \(location.absoluteURL)")
-        print("Finished \(location.absoluteString)")
-        print("Finished \(assetDownloadTask.urlAsset.url)")
-        UserDefaults.standard.set(location.relativePath, forKey: "\(assetDownloadTask.urlAsset.url).cache")
+        UserDefaults.standard.set(location.relativePath, forKey: "assetPath")
     }
     
     func setupAssetDownload(videoUrl: String) {
-        guard UserDefaults.standard.value(forKey: "\(String(describing: videoUrl)).cache") is String else {
+        guard UserDefaults.standard.value(forKey: "assetPath") is String else {
             // Create new background session configuration.
             configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
             
