@@ -389,8 +389,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    func close(duration:Double){
-        self.dismiss(animated: true, completion: nil);
+    func close(duration : Double){
+        playerView.stop()
+        playerView.removeMediaPlayerObservers()
+        self.dismiss(animated: true, completion: nil)
         delegate?.getDuration(duration: duration)
     }
     

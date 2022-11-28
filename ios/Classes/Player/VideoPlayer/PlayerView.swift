@@ -322,12 +322,9 @@ class PlayerView: UIView {
         timeSlider.setThumbImage(circleImage, for: .highlighted)
     }
     
-    func loadMediaPlayer(){
-        guard let url = media?.contentURL else {
-            return
-        }
+    func loadMediaPlayer(asset:AVURLAsset){
         player.automaticallyWaitsToMinimizeStalling = true
-        player.replaceCurrentItem(with: AVPlayerItem(asset: AVURLAsset(url: url)))
+        player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect
         videoView.layer.addSublayer(playerLayer)
@@ -340,31 +337,17 @@ class PlayerView: UIView {
     
     
     func playOfflineAsset() {
-        guard let assetPath = UserDefaults.standard.value(forKey: "assetPath") as? String else {
-            print("not cache")
-            loadMediaPlayer()
+        guard let url = media?.contentURL else {
+            return
+        }
+        guard let assetPath = UserDefaults.standard.value(forKey: media?.contentURL?.absoluteString ?? "") as? String else {
+            loadMediaPlayer(asset: AVURLAsset(url: url))
             return
         }
         let baseURL = URL(fileURLWithPath: NSHomeDirectory())
         let assetURL = baseURL.appendingPathComponent(assetPath)
         let asset = AVURLAsset(url: assetURL)
-        if let cache = asset.assetCache, cache.isPlayableOffline {
-            guard (media?.contentURL) != nil else {
-                return
-            }
-            player.automaticallyWaitsToMinimizeStalling = true
-            player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
-            playerLayer = AVPlayerLayer(player: player)
-            playerLayer.videoGravity = .resizeAspect
-            videoView.layer.addSublayer(playerLayer)
-            layer.insertSublayer(playerLayer, above: videoView.layer)
-            if !playerConfiguration.isLive{
-                NotificationCenter.default.addObserver(self, selector: #selector(playerEndedPlaying), name: Notification.Name("AVPlayerItemDidPlayToEndTimeNotification"), object: nil)
-            }
-            addTimeObserver()
-        } else {
-            // Present Error: No playable version of this asset exists offline
-        }
+        loadMediaPlayer(asset: asset)
     }
     
     func changeUrl(url:String?, title: String?){
@@ -789,7 +772,7 @@ class PlayerView: UIView {
       if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
         // Loading has failed, try it again.
         purgeMediaPlayer()
-        loadMediaPlayer()
+        playOfflineAsset()
         return
       }
       if streamDuration == nil {

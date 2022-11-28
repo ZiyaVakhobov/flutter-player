@@ -3,16 +3,30 @@ import AVFoundation
 import AVFAudio
 import UIKit
 
-public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate, AVAssetDownloadDelegate, AVAssetResourceLoaderDelegate {
+public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDelegate {
     
     public static var viewController = FlutterViewController()
     private var flutterResult: FlutterResult?
     private static var channel : FlutterMethodChannel?
     
-    var configuration: URLSessionConfiguration?
-    var downloadSession: AVAssetDownloadURLSession?
-    var downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
+    fileprivate let downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
     var totalDownloadedBytes: Int64 = 0
+    /// The AVAssetDownloadURLSession to use for managing AVAssetDownloadTasks.
+    fileprivate var assetDownloadURLSession: AVAssetDownloadURLSession!
+    /// Internal map of AVAggregateAssetDownloadTask to its corresponding Asset.
+    fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: DownloadConfiguration]()
+    
+    /// Internal map of AVAggregateAssetDownloadTask to download URL.
+    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: DownloadConfiguration]()
+    
+    override private init(){
+        super.init()
+        let configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
+        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
+        assetDownloadURLSession = AVAssetDownloadURLSession(configuration: configuration,
+                                                            assetDownloadDelegate: self,
+                                                            delegateQueue: OperationQueue.main)
+    }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         viewController = (UIApplication.shared.delegate?.window??.rootViewController)! as! FlutterViewController
@@ -37,7 +51,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             }
             let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
             print("Download URL \(download.url)")
-            setupAssetDownload(videoUrl: download.url)
+            setupAssetDownload(download: download)
             return
         }
         case "pauseDownload": do {
@@ -48,7 +62,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 return
             }
             let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
-            pauseDownload(videoUrl: download.url)
+            pauseDownload(for: download)
             return
         }
         case "resumeDownload": do {
@@ -59,7 +73,29 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
                 return
             }
             let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
-            restorePendingDownloads()
+            resumeDownload(for: download)
+            return
+        }
+        case "getStateDownload": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            getStateDownload(for: download)
+            return
+        }
+        case "checkIsDownloadedVideo": do {
+            guard let args = call.arguments else {
+                return
+            }
+            guard let json = convertStringToDictionary(text: (args as! [String:String])["downloadConfigJsonString"] ?? "") else {
+                return
+            }
+            let download : DownloadConfiguration = DownloadConfiguration.fromMap(map: json)
+            isDownloadVideo(for: download)
             return
         }
         case "playVideo": do {
@@ -95,104 +131,136 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     }
     
     func getDuration(duration: Double) {
-        flutterResult!("\(Int(duration))")
+        flutterResult!(Int(duration))
     }
     
-    func successDownload(){
-        flutterResult!("Success")
+    private func getPercentComplete(download: DownloadConfiguration){
+        SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: download.fromString())
     }
     
-    private func getPercentComplete(percent: Int){
-        SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: Int(percent))
-    }
-    
-    public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue], timeRangeExpectedToLoad: CMTimeRange) {
-        var percentComplete = 0.0
-        // Iterate through the loaded time ranges
-        for value in loadedTimeRanges {
-            // Unwrap the CMTimeRange from the NSValue
-            let loadedTimeRange = value.timeRangeValue
-            // Calculate the percentage of the total expected asset duration
-            percentComplete += loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
+    /// is download video
+    private func isDownloadVideo(for download: DownloadConfiguration){
+        var task: AVAggregateAssetDownloadTask?
+        for (taskKey, assetVal) in activeDownloadsMap where (download.url == assetVal.url) {
+            task = taskKey
+            break
         }
-        print(assetDownloadTask.state)
-        percentComplete *= 100
-        print("percentComplete \(percentComplete)")
-        getPercentComplete(percent : Int(percentComplete))
-        let params = ["percent": percentComplete]
-        if percentComplete == 100 {
-            successDownload()
+        flutterResult!(task != nil)
+    }
+    
+    /// get state download
+    private func getStateDownload(for download: DownloadConfiguration){
+        var task: AVAggregateAssetDownloadTask?
+        for (taskKey, assetVal) in activeDownloadsMap where (download.url == assetVal.url) {
+            task = taskKey
+            break
         }
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "completion"), object: nil, userInfo: params)
+        flutterResult!(task?.state ?? DownloadConfiguration.STATE_FAILED)
     }
     
-    public func urlSession(_ session: URLSession, assetDownloadTask: AVAssetDownloadTask, didFinishDownloadingTo location: URL) {
-        UserDefaults.standard.set(location.relativePath, forKey: "assetPath")
-    }
-    
-    func setupAssetDownload(videoUrl: String) {
-        guard UserDefaults.standard.value(forKey: "assetPath") is String else {
+    /// download an AVAssetDownloadTask given an Asset.
+    /// - Tag: DownloadDownload
+    private func setupAssetDownload(download: DownloadConfiguration) {
+        guard UserDefaults.standard.value(forKey: download.url) is String else {
             // Create new background session configuration.
-            configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-            
-            // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
-            downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
-                                                        assetDownloadDelegate: self,
-                                                        delegateQueue: OperationQueue.main)
-            if let url = URL(string: videoUrl){
+            if let url = URL(string: download.url) {
                 let asset = AVURLAsset(url: url)
+                // Get the default media selections for the asset's media selection groups.
+                let preferredMediaSelection = asset.preferredMediaSelection
                 // Create new AVAssetDownloadTask for the desired asset
-                let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
-                                                                          assetTitle: "Some Title",
-                                                                          assetArtworkData: nil,
-                                                                          options: nil)
-                downloadTask?.resume()
+                guard let downloadTask = assetDownloadURLSession.aggregateAssetDownloadTask(with: asset, mediaSelections: [preferredMediaSelection],
+                                                                                            assetTitle: "Some Title",
+                                                                                            assetArtworkData: nil,
+                                                                                            options:  [AVAssetDownloadTaskMinimumRequiredMediaBitrateKey: 265_000]) else { return }
+                downloadTask.taskDescription = asset.description
+                activeDownloadsMap[downloadTask] = download
+                downloadTask.resume()
             }
             return
         }
-        print(UserDefaults.standard.value(forKey: "\(String(describing: videoUrl)).cache"))
-        getPercentComplete(percent: 100)
+        getPercentComplete(download: DownloadConfiguration(url: download.url, percent: 100, state: DownloadConfiguration.STATE_COMPLETED))
+    }
+    
+    /// Cancels an AVAssetDownloadTask given an Asset.
+    /// - Tag: CancelDownload
+    func cancelDownload(for asset: DownloadConfiguration) {
+        var task: AVAggregateAssetDownloadTask?
+        
+        for (taskKey, assetVal) in activeDownloadsMap where (asset.url == assetVal.url) {
+            task = taskKey
+            break
+        }
+        
+        task?.cancel()
+    }
+    
+    /// suspend an AVAssetDownloadTask given an Asset.
+    /// - Tag: SuspendDownload
+    func pauseDownload(for asset: DownloadConfiguration) {
+        var task: AVAggregateAssetDownloadTask?
+        for (taskKey, assetVal) in activeDownloadsMap where asset.url == assetVal.url {
+            task = taskKey
+            break
+        }
+        
+        task?.suspend()
+    }
+    
+    /// Resume an AVAssetDownloadTask given an Asset.
+    /// - Tag: ResumeDownload
+    func resumeDownload(for asset: DownloadConfiguration) {
+        var task: AVAggregateAssetDownloadTask?
+        for (taskKey, assetVal) in activeDownloadsMap where asset.url == assetVal.url {
+            task = taskKey
+            break
+        }
+        task?.resume()
+    }
+}
+
+/**
+ Extend `SwiftUdevsVideoPlayerPlugin` to conform to the `AVAssetDownloadDelegate` protocol.
+ */
+extension SwiftUdevsVideoPlayerPlugin: AVAssetDownloadDelegate {
+
+    /// Tells the delegate that the task finished transferring data.
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+       
+    }
+
+    /// Method called when the an aggregate download task determines the location this asset will be downloaded to.
+    public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    willDownloadTo location: URL) {
+        UserDefaults.standard.set(location.relativePath, forKey: "\(aggregateAssetDownloadTask.urlAsset.url.absoluteURL)")
+        self.getPercentComplete(download: DownloadConfiguration(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: 100, state: DownloadConfiguration.STATE_COMPLETED))
+    }
+
+    /// Method called when a child AVAssetDownloadTask completes.
+    public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    didCompleteFor mediaSelection: AVMediaSelection) {
+        /*
+         This delegate callback provides an AVMediaSelection object which is now fully available for
+         offline use. You can perform any additional processing with the object here.
+         */
+
+        guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
 
     }
-    
-    private func pauseDownload(videoUrl:String){
-        //        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-        //
-        //        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
-        //        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
-        //                                                    assetDownloadDelegate: self,
-        //                                                    delegateQueue: OperationQueue.main)
-        
-        if let url = URL(string: videoUrl){
-            let asset = AVURLAsset(url: url)
-            // Create new AVAssetDownloadTask for the desired asset
-            let downloadTask = downloadSession?.makeAssetDownloadTask(asset: asset,
-                                                                      assetTitle: "Some Title",
-                                                                      assetArtworkData: nil,
-                                                                      options: nil)
-            print("PAUSE -------------")
-            downloadTask?.suspend()
+
+    /// Method to adopt to subscribe to progress updates of an AVAggregateAssetDownloadTask.
+    public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
+                    didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue],
+                    timeRangeExpectedToLoad: CMTimeRange, for mediaSelection: AVMediaSelection) {
+        guard activeDownloadsMap[aggregateAssetDownloadTask] != nil else { return }
+        var percentComplete = 0.0
+        for value in loadedTimeRanges {
+            let loadedTimeRange: CMTimeRange = value.timeRangeValue
+            percentComplete +=
+                loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
         }
+        percentComplete *= 100
+        print(percentComplete)
+        self.getPercentComplete(download: DownloadConfiguration(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: Int(percentComplete), state: DownloadConfiguration.STATE_DOWNLOADING))
     }
-    
-    private func restorePendingDownloads() {
-        // Create session configuration with ORIGINAL download identifier
-        configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-        
-        // Create a new AVAssetDownloadURLSession
-        downloadSession = AVAssetDownloadURLSession(configuration: configuration!,
-                                                    assetDownloadDelegate: self,
-                                                    delegateQueue: OperationQueue.main)
-        
-        // Grab all the pending tasks associated with the downloadSession
-        downloadSession!.getAllTasks { tasksArray in
-            // For each task, restore the state in the app
-            for task in tasksArray {
-                guard let downloadTask = task as? AVAssetDownloadTask else { break }
-                // Restore asset, progress indicators, state, etc...
-                _ = downloadTask.urlAsset
-            }
-        }
-    }
-    
 }
+

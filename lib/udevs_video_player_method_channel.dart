@@ -71,9 +71,10 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
         var decode = jsonDecode(json);
         _streamController.add(
           DownloadConfiguration(
-              url: decode['url'],
-              percent: decode['percent'],
-              state: decode['state']),
+            url: decode['url'],
+            percent: decode['percent'],
+            state: decode['state'],
+          ),
         );
       }
     });
@@ -109,7 +110,6 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
     });
     return res;
   }
-
 
   @override
   void dispose() {
