@@ -340,23 +340,18 @@ class PlayerView: UIView {
     
     
     func playOfflineAsset() {
-        print("TTTTTTTT")
-        guard UserDefaults.standard.value(forKey: "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8.cache") is String else {
+        guard let assetPath = UserDefaults.standard.value(forKey: "assetPath") as? String else {
             print("not cache")
             loadMediaPlayer()
             return
         }
-        let assetPath = UserDefaults.standard.value(forKey: "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8.cache") as! String
-        print("TTTTTTTT")
         let baseURL = URL(fileURLWithPath: NSHomeDirectory())
         let assetURL = baseURL.appendingPathComponent(assetPath)
         let asset = AVURLAsset(url: assetURL)
-        print("TTTTTTTT \(asset.url)")
         if let cache = asset.assetCache, cache.isPlayableOffline {
             guard (media?.contentURL) != nil else {
                 return
             }
-            
             player.automaticallyWaitsToMinimizeStalling = true
             player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
             playerLayer = AVPlayerLayer(player: player)
