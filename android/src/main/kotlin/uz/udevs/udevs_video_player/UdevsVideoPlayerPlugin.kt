@@ -122,6 +122,11 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        downloadTracker = DownloadUtil.getDownloadTracker(binding.applicationContext)
+        startDownloadService(binding.applicationContext)
+        downloadTracker!!.addListener(this)
+        renderersFactory =
+            DownloadUtil.buildRenderersFactory(binding.applicationContext, false)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

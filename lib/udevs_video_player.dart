@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:udevs_video_player/models/download_configuration.dart';
 import 'package:udevs_video_player/models/media_item_download.dart';
@@ -22,6 +23,7 @@ class UdevsVideoPlayer {
 
   Future<int?> playVideo({required PlayerConfiguration playerConfig}) {
     String jsonStringConfig = jsonEncode(playerConfig.toJson());
+    log('UdevsVideoPlayer: playVideo');
     return UdevsVideoPlayerPlatform.instance.playVideo(
       playerConfigJsonString: jsonStringConfig,
     );
@@ -30,6 +32,7 @@ class UdevsVideoPlayer {
   Future<dynamic> downloadVideo(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: downloadVideo');
     return UdevsVideoPlayerPlatform.instance
         .downloadVideo(downloadConfigJsonString: jsonStringConfig);
   }
@@ -37,6 +40,7 @@ class UdevsVideoPlayer {
   Future<dynamic> pauseDownload(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: pauseDownload');
     return UdevsVideoPlayerPlatform.instance
         .pauseDownload(downloadConfigJsonString: jsonStringConfig);
   }
@@ -44,6 +48,7 @@ class UdevsVideoPlayer {
   Future<dynamic> resumeDownload(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: resumeDownload');
     return UdevsVideoPlayerPlatform.instance
         .resumeDownload(downloadConfigJsonString: jsonStringConfig);
   }
@@ -51,6 +56,7 @@ class UdevsVideoPlayer {
   Future<bool> isDownloadVideo(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: isDownloadVideo');
     return UdevsVideoPlayerPlatform.instance
         .isDownloadVideo(downloadConfigJsonString: jsonStringConfig);
   }
@@ -58,6 +64,7 @@ class UdevsVideoPlayer {
   Future<int?> getCurrentProgressDownload(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: getCurrentProgressDownload');
     return UdevsVideoPlayerPlatform.instance
         .getCurrentProgressDownload(downloadConfigJsonString: jsonStringConfig);
   }
@@ -68,6 +75,7 @@ class UdevsVideoPlayer {
   Future<int?> getStateDownload(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: getStateDownload');
     return UdevsVideoPlayerPlatform.instance
         .getStateDownload(downloadConfigJsonString: jsonStringConfig);
   }
@@ -75,6 +83,7 @@ class UdevsVideoPlayer {
   Future<int?> getBytesDownloaded(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: getBytesDownloaded');
     return UdevsVideoPlayerPlatform.instance
         .getBytesDownloaded(downloadConfigJsonString: jsonStringConfig);
   }
@@ -82,6 +91,7 @@ class UdevsVideoPlayer {
   Future<int?> getContentBytesDownload(
       {required DownloadConfiguration downloadConfig}) {
     String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: getContentBytesDownload');
     return UdevsVideoPlayerPlatform.instance
         .getContentBytesDownload(downloadConfigJsonString: jsonStringConfig);
   }
