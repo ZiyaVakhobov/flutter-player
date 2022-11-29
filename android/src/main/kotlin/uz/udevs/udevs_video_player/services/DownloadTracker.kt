@@ -59,7 +59,7 @@ class DownloadTracker(
 
     fun isDownloaded(mediaItem: MediaItem): Boolean {
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
-        return download != null && download.state != Download.STATE_COMPLETED
+        return download?.state == Download.STATE_COMPLETED
     }
 
 
