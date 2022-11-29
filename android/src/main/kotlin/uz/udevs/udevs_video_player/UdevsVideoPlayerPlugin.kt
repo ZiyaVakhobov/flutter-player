@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Util
@@ -197,7 +196,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     val handler = Handler(Looper.getMainLooper())
     var runnable: Runnable? = null
     override fun onDownloadsChanged(download: Download) {
-        Log.d("TAG", "onDownloadsChanged: ${download.state}")
         if (download.state == Download.STATE_DOWNLOADING) {
             runnable = object : Runnable {
                 override fun run() {
@@ -231,7 +229,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 download.bytesDownloaded
             )
         )
-        Log.d("TAG", "toJson: $toJson")
         return toJson
     }
 
