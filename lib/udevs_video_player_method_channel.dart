@@ -74,7 +74,6 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
             url: decode['url'],
             percent: decode['percent'],
             state: decode['state'],
-            contentBytes: decode['contentBytes'],
             downloadedBytes: decode['downloadedBytes'],
           ),
         );

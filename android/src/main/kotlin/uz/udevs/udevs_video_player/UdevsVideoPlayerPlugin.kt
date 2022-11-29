@@ -228,7 +228,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 download.request.id,
                 percent,
                 download.state,
-                download.contentLength,
                 download.bytesDownloaded
             )
         )

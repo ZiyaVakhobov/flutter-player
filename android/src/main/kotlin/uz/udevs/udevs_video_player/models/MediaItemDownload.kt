@@ -10,8 +10,6 @@ data class MediaItemDownload(
     val percent: Int,
     @SerializedName("state")
     val state: Int,
-    @SerializedName("contentBytes")
-    val contentBytes: Long,
     @SerializedName("downloadedBytes")
     val downloadedBytes: Long,
 ) : Serializable

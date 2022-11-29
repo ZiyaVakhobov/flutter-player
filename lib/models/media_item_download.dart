@@ -9,7 +9,6 @@ class MediaItemDownload {
   String url;
   int percent;
   int state;
-  int contentBytes;
   int downloadedBytes;
 
   Map<String, dynamic> toJson() {
@@ -28,7 +27,6 @@ class MediaItemDownload {
     required this.url,
     this.percent = 0,
     this.state = 0,
-    required this.contentBytes,
     required this.downloadedBytes,
   });
 }
