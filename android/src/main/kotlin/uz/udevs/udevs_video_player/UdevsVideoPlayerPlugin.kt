@@ -116,10 +116,10 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         result.success(progressDownload)
                     }
                     "pauseDownload" -> {
-                        downloadTracker?.pauseAllDownloading()
+                        downloadTracker?.pauseDownloading(mediaItem)
                     }
                     "resumeDownload" -> {
-                        downloadTracker?.resumeAllDownload()
+                        downloadTracker?.resumeDownload(mediaItem)
                     }
                     "getStateDownload" -> {
                         result.success(downloadTracker?.getStateDownload(mediaItem))

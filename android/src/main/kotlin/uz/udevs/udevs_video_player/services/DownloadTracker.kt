@@ -97,7 +97,7 @@ class DownloadTracker(
 
     fun removeDownload(mediaItem: MediaItem) {
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
-        if (download != null && download.state != Download.STATE_FAILED) {
+        if (download != null) {
             DownloadService.sendRemoveDownload(
                 context,
                 MyDownloadService::class.java,
@@ -107,12 +107,26 @@ class DownloadTracker(
         }
     }
 
-    fun resumeAllDownload() {
-        DownloadService.sendResumeDownloads(context, MyDownloadService::class.java, false)
+    fun resumeDownload(mediaItem: MediaItem) {
+        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
+        DownloadService.sendSetStopReason(
+            context,
+            MyDownloadService::class.java,
+            download?.request?.id,
+            Download.STOP_REASON_NONE,
+            true
+        )
     }
 
-    fun pauseAllDownloading() {
-        DownloadService.sendPauseDownloads(context, MyDownloadService::class.java, false)
+    fun pauseDownloading(mediaItem: MediaItem) {
+        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
+        DownloadService.sendSetStopReason(
+            context,
+            MyDownloadService::class.java,
+            download?.request?.id,
+            Download.STATE_STOPPED,
+            true
+        )
     }
 
     private fun loadDownloads() {
