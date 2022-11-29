@@ -53,6 +53,20 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         downloadTracker!!.addListener(this)
         renderersFactory =
             DownloadUtil.buildRenderersFactory(flutterPluginBinding.applicationContext, false)
+        val download = downloadTracker?.getDownload()
+        if (download != null) {
+            runnable = object : Runnable {
+                override fun run() {
+                    try {
+                        channel.invokeMethod("percent", toJson(download))
+                        handler.postDelayed(this, 2000)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            handler.postDelayed(runnable!!, 2000)
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -82,7 +96,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     Util.getAdaptiveMimeTypeForContentType(Util.inferContentType(uri))
                 val mediaItem = MediaItem.Builder()
                     .setUri(uri)
-                    .setMediaMetadata(MediaMetadata.Builder().setTitle(downloadConfiguration.title).build())
+                    .setMediaMetadata(
+                        MediaMetadata.Builder().setTitle(downloadConfiguration.title).build()
+                    )
                     .setMimeType(adaptiveMimeType).build()
                 when (call.method) {
                     "downloadVideo" -> {
@@ -122,11 +138,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        downloadTracker = DownloadUtil.getDownloadTracker(binding.applicationContext)
-        startDownloadService(binding.applicationContext)
-        downloadTracker!!.addListener(this)
-        renderersFactory =
-            DownloadUtil.buildRenderersFactory(binding.applicationContext, false)
+        if (runnable != null) {
+            handler.removeCallbacks(runnable!!)
+        }
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -155,7 +169,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == PLAYER_ACTIVITY && resultCode == PLAYER_ACTIVITY_FINISH) {
-            resultMethod?.success(data?.getLongExtra("position",0))
+            resultMethod?.success(data?.getLongExtra("position", 0))
         }
         return true
     }

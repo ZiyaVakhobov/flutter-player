@@ -101,6 +101,25 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  Future<int> getStateDownload() async {
+    int state = -1;
+    try {
+      state = await _udevsVideoPlayerPlugin.getStateDownload(
+              downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
+            url:
+                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+          )) ??
+          -1;
+      if (kDebugMode) {
+        print('result: $state');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+    return state;
+  }
+
   Future<bool> checkIsDownloaded() async {
     bool isDownloaded = false;
     try {
@@ -201,6 +220,13 @@ class _MainPageState extends State<MainPage> {
                   MaterialPageRoute(builder: (context) => const SecondPage()));
             },
             child: const Text('Got to next page'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              var state = await getStateDownload();
+              print('download state: $state');
+            },
+            child: const Text('Get state'),
           ),
           StreamBuilder(
             stream: currentProgressDownloadAsStream(),

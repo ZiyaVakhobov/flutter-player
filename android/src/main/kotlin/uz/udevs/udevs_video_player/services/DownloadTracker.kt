@@ -9,12 +9,6 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.offline.*
 import com.google.common.base.Preconditions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.roundToInt
@@ -83,15 +77,25 @@ class DownloadTracker(
         }
     }
 
-    fun getStateDownload(mediaItem: MediaItem) : Int? {
+    fun getStateDownload(mediaItem: MediaItem): Int? {
         return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.state
     }
 
-    fun getBytesDownloaded(mediaItem: MediaItem) : Long? {
+    fun getDownload(): Download? {
+        var d: Download? = null
+        downloads.forEach { (_, download) ->
+            if (download.state == Download.STATE_DOWNLOADING) {
+                d = download
+            }
+        }
+        return d
+    }
+
+    fun getBytesDownloaded(mediaItem: MediaItem): Long? {
         return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.bytesDownloaded
     }
 
-    fun getContentBytesDownload(mediaItem: MediaItem) : Long? {
+    fun getContentBytesDownload(mediaItem: MediaItem): Long? {
         return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.contentLength
     }
 
