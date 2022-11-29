@@ -44,8 +44,10 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('isDownloadVideo() has not been implemented.');
   }
 
-  Future<int?> getCurrentProgressDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('getCurrentProgressDownload() has not been implemented.');
+  Future<int?> getCurrentProgressDownload(
+      {required String downloadConfigJsonString}) {
+    throw UnimplementedError(
+        'getCurrentProgressDownload() has not been implemented.');
   }
 
   Stream<MediaItemDownload> currentProgressDownloadAsStream() {
@@ -56,14 +58,19 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     throw UnimplementedError('getStateDownload() has not been implemented.');
   }
 
+  Future<int?> getPercentDownload({required String downloadConfigJsonString}) {
+    throw UnimplementedError('getPercentDownload() has not been implemented.');
+  }
+
   Future<int?> getBytesDownloaded({required String downloadConfigJsonString}) {
     throw UnimplementedError('getBytesDownloaded() has not been implemented.');
   }
 
-  Future<int?> getContentBytesDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('getContentBytesDownload() has not been implemented.');
+  Future<int?> getContentBytesDownload(
+      {required String downloadConfigJsonString}) {
+    throw UnimplementedError(
+        'getContentBytesDownload() has not been implemented.');
   }
-
 
   Future removeDownload({required String downloadConfigJsonString}) {
     throw UnimplementedError('removeDownload() has not been implemented.');

@@ -143,13 +143,7 @@ class DownloadTracker(
     }
 
     fun getCurrentProgressDownload(mediaItem: MediaItem): Int? {
-        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
-        if (download != null) {
-            return 100
-        }
-        return downloadManager.currentDownloads.find {
-            it.request.uri == mediaItem.localConfiguration?.uri
-        }?.percentDownloaded?.roundToInt()
+        return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.percentDownloaded?.roundToInt()
     }
 
     override fun onPrepared(helper: DownloadHelper) {
