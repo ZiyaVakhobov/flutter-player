@@ -10,9 +10,9 @@ import Foundation
 struct MediaItemDownload {
     var url: String
     var percent: Int
-    var state: Int
+    var state: Int?
     
-    init(url: String, percent: Int, state: Int) {
+    init(url: String, percent: Int, state: Int?) {
         self.url = url
         self.percent = percent
         self.state = state

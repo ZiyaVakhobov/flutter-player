@@ -169,9 +169,9 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             // For each task, restore the state in the app by recreating Asset structs and reusing existing AVURLAsset objects.
             for task in tasksArray {
                 guard let assetDownloadTask = task as? AVAggregateAssetDownloadTask else { break }
-                let at = task.progress.fileCompletedCount
+                guard assetDownloadTask.urlAsset.url.absoluteString != nil else { break }
                 let urlAsset = assetDownloadTask.urlAsset
-                let asset = MediaItemDownload(url: urlAsset.url.absoluteString, percent: at ?? 0, state: MediaItemDownload.STATE_STOPPED)
+                let asset = MediaItemDownload(url: urlAsset.url.absoluteString, percent: 100, state: nil)
             }
         }
     }
