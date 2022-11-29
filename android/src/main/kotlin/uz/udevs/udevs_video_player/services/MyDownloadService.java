@@ -41,6 +41,7 @@ public class MyDownloadService extends DownloadService {
 
     private static final int JOB_ID = 1;
     private static final int FOREGROUND_NOTIFICATION_ID = 1;
+    private static final int MAX_PARALLEL_DOWNLOADING_COUNT = 1;
 
     public MyDownloadService() {
         super(
@@ -55,6 +56,7 @@ public class MyDownloadService extends DownloadService {
     @Override
     protected DownloadManager getDownloadManager() {
         DownloadManager downloadManager = DownloadUtil.getDownloadManager(this);
+        downloadManager.setMaxParallelDownloads(MAX_PARALLEL_DOWNLOADING_COUNT);
         DownloadNotificationHelper downloadNotificationHelper =
                 DownloadUtil.getDownloadNotificationHelper(this);
         downloadManager.addListener(

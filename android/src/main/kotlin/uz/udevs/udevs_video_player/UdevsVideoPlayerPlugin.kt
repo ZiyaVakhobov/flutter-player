@@ -223,13 +223,15 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         if (download.state == Download.STATE_REMOVING) {
             percent = 0
         }
-        return gson.toJson(
+        val toJson = gson.toJson(
             MediaItemDownload(
                 download.request.id,
                 percent,
                 download.state
             )
         )
+        Log.d("TAG", "toJson: $toJson")
+        return toJson
     }
 
 }
