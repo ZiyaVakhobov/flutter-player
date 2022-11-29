@@ -9,15 +9,12 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     private var flutterResult: FlutterResult?
     private static var channel : FlutterMethodChannel?
     
+    private var didRestorePersistenceManager = false
     fileprivate let downloadIdentifier = "\(Bundle.main.bundleIdentifier!).background"
-    var totalDownloadedBytes: Int64 = 0
     /// The AVAssetDownloadURLSession to use for managing AVAssetDownloadTasks.
     fileprivate var assetDownloadURLSession: AVAssetDownloadURLSession!
     /// Internal map of AVAggregateAssetDownloadTask to its corresponding Asset.
     fileprivate var activeDownloadsMap = [AVAggregateAssetDownloadTask: MediaItemDownload]()
-    
-    /// Internal map of AVAggregateAssetDownloadTask to download URL.
-    fileprivate var willDownloadToUrlMap = [AVAggregateAssetDownloadTask: MediaItemDownload]()
     
     override private init(){
         super.init()
@@ -26,6 +23,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         assetDownloadURLSession = AVAssetDownloadURLSession(configuration: configuration,
                                                             assetDownloadDelegate: self,
                                                             delegateQueue: OperationQueue.main)
+        restorePersistenceManager()
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -160,6 +158,24 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         SwiftUdevsVideoPlayerPlugin.channel?.invokeMethod("percent", arguments: download.fromString())
     }
     
+    /// Restores the Application state by getting all the AVAssetDownloadTasks and restoring their Asset structs.
+    func restorePersistenceManager() {
+        guard !didRestorePersistenceManager else { return }
+        
+        didRestorePersistenceManager = true
+        
+        // Grab all the tasks associated with the assetDownloadURLSession
+        assetDownloadURLSession.getAllTasks { tasksArray in
+            // For each task, restore the state in the app by recreating Asset structs and reusing existing AVURLAsset objects.
+            for task in tasksArray {
+                guard let assetDownloadTask = task as? AVAggregateAssetDownloadTask else { break }
+                let at = task.progress.fileCompletedCount
+                let urlAsset = assetDownloadTask.urlAsset
+                let asset = MediaItemDownload(url: urlAsset.url.absoluteString, percent: at ?? 0, state: MediaItemDownload.STATE_STOPPED)
+            }
+        }
+    }
+    
     /// is download video
     private func isDownloadVideo(for download: DownloadConfiguration){
         guard UserDefaults.standard.value(forKey: download.url) is String else {
@@ -243,41 +259,41 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
  Extend `SwiftUdevsVideoPlayerPlugin` to conform to the `AVAssetDownloadDelegate` protocol.
  */
 extension SwiftUdevsVideoPlayerPlugin: AVAssetDownloadDelegate {
-
+    
     /// Tells the delegate that the task finished transferring data.
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-       
+        
     }
-
+    
     /// Method called when the an aggregate download task determines the location this asset will be downloaded to.
     public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
-                    willDownloadTo location: URL) {
+                           willDownloadTo location: URL) {
         UserDefaults.standard.set(location.relativePath, forKey: "\(aggregateAssetDownloadTask.urlAsset.url.absoluteURL)")
         self.getPercentComplete(download: MediaItemDownload(url: aggregateAssetDownloadTask.urlAsset.url.absoluteString, percent: 100, state: MediaItemDownload.STATE_COMPLETED))
     }
-
+    
     /// Method called when a child AVAssetDownloadTask completes.
     public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
-                    didCompleteFor mediaSelection: AVMediaSelection) {
+                           didCompleteFor mediaSelection: AVMediaSelection) {
         /*
          This delegate callback provides an AVMediaSelection object which is now fully available for
          offline use. You can perform any additional processing with the object here.
          */
-
+        
         guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
-
+        
     }
-
+    
     /// Method to adopt to subscribe to progress updates of an AVAggregateAssetDownloadTask.
     public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
-                    didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue],
-                    timeRangeExpectedToLoad: CMTimeRange, for mediaSelection: AVMediaSelection) {
+                           didLoad timeRange: CMTimeRange, totalTimeRangesLoaded loadedTimeRanges: [NSValue],
+                           timeRangeExpectedToLoad: CMTimeRange, for mediaSelection: AVMediaSelection) {
         guard activeDownloadsMap[aggregateAssetDownloadTask] != nil else { return }
         var percentComplete = 0.0
         for value in loadedTimeRanges {
             let loadedTimeRange: CMTimeRange = value.timeRangeValue
             percentComplete +=
-                loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
+            loadedTimeRange.duration.seconds / timeRangeExpectedToLoad.duration.seconds
         }
         percentComplete *= 100
         print(percentComplete)
