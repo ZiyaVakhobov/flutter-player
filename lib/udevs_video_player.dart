@@ -96,5 +96,13 @@ class UdevsVideoPlayer {
         .getContentBytesDownload(downloadConfigJsonString: jsonStringConfig);
   }
 
+  Future<dynamic> removeDownload(
+      {required DownloadConfiguration downloadConfig}) {
+    String jsonStringConfig = jsonEncode(downloadConfig.toJson());
+    log('UdevsVideoPlayer: removeDownload');
+    return UdevsVideoPlayerPlatform.instance
+        .removeDownload(downloadConfigJsonString: jsonStringConfig);
+  }
+
   void dispose() => UdevsVideoPlayerPlatform.instance.dispose();
 }

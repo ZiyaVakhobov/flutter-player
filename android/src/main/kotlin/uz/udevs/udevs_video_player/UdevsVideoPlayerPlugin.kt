@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.Util
@@ -85,7 +86,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" ||
             call.method == "getCurrentProgressDownload" || call.method == "pauseDownload" ||
             call.method == "resumeDownload" || call.method == "getStateDownload" || call.method == "getBytesDownloaded" ||
-            call.method == "getContentBytesDownload"
+            call.method == "getContentBytesDownload" || call.method == "removeDownload"
         ) {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
@@ -128,6 +129,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                     "getContentBytesDownload" -> {
                         result.success(downloadTracker?.getContentBytesDownload(mediaItem))
+                    }
+                    "removeDownload" -> {
+                        downloadTracker?.removeDownload(mediaItem)
                     }
                 }
             }
@@ -193,52 +197,32 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     val handler = Handler(Looper.getMainLooper())
     var runnable: Runnable? = null
     override fun onDownloadsChanged(download: Download) {
-        when (download.state) {
-            Download.STATE_DOWNLOADING -> {
-                runnable = object : Runnable {
-                    override fun run() {
-                        try {
-                            channel.invokeMethod("percent", toJson(download))
-                            handler.postDelayed(this, 2000)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+        Log.d("TAG", "onDownloadsChanged: ${download.state}")
+        if (download.state == Download.STATE_DOWNLOADING) {
+            runnable = object : Runnable {
+                override fun run() {
+                    try {
+                        channel.invokeMethod("percent", toJson(download))
+                        handler.postDelayed(this, 2000)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
-                handler.postDelayed(runnable!!, 2000)
             }
-            Download.STATE_COMPLETED -> {
-                if (runnable != null) {
-                    channel.invokeMethod("percent", toJson(download))
-                    handler.removeCallbacks(runnable!!)
-                }
-            }
-            Download.STATE_FAILED -> {
-                if (runnable != null) {
-                    channel.invokeMethod("percent", toJson(download))
-                    handler.removeCallbacks(runnable!!)
-                }
-            }
-            Download.STATE_QUEUED -> {
+            handler.postDelayed(runnable!!, 2000)
+        } else {
+            if (runnable != null) {
+                handler.removeCallbacks(runnable!!)
                 channel.invokeMethod("percent", toJson(download))
-            }
-            Download.STATE_REMOVING -> {
-                channel.invokeMethod("percent", toJson(download))
-            }
-            Download.STATE_RESTARTING -> {
-                channel.invokeMethod("percent", toJson(download))
-            }
-            Download.STATE_STOPPED -> {
-                if (runnable != null) {
-                    channel.invokeMethod("percent", toJson(download))
-                    handler.removeCallbacks(runnable!!)
-                }
             }
         }
     }
 
     private fun toJson(download: Download): String {
-        val percent = download.percentDownloaded.roundToInt()
+        var percent = download.percentDownloaded.roundToInt()
+        if (download.state == Download.STATE_REMOVING) {
+            percent = 0
+        }
         return gson.toJson(
             MediaItemDownload(
                 download.request.id,

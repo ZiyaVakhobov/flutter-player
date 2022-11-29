@@ -112,6 +112,13 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   }
 
   @override
+  Future removeDownload({required String downloadConfigJsonString}) async {
+    await methodChannel.invokeMethod('removeDownload', <String, dynamic>{
+      'downloadConfigJsonString': downloadConfigJsonString
+    });
+  }
+
+  @override
   void dispose() {
     _streamController.onCancel;
   }

@@ -65,11 +65,7 @@ class DownloadTracker(
 
     fun toggleDownload(mediaItem: MediaItem, renderersFactory: RenderersFactory) {
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
-        if (download != null && download.state != Download.STATE_FAILED) {
-            DownloadService.sendRemoveDownload(
-                context, MyDownloadService::class.java, download.request.id, false
-            )
-        } else {
+        if (download == null) {
             this.mediaItem = mediaItem
             downloadHelper =
                 DownloadHelper.forMediaItem(context, mediaItem, renderersFactory, dataSourceFactory)
@@ -97,6 +93,18 @@ class DownloadTracker(
 
     fun getContentBytesDownload(mediaItem: MediaItem): Long? {
         return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.contentLength
+    }
+
+    fun removeDownload(mediaItem: MediaItem) {
+        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
+        if (download != null && download.state != Download.STATE_FAILED) {
+            DownloadService.sendRemoveDownload(
+                context,
+                MyDownloadService::class.java,
+                download.request.id,
+                false
+            )
+        }
     }
 
     fun resumeAllDownload() {

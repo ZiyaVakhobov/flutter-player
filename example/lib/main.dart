@@ -101,6 +101,23 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  removeDownload() async {
+    try {
+      var s = await _udevsVideoPlayerPlugin.removeDownload(
+              downloadConfig: DownloadConfiguration(
+            title: 'She-Hulk',
+            url:
+                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+          )) ??
+          'nothing';
+      if (kDebugMode) {
+        print('result: $s');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+  }
+
   Future<int> getStateDownload() async {
     int state = -1;
     try {
@@ -213,6 +230,10 @@ class _MainPageState extends State<MainPage> {
           ElevatedButton(
             onPressed: resumeDownload,
             child: const Text('Resume Download'),
+          ),
+          ElevatedButton(
+            onPressed: removeDownload,
+            child: const Text('Remove Download'),
           ),
           ElevatedButton(
             onPressed: () {
