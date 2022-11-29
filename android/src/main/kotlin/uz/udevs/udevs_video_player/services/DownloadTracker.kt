@@ -24,7 +24,6 @@ class DownloadTracker(
         fun onDownloadsChanged(download: Download)
     }
 
-
     private val TAG = "DownloadTracker"
 
     private var context: Context
@@ -48,7 +47,6 @@ class DownloadTracker(
         loadDownloads()
     }
 
-
     fun addListener(listener: Listener) {
         listeners.add(Preconditions.checkNotNull(listener))
     }
@@ -58,10 +56,8 @@ class DownloadTracker(
     }
 
     fun isDownloaded(mediaItem: MediaItem): Boolean {
-        val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
-        return download?.state == Download.STATE_COMPLETED
+        return downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]?.state == Download.STATE_COMPLETED
     }
-
 
     fun toggleDownload(mediaItem: MediaItem, renderersFactory: RenderersFactory) {
         val download = downloads[Preconditions.checkNotNull(mediaItem.localConfiguration).uri]
