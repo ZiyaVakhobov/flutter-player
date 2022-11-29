@@ -227,7 +227,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             MediaItemDownload(
                 download.request.id,
                 percent,
-                download.state
+                download.state,
+                download.contentLength,
+                download.bytesDownloaded
             )
         )
         Log.d("TAG", "toJson: $toJson")
