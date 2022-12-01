@@ -13,6 +13,7 @@ export 'package:udevs_video_player/models/season.dart';
 export 'package:udevs_video_player/models/tv_program.dart';
 export 'package:udevs_video_player/models/programs_info.dart';
 export 'package:udevs_video_player/models/download_configuration.dart';
+export 'package:udevs_video_player/models/media_item_download.dart';
 
 class UdevsVideoPlayer {
   UdevsVideoPlayer._();
