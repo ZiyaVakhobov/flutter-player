@@ -11,11 +11,13 @@ struct MediaItemDownload {
     var url: String
     var percent: Int
     var state: Int?
+    var downloadedBytes: Int
     
-    init(url: String, percent: Int, state: Int?) {
+    init(url: String, percent: Int, state: Int?, downloadedBytes: Int) {
         self.url = url
         self.percent = percent
         self.state = state
+        self.downloadedBytes = downloadedBytes
     }
     
     static let STATE_QUEUED = 0
@@ -27,12 +29,12 @@ struct MediaItemDownload {
     static let STATE_RESTARTING = 7
     
     static func fromMap(map : [String:Any]) -> MediaItemDownload {
-        return MediaItemDownload(url: map["url"] as! String, percent: map["percent"] as! Int, state: 0)
+        return MediaItemDownload(url: map["url"] as! String, percent: map["percent"] as! Int, state: 0, downloadedBytes: 0)
     }
     
     func fromString() -> String {
         do {
-            let data1 = try JSONSerialization.data(withJSONObject: ["url": url, "percent":percent, "state" : state], options: JSONSerialization.WritingOptions.prettyPrinted)
+            let data1 = try JSONSerialization.data(withJSONObject: ["url": url, "percent":percent, "state" : state ?? 0, "downloadedBytes" : downloadedBytes], options: JSONSerialization.WritingOptions.prettyPrinted)
             let convertedString = String(data: data1, encoding: String.Encoding.utf8) ?? ""
             return convertedString
         } catch _ {

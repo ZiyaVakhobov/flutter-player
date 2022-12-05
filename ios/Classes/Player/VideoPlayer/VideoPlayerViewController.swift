@@ -202,7 +202,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         if playbackMode == .local {
             return
         }
-        var playPosition: TimeInterval = 0
+        var playPosition: TimeInterval = TimeInterval(playerConfiguration.lastPosition)
         var paused: Bool = false
         var ended: Bool = false
         if playbackMode == .remote {

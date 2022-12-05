@@ -28,10 +28,10 @@ protocol PlayerViewDelegate: NSObjectProtocol {
 }
 
 enum LocalPlayerState: Int {
-  case stopped
-  case starting
-  case playing
-  case paused
+    case stopped
+    case starting
+    case playing
+    case paused
 }
 
 class PlayerView: UIView {
@@ -262,13 +262,13 @@ class PlayerView: UIView {
     
     func loadMedia(_ media: GCKMediaInformation?, autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
         if self.media?.contentURL != nil && (self.media?.contentURL == media?.contentURL) {
-          print("Don't reinit if media already set")
-          return
+            print("Don't reinit if media already set")
+            return
         }
         self.media = media
         if media == nil {
-          purgeMediaPlayer()
-          return
+            purgeMediaPlayer()
+            return
         }
         translatesAutoresizingMaskIntoConstraints = false
         uiSetup()
@@ -537,7 +537,7 @@ class PlayerView: UIView {
     }
     
     func fullFrame() -> CGRect {
-      return bounds
+        return bounds
     }
     
     override func updateConstraints() {
@@ -732,9 +732,9 @@ class PlayerView: UIView {
             self.durationTimeLabel.text = VGPlayerUtils.getTimeString(from: player.currentItem!.duration)
         }
         if keyPath == "status" {
-          if player.status == .readyToPlay {
-            handleMediaPlayerReady()
-          }
+            if player.status == .readyToPlay {
+                handleMediaPlayerReady()
+            }
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
             if newValue != oldValue {
@@ -768,42 +768,59 @@ class PlayerView: UIView {
     }
     
     func handleMediaPlayerReady() {
-      print("handleMediaPlayerReady \(pendingPlay)")
-      if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
-        // Loading has failed, try it again.
-        purgeMediaPlayer()
-        playOfflineAsset()
-        return
-      }
-      if streamDuration == nil {
-        if let duration = player.currentItem?.duration {
-          streamDuration = CMTimeGetSeconds(duration)
-          if let streamDuration = streamDuration {
-              timeSlider.maximumValue = Float(streamDuration)
-              timeSlider.minimumValue = 0
-              timeSlider.value = Float(pendingPlayPosition)
-              timeSlider.isEnabled = true
-//            totalTime.text = GCKUIUtils.timeInterval(asString: streamDuration)
-          }
+        print("handleMediaPlayerReady \(pendingPlay)")
+        if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
+            // Loading has failed, try it again.
+            purgeMediaPlayer()
+            playOfflineAsset()
+            return
         }
-      }
-      if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
-        print("seeking to pending position \(pendingPlayPosition)")
-//        performSeek(toTime: pendingPlayPosition)
-        pendingPlayPosition = kGCKInvalidTimeInterval
-        return
-      } else {
-        activityIndicatorView.stopAnimating()
-      }
-      if pendingPlay {
-        pendingPlay = false
-        player.play()
-        playerState = .playing
-      } else {
-        playerState = .paused
-      }
+        if streamDuration == nil {
+            if let duration = player.currentItem?.duration {
+                streamDuration = CMTimeGetSeconds(duration)
+                if let streamDuration = streamDuration {
+                    timeSlider.maximumValue = Float(streamDuration)
+                    timeSlider.minimumValue = 0
+                    timeSlider.value = Float(pendingPlayPosition)
+                    timeSlider.isEnabled = true
+                    //            totalTime.text = GCKUIUtils.timeInterval(asString: streamDuration)
+                }
+            }
+        }
+        if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
+            print("seeking to pending position \(pendingPlayPosition)")
+            player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
+                if self?.playerState == .starting {
+                    self?.pendingPlay = true
+                }
+                self?.handleSeekFinished()
+            }
+            pendingPlayPosition = kGCKInvalidTimeInterval
+            return
+        } else {
+            activityIndicatorView.stopAnimating()
+        }
+        if pendingPlay {
+            pendingPlay = false
+            player.play()
+            playerState = .playing
+        } else {
+            playerState = .paused
+        }
         delegate?.isCheckPlay()
     }
+    
+    func handleSeekFinished() {
+        activityIndicatorView.stopAnimating()
+        if pendingPlay {
+          pendingPlay = false
+          player.play()
+          playerState = .playing
+        } else {
+          playerState = .paused
+        }
+        seeking = false
+      }
     
     func setPlayButton(isPlay: Bool){
         if isPlay {
@@ -973,7 +990,7 @@ class PlayerView: UIView {
             _ = 0.0
         }, completion: nil)
     }
-
+    
     
     @objc func tapGestureControls() {
         let location = tapGesture.location(in: overlayView)
@@ -1021,8 +1038,8 @@ class PlayerView: UIView {
         player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         if(!playerConfiguration.isLive){
-        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        let mainQueue = DispatchQueue.main
+            let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            let mainQueue = DispatchQueue.main
             player.addPeriodicTimeObserver(forInterval: interval, queue: mainQueue, using: { [weak self] time in
                 guard let currentItem = self?.player.currentItem else {return}
                 
@@ -1041,35 +1058,35 @@ class PlayerView: UIView {
     }
     
     func removeMediaPlayerObservers() {
-      print("removeMediaPlayerObservers")
-      if observingMediaPlayer {
-        if let mediaTimeObserverToRemove = mediaTimeObserver {
-          player.removeTimeObserver(mediaTimeObserverToRemove)
-          mediaTimeObserver = nil
+        print("removeMediaPlayerObservers")
+        if observingMediaPlayer {
+            if let mediaTimeObserverToRemove = mediaTimeObserver {
+                player.removeTimeObserver(mediaTimeObserverToRemove)
+                mediaTimeObserver = nil
+            }
+            if player.currentItem != nil {
+                NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                          object: player.currentItem)
+            }
+            player.currentItem?.removeObserver(self, forKeyPath: "duration")
+            player.currentItem?.removeObserver(self, forKeyPath: "timeControlStatus")
+            player.currentItem?.removeObserver(self, forKeyPath: "status")
+            observingMediaPlayer = false
         }
-          if player.currentItem != nil {
-          NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
-                                                    object: player.currentItem)
-        }
-        player.currentItem?.removeObserver(self, forKeyPath: "duration")
-        player.currentItem?.removeObserver(self, forKeyPath: "timeControlStatus")
-        player.currentItem?.removeObserver(self, forKeyPath: "status")
-        observingMediaPlayer = false
-      }
     }
     
     func stop() {
-      playerState = .stopped
-      player.pause()
+        playerState = .stopped
+        player.pause()
     }
     
     func purgeMediaPlayer() {
-//      removeMediaPlayerObservers()
-//      player.
-      playerLayer.removeFromSuperlayer()
-      player.pause()
-//      pendingPlayPosition = kGCKInvalidTimeInterval
-//      pendingPlay = true
-//      seeking = false
+        //      removeMediaPlayerObservers()
+        //      player.
+        playerLayer.removeFromSuperlayer()
+        player.pause()
+        //      pendingPlayPosition = kGCKInvalidTimeInterval
+        //      pendingPlay = true
+        //      seeking = false
     }
 }
