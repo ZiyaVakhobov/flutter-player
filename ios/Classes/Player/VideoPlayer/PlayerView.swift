@@ -262,7 +262,6 @@ class PlayerView: UIView {
     
     func loadMedia(_ media: GCKMediaInformation?, autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
         if self.media?.contentURL != nil && (self.media?.contentURL == media?.contentURL) {
-            print("Don't reinit if media already set")
             return
         }
         self.media = media
@@ -769,24 +768,25 @@ class PlayerView: UIView {
     
     func handleMediaPlayerReady() {
         print("handleMediaPlayerReady \(pendingPlay)")
-        if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
-            // Loading has failed, try it again.
-            purgeMediaPlayer()
-            playOfflineAsset()
-            return
-        }
-        if streamDuration == nil {
-            if let duration = player.currentItem?.duration {
-                streamDuration = CMTimeGetSeconds(duration)
-                if let streamDuration = streamDuration {
-                    timeSlider.maximumValue = Float(streamDuration)
-                    timeSlider.minimumValue = 0
-                    timeSlider.value = Float(pendingPlayPosition)
-                    timeSlider.isEnabled = true
-                    //            totalTime.text = GCKUIUtils.timeInterval(asString: streamDuration)
+        if(!playerConfiguration.isLive){
+            if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
+                purgeMediaPlayer()
+                playOfflineAsset()
+                return
+            }
+            if streamDuration == nil  {
+                if let duration = player.currentItem?.duration {
+                    streamDuration = CMTimeGetSeconds(duration)
+                    if let streamDuration = streamDuration {
+                        timeSlider.maximumValue = Float(streamDuration)
+                        timeSlider.minimumValue = 0
+                        timeSlider.value = Float(pendingPlayPosition)
+                        timeSlider.isEnabled = true
+                    }
                 }
             }
         }
+        
         if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
             print("seeking to pending position \(pendingPlayPosition)")
             player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
@@ -801,12 +801,15 @@ class PlayerView: UIView {
             activityIndicatorView.stopAnimating()
         }
         if pendingPlay {
+            print("pendingPlay")
+            print(pendingPlay)
             pendingPlay = false
             player.play()
             playerState = .playing
         } else {
             playerState = .paused
         }
+        
         delegate?.isCheckPlay()
     }
     
@@ -1031,9 +1034,8 @@ class PlayerView: UIView {
         }
     }
     
-    //MARK: - Time logic
+    /// MARK: - Time logic
     func addTimeObserver() {
-        print("add time observer")
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
@@ -1058,7 +1060,6 @@ class PlayerView: UIView {
     }
     
     func removeMediaPlayerObservers() {
-        print("removeMediaPlayerObservers")
         if observingMediaPlayer {
             if let mediaTimeObserverToRemove = mediaTimeObserver {
                 player.removeTimeObserver(mediaTimeObserverToRemove)
@@ -1081,12 +1082,7 @@ class PlayerView: UIView {
     }
     
     func purgeMediaPlayer() {
-        //      removeMediaPlayerObservers()
-        //      player.
         playerLayer.removeFromSuperlayer()
         player.pause()
-        //      pendingPlayPosition = kGCKInvalidTimeInterval
-        //      pendingPlay = true
-        //      seeking = false
     }
 }
