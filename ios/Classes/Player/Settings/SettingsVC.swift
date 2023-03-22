@@ -70,15 +70,6 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         return view
     }()
     
-    lazy var cancelBtn: UIButton = {
-        let cancelBtn = UIButton()
-        cancelBtn.setImage(Svg.back.uiImage, for: .normal)
-        cancelBtn.imageView?.contentMode = .scaleAspectFit
-        cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
-        return cancelBtn
-    }()
-    
-    
     lazy var backdropView: UIView = {
         let bdView = UIView(frame: self.view.bounds)
         bdView.backgroundColor = .clear

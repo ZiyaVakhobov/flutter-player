@@ -15,8 +15,8 @@
             android:id="@+id/quality_speed_sheet_back"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:padding="10dp"
-            android:src="@drawable/ic_back"
+            android:padding="8dp"
+            android:src="@drawable/ic_close"
             tools:ignore="ContentDescription" />
 
         <TextView

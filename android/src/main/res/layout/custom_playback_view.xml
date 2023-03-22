@@ -5,6 +5,7 @@
     android:id="@+id/custom_playback"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#4D000000"
     android:orientation="vertical">
 
     <LinearLayout
@@ -179,9 +180,9 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/semibold"
                     android:text="00:00"
-                    android:visibility="gone"
                     android:textColor="@color/white"
                     android:textSize="15sp"
+                    android:visibility="gone"
                     tools:ignore="HardcodedText" />
 
                 <TextView
@@ -355,7 +356,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="7dp"
-            app:played_color="@color/white"
+            app:played_color="@color/blue"
             app:scrubber_color="@color/blue"
             app:unplayed_color="@color/grey10" />
 
@@ -369,6 +370,7 @@
             android:progress="100"
             android:progressDrawable="@drawable/custom_progress_bar"
             android:thumb="@drawable/custom_thumb"
+
             android:visibility="gone" />
     </LinearLayout>
 </RelativeLayout>

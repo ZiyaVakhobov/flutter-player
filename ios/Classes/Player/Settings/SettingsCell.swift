@@ -135,7 +135,6 @@ class SettingCell: UITableViewCell {
         containerStack.addArrangedSubviews(leftStack,rightStack)
         leftStack.addArrangedSubviews(leftIcon,leftTitle)
         rightStack.addArrangedSubviews(configureLabel,rightIcon)
-        
     }
 }
 

@@ -454,8 +454,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "pip" {
-            print("PIP PIP PIP")
-            print(self.pipController.isPictureInPictureActive)
             if self.pipController.isPictureInPictureActive {
                 self.playerView.isHiddenPiP(isPiP: true)
             } else {

@@ -7,7 +7,8 @@
 
 import Foundation
 
-class Colors{
+class Colors {
+    static let black03 = UIColor(red:0, green: 0, blue: 0, alpha: 0.3)
     static let backgroud = UIColor(red: 22, green: 22, blue: 22)
     static let backgroudColor = UIColor(red: 18, green: 18, blue: 18)
     static let baseTextColor = UIColor(red: 157, green: 157, blue: 157)

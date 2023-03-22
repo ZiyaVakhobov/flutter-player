@@ -73,7 +73,7 @@ class PlayerView: UIView {
     
     private var overlayView: UIView = {
         let view = UIView()
-        view.backgroundColor =  .clear
+        view.backgroundColor = Colors.black03
         return view
     }()
     
