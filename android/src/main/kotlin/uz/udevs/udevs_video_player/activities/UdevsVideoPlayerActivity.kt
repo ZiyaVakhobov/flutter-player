@@ -425,6 +425,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         player?.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Log.d(TAG, "onPlayerError: ${error.errorCode}")
+                player?.pause()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
