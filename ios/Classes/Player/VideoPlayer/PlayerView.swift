@@ -52,6 +52,7 @@ class PlayerView: UIView {
     private var panDirection = SwipeDirection.vertical
     private var isVolume = false
     private var volumeViewSlider: UISlider!
+    private var brightnessViewSlider: UISlider!
     ///
     private(set) var streamPosition: TimeInterval?
     private(set) var streamDuration: TimeInterval?
@@ -236,11 +237,24 @@ class PlayerView: UIView {
         return button
     }()
     
+    private var brightnessSlider: UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 1
+        slider.minimumTrackTintColor = UIColor.white
+        slider.maximumTrackTintColor = .lightGray
+        slider.value = Float(UIScreen.main.brightness)
+        slider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2))
+        slider.isHidden = true
+        return slider
+    }()
+    
     private func configureVolume() {
         let volumeView = MPVolumeView()
         for view in volumeView.subviews {
             if let slider = view as? UISlider {
                 self.volumeViewSlider = slider
+                self.brightnessViewSlider = slider
             }
         }
     }
@@ -297,6 +311,7 @@ class PlayerView: UIView {
             setSliderThumbTintColor(Colors.mainColor)
         } else {
             timeSlider.thumbTintColor = Colors.moreColor
+            brightnessSlider.thumbTintColor = Colors.white
         }
         setTitle(title: playerConfiguration.title)
     }
@@ -315,6 +330,11 @@ class PlayerView: UIView {
     }
     
     private func setSliderThumbTintColor(_ color: UIColor) {
+        let circle = makeCircleWith(size: CGSize(width: 4, height: 4),
+                                         backgroundColor: UIColor.white)
+        brightnessSlider.setThumbImage(circle, for: .normal)
+        brightnessSlider.setThumbImage(circle, for: .highlighted)
+        ///
         let circleImage = makeCircleWith(size: CGSize(width: 24, height: 24),
                                          backgroundColor: color)
         timeSlider.setThumbImage(circleImage, for: .normal)
@@ -521,7 +541,7 @@ class PlayerView: UIView {
             let scale = gesture.scale
             if scale < 0.9 {
                 self.playerLayer.videoGravity = .resizeAspect
-            }else {
+            } else {
                 self.playerLayer.videoGravity = .resizeAspectFill
             }
             resetTimer()
@@ -573,6 +593,7 @@ class PlayerView: UIView {
     func addSubviews() {
         addSubview(videoView)
         addSubview(overlayView)
+        addSubview(brightnessSlider)
         overlayView.addSubview(topView)
         overlayView.addSubview(playButton)
         overlayView.addSubview(skipForwardButton)
@@ -616,6 +637,16 @@ class PlayerView: UIView {
     }
     
     private func addControlButtonConstraints(){
+        
+        ///
+        brightnessSlider.centerY(to: overlayView)
+        brightnessSlider.width(120)
+        brightnessSlider.height(12)
+        
+        brightnessSlider.snp.makeConstraints { make in
+            make.left.equalToSuperview().offset(-42)
+        }
+        ///
         playButton.centerX(to: overlayView)
         playButton.centerY(to: overlayView)
         playButton.width(Constants.controlButtonSize)
@@ -879,8 +910,10 @@ class PlayerView: UIView {
         case UIGestureRecognizer.State.ended:
             switch panDirection {
             case SwipeDirection.horizontal:
+                brightnessSlider.isHidden = true
                 break
             case SwipeDirection.vertical:
+                brightnessSlider.isHidden = true
                 isVolume = false
                 break
             }
@@ -896,8 +929,9 @@ class PlayerView: UIView {
             } else {
                 delegate?.volumeChanged(value: Float(value / 10000))
             }
-        }
-        else{
+        } else {
+            brightnessSlider.isHidden = false
+            brightnessSlider.value -= Float(value / 10000)
             UIScreen.main.brightness -= value / 10000
         }
     }
