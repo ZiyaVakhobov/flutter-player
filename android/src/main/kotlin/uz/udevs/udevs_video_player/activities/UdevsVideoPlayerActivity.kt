@@ -161,8 +161,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             override fun onReceive(context: Context?, intent: Intent?) {
                 super.onReceive(context, intent)
                 if (isNetworkAvailable(context!!)) {
-                    println("Internet bor")
-                    Log.d(TAG, "onPlayerError: Internet bor")
+                    Log.d(TAG, "Reconnect player: Internet bor")
                     rePlayVideo()
                 } else {
                     Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
