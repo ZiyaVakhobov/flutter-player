@@ -2,8 +2,10 @@ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -11,6 +13,8 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -66,6 +70,7 @@ import uz.udevs.udevs_video_player.models.PremierStreamResponse
 import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import uz.udevs.udevs_video_player.services.DownloadUtil
+import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
 
@@ -75,6 +80,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private var playerView: PlayerView? = null
     private var player: ExoPlayer? = null
+    private lateinit var networkChangeReceiver: NetworkChangeReceiver
+    private lateinit var intentFilter: IntentFilter
     private lateinit var playerConfiguration: PlayerConfiguration
     private var close: ImageView? = null
     private var pip: ImageView? = null
@@ -136,6 +143,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         PLAYING, PAUSED, BUFFERING, IDLE
     }
 
+    @SuppressLint("AppCompatMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.player_activity)
@@ -144,6 +152,27 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = Color.BLACK
         window.navigationBarColor = Color.BLACK
+
+        // IntentFilter yaratish
+        intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+
+        // NetworkChangeReceiver yaratish
+        networkChangeReceiver = object : NetworkChangeReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                super.onReceive(context, intent)
+                if (isNetworkAvailable(context!!)) {
+                    println("Internet bor")
+                    Log.d(TAG, "onPlayerError: Internet bor")
+                    rePlayVideo()
+                } else {
+                    Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // BroadcastReceiver ni faollashtirish
+        registerReceiver(networkChangeReceiver, intentFilter)
+
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
         seasonIndex = playerConfiguration.seasonIndex
         episodeIndex = playerConfiguration.episodeIndex
@@ -193,6 +222,35 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         volumeSeekBar?.progress = volume.toInt()
 
         playVideo()
+    }
+
+    fun isNetworkAvailable(context: Context?): Boolean {
+        if (context == null) return false
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                when {
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
+                        return true
+                    }
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
+                        return true
+                    }
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
+                        return true
+                    }
+                }
+            }
+        } else {
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun setupCastListener() {
@@ -425,6 +483,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         player?.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Log.d(TAG, "onPlayerError: ${error.errorCode}")
+                player?.pause()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -477,6 +536,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             registerCallBack()
             listenToProgress()
         }
+    }
+    private fun rePlayVideo() {
+        player?.prepare()
+        player?.play()
     }
 
     private var lastClicked1: Long = -1L
@@ -673,8 +736,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     seasonIndex++
                 }
             }
-            if (seasonIndex == playerConfiguration.seasons.size - 1 && episodeIndex == playerConfiguration.seasons[seasonIndex].movies.size - 1) {
+            if (isLastEpisode()) {
                 nextButton?.visibility = View.GONE
+            } else {
+                nextButton?.visibility = View.VISIBLE
             }
             title?.text =
                 "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
@@ -733,6 +798,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }, 3000)
         }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onUserLeaveHint() {
@@ -837,7 +903,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             title1?.text = ""
             title1?.visibility = View.GONE
             if (playerConfiguration.isSerial)
-                nextButton?.visibility = View.VISIBLE
+                if (isLastEpisode())
+                    nextButton?.visibility = View.VISIBLE
+                else
+                    nextButton?.visibility = View.GONE
+            else
+                nextButton?.visibility = View.GONE
             zoom?.visibility = View.VISIBLE
             orientation?.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
@@ -894,6 +965,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private var currentBottomSheet = BottomSheet.NONE
+
+    private fun isLastEpisode(): Boolean {
+        return playerConfiguration.seasons.size == seasonIndex + 1 && playerConfiguration.seasons[playerConfiguration.seasons.size - 1].movies.size == episodeIndex + 1
+    }
 
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
@@ -1276,5 +1351,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 AudioManager.AUDIOFOCUS_GAIN
             )
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // BroadcastReceiver ni to'xtatish
+        unregisterReceiver(networkChangeReceiver)
     }
 }
