@@ -164,7 +164,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     Log.d(TAG, "Reconnect player: Internet bor")
                     rePlayVideo()
                 } else {
-                    Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
                 }
             }
         }
