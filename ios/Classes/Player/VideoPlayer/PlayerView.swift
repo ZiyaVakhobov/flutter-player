@@ -345,27 +345,13 @@ class PlayerView: UIView {
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
         playerLayer = AVPlayerLayer(player: player)
-        playerLayer.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
-        if let videoTrack = player.currentItem?.asset.tracks(withMediaType: .video).first {
-                    let videoSize = videoTrack.naturalSize
-                    let videoAspectRatio = videoSize.width / videoSize.height
-                    
-                    if videoAspectRatio > 1 {
-                        // Landscape video
-                        playerLayer.frame.size.width = bounds.width
-                        playerLayer.frame.size.height = bounds.width / videoAspectRatio
-                    } else {
-                        // Portrait video
-                        playerLayer.frame.size.height = bounds.height
-                        playerLayer.frame.size.width = bounds.height * videoAspectRatio
-                    }
-                }
+        playerLayer.frame = bounds
         if (playerConfiguration.isLive){
-            if (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight){
+//            if (isPortrait){
                 playerLayer.videoGravity = .resize
-            } else {
-                playerLayer.videoGravity = .resizeAspect
-            }
+//            } else {
+//                playerLayer.videoGravity = .resizeAspect
+//            }
         } else {
             playerLayer.videoGravity = .resizeAspect
         }
@@ -563,7 +549,11 @@ class PlayerView: UIView {
         if gesture.state == .changed {
             let scale = gesture.scale
             if scale < 0.9 {
-                self.playerLayer.videoGravity = .resizeAspect
+                if playerConfiguration.isLive {
+                    self.playerLayer.videoGravity = .resize
+                } else {
+                    self.playerLayer.videoGravity = .resizeAspect
+                }
             } else {
                 self.playerLayer.videoGravity = .resizeAspectFill
             }
@@ -827,7 +817,6 @@ class PlayerView: UIView {
     }
     
     func handleMediaPlayerReady() {
-        print("handleMediaPlayerReady \(pendingPlay)")
         if(!playerConfiguration.isLive){
             if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
                 purgeMediaPlayer()
@@ -848,7 +837,6 @@ class PlayerView: UIView {
         }
         
         if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
-            print("seeking to pending position \(pendingPlayPosition)")
             player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
                 if self?.playerState == .starting {
                     self?.pendingPlay = true
@@ -861,8 +849,6 @@ class PlayerView: UIView {
             activityIndicatorView.stopAnimating()
         }
         if pendingPlay {
-            print("pendingPlay")
-            print(pendingPlay)
             pendingPlay = false
             player.play()
             playerState = .playing

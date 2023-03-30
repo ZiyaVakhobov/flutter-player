@@ -310,7 +310,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func isCheckPlay(){
         let castSession = sessionManager.currentCastSession
         if castSession != nil {
-            print("IS PLAY CHECK")
             let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
             playerRate = remoteMediaClient?.mediaStatus?.playbackRate ?? 1.0
             playerView.setPlayButton(isPlay: remoteMediaClient?.mediaStatus?.playerState == .playing)
