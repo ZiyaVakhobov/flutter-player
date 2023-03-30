@@ -345,7 +345,30 @@ class PlayerView: UIView {
         player.automaticallyWaitsToMinimizeStalling = true
         player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
         playerLayer = AVPlayerLayer(player: player)
-        playerLayer.videoGravity = .resizeAspect
+        playerLayer.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
+        if let videoTrack = player.currentItem?.asset.tracks(withMediaType: .video).first {
+                    let videoSize = videoTrack.naturalSize
+                    let videoAspectRatio = videoSize.width / videoSize.height
+                    
+                    if videoAspectRatio > 1 {
+                        // Landscape video
+                        playerLayer.frame.size.width = bounds.width
+                        playerLayer.frame.size.height = bounds.width / videoAspectRatio
+                    } else {
+                        // Portrait video
+                        playerLayer.frame.size.height = bounds.height
+                        playerLayer.frame.size.width = bounds.height * videoAspectRatio
+                    }
+                }
+        if (playerConfiguration.isLive){
+            if (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight){
+                playerLayer.videoGravity = .resize
+            } else {
+                playerLayer.videoGravity = .resizeAspect
+            }
+        } else {
+            playerLayer.videoGravity = .resizeAspect
+        }
         videoView.layer.addSublayer(playerLayer)
         layer.insertSublayer(playerLayer, above: videoView.layer)
         if !playerConfiguration.isLive {
@@ -574,12 +597,18 @@ class PlayerView: UIView {
     private func addVideoPortaitConstraints() {
         titleLabelLandacape.isHidden = true
         titleLabelPortrait.isHidden = false
+        if (playerConfiguration.isLive){
+            playerLayer.videoGravity = .resizeAspect
+        }
         landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
     }
     
     private func addVideoLandscapeConstraints() {
         titleLabelLandacape.isHidden = false
         titleLabelPortrait.isHidden = true
+        if (playerConfiguration.isLive){
+            playerLayer.videoGravity = .resize
+        }
         landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
