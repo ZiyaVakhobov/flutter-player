@@ -45,6 +45,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         return view
     }()
+    
     lazy var contentView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 24
@@ -78,7 +79,9 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
     
     let menuView :UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 24
+        view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
+        view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         view.backgroundColor = .black
         return view
     }()

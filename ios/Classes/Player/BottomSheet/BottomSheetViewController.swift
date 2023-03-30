@@ -82,7 +82,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     lazy var containerView: UIView = {
         let view = UIView()
         view.backgroundColor = Colors.black
-        view.layer.cornerRadius = 24
+        view.layer.cornerRadius = 16
         view.clipsToBounds = true
         view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         return view
