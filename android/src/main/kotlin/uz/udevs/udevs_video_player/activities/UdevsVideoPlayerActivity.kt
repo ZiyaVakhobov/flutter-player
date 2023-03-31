@@ -536,6 +536,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             listenToProgress()
         }
     }
+
     private fun rePlayVideo() {
         player?.prepare()
         player?.play()
@@ -790,6 +791,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
+                    if (playerConfiguration!.isLive) {
+                        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
             it.postDelayed({
