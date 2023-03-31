@@ -113,10 +113,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-        if #available(iOS 13.0, *) {
-            let value = UIInterfaceOrientationMask.landscapeRight.rawValue
-            UIDevice.current.setValue(value, forKey: "orientation")
-        }
+        portraitOrientation()
         view.backgroundColor = .black
         
         playerView.delegate = self
@@ -127,6 +124,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         NotificationCenter.default.addObserver(self, selector: #selector(castDeviceDidChange),
                                                name: NSNotification.Name.gckCastStateDidChange,
                                                object: GCKCastContext.sharedInstance())
+        
     }
     
     @objc func castDeviceDidChange(_: Notification) {
@@ -136,6 +134,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
+//        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
         if hasConnectedSession, (playbackMode != .remote) {
             populateMediaInfo(false, playPosition: 0)
@@ -147,7 +146,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
         sessionManager.add(self)
         setupPictureInPicture()
-        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         super.viewWillAppear(animated)
     }
     
@@ -163,16 +161,13 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
-        playerView.stop()
-        playerView.removeMediaPlayerObservers()
         NotificationCenter.default.removeObserver(self)
-        UIDevice.current.setValue(UIInterfaceOrientationMask.portrait.rawValue, forKey: "orientation")
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         playerView.changeConstraints()
-        if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight{
+        if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
             addVideosLandscapeConstraints()
         } else {
             addVideoPortaitConstraints()
@@ -198,7 +193,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func switchToLocalPlayback() {
-        print("switchToLocalPlayback")
         if playbackMode == .local {
             return
         }
@@ -217,14 +211,11 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func switchToRemotePlayback() {
-        print("switchToRemotePlayback")
         if playbackMode == .remote {
             return
         }
         // If we were playing locally, load the local media on the remote player
         if playbackMode == .local, (playerView.playerState != .stopped) {
-            print("playerView.playerState != .stopped")
-            print(playerView.playerState != .stopped)
             let mediaLoadRequestDataBuilder = GCKMediaLoadRequestDataBuilder()
             mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: playerView.streamPosition ?? 0, url: playerConfiguration.url)
             mediaLoadRequestDataBuilder.autoplay = true
@@ -244,14 +235,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
             playerRate = remoteMediaClient?.mediaStatus?.playbackRate ?? 1.0
             if remoteMediaClient?.mediaStatus?.mediaInformation?.contentURL != URL(string: url!){
-                print("TOTTOTOTOTTOT")
                 loadRemoteMedia(position: TimeInterval(0))
             }
         }
     }
     
     private func loadRemoteMedia(position: TimeInterval){
-        print("LOAD REMOTE MEDIA")
         if sessionManager == nil {
             return
         }
@@ -317,7 +306,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.playerView.setDuration(position: position)
         }
     }
-    
     
     func skipForwardButtonPressed() {
         let castSession = sessionManager.currentCastSession
@@ -389,30 +377,49 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func close(duration : Double){
-        playerView.stop()
-        playerView.removeMediaPlayerObservers()
+        portraitOrientation()
         self.dismiss(animated: true, completion: nil)
         delegate?.getDuration(duration: duration)
     }
     
     func changeOrientation(){
-        var value  = UIInterfaceOrientation.landscapeRight.rawValue
+        var value = UIInterfaceOrientation.landscapeRight.rawValue
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
             value = UIInterfaceOrientation.portrait.rawValue
         }
-        UIDevice.current.setValue(value, forKey: "orientation")
         if #available(iOS 16.0, *) {
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return
-            }
-            self.setNeedsUpdateOfSupportedInterfaceOrientations()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight) ? .portrait : .landscapeRight)){
-                    error in
-                    print(error)
-                    print(windowScene.effectiveGeometry)
+            DispatchQueue.main.async {
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+                    return
                 }
-            })
-        } else{
+                self.setNeedsUpdateOfSupportedInterfaceOrientations()
+                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight) ? .portrait : .landscapeRight)){
+                        error in
+                        print(error)
+                        print(windowScene.effectiveGeometry)
+                }
+            }
+        } else {
+            UIDevice.current.setValue(value, forKey: "orientation")
+            UIViewController.attemptRotationToDeviceOrientation()
+        }
+    }
+    
+    func portraitOrientation(){
+        if #available(iOS 16.0, *) {
+            DispatchQueue.main.async {
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+                    return
+                }
+                self.setNeedsUpdateOfSupportedInterfaceOrientations()
+                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)){
+                        error in
+                        print(error)
+                        print(windowScene.effectiveGeometry)
+                }
+            }
+        } else {
+            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             UIViewController.attemptRotationToDeviceOrientation()
         }
     }

@@ -346,12 +346,26 @@ class PlayerView: UIView {
         player.replaceCurrentItem(with: AVPlayerItem(asset: asset))
         playerLayer = AVPlayerLayer(player: player)
         playerLayer.frame = bounds
+        if let videoTrack = player.currentItem?.asset.tracks(withMediaType: .video).first {
+            let videoSize = videoTrack.naturalSize
+            let videoAspectRatio = videoSize.width / videoSize.height
+            
+            if videoAspectRatio > 1 {
+                // Landscape video
+                playerLayer.frame.size.width = videoView.bounds.width
+                playerLayer.frame.size.height = videoView.bounds.width / videoAspectRatio
+            } else {
+                // Portrait video
+                playerLayer.frame.size.height = videoView.bounds.height
+                playerLayer.frame.size.width = videoView.bounds.height * videoAspectRatio
+            }
+        }
         if (playerConfiguration.isLive){
-//            if (isPortrait){
+            if (UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight){
                 playerLayer.videoGravity = .resize
-//            } else {
-//                playerLayer.videoGravity = .resizeAspect
-//            }
+            } else {
+                playerLayer.videoGravity = .resizeAspect
+            }
         } else {
             playerLayer.videoGravity = .resizeAspect
         }
@@ -415,6 +429,8 @@ class PlayerView: UIView {
     }
     
     @objc func exitButtonPressed(_ sender: UIButton){
+        purgeMediaPlayer();
+        removeMediaPlayerObservers();
         delegate?.close(duration: player.currentTime().seconds)
     }
     
@@ -585,20 +601,20 @@ class PlayerView: UIView {
     }
     
     private func addVideoPortaitConstraints() {
+        if playerConfiguration.isLive {
+            self.playerLayer.videoGravity = .resize
+        } else {
+            self.playerLayer.videoGravity = .resizeAspect
+        }
         titleLabelLandacape.isHidden = true
         titleLabelPortrait.isHidden = false
-        if (playerConfiguration.isLive){
-            playerLayer.videoGravity = .resizeAspect
-        }
         landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
     }
     
     private func addVideoLandscapeConstraints() {
+        self.playerLayer.videoGravity = .resizeAspect
         titleLabelLandacape.isHidden = false
         titleLabelPortrait.isHidden = true
-        if (playerConfiguration.isLive){
-            playerLayer.videoGravity = .resize
-        }
         landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
@@ -817,6 +833,7 @@ class PlayerView: UIView {
     }
     
     func handleMediaPlayerReady() {
+        print("handleMediaPlayerReady \(pendingPlay)")
         if(!playerConfiguration.isLive){
             if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
                 purgeMediaPlayer()
@@ -837,6 +854,7 @@ class PlayerView: UIView {
         }
         
         if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
+            print("seeking to pending position \(pendingPlayPosition)")
             player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
                 if self?.playerState == .starting {
                     self?.pendingPlay = true
@@ -849,6 +867,8 @@ class PlayerView: UIView {
             activityIndicatorView.stopAnimating()
         }
         if pendingPlay {
+            print("pendingPlay")
+            print(pendingPlay)
             pendingPlay = false
             player.play()
             playerState = .playing
@@ -1131,6 +1151,7 @@ class PlayerView: UIView {
     }
     
     func purgeMediaPlayer() {
+        playerState = .stopped
         playerLayer.removeFromSuperlayer()
         player.pause()
     }

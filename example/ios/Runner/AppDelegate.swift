@@ -4,13 +4,9 @@ import AVFoundation
 import GoogleCast
 import Flutter
 
-//let kPrefPreloadTime = "preload_time_sec"
-//let kPrefEnableAnalyticsLogging = "enable_analytics_logging"
 let kPrefAppVersion = "app_version"
 let kPrefSDKVersion = "sdk_version"
 let kPrefEnableMediaNotifications = "enable_media_notifications"
-
-let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -21,6 +17,10 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
     fileprivate var mediaNotificationsEnabled = false
     fileprivate var firstUserDefaultsSync = false
     fileprivate var useCastContainerViewController = false
+    
+    override func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+             return .all
+        }
     
     var isCastControlBarsEnabled: Bool {
         get {
@@ -78,25 +78,25 @@ let appDelegate = (UIApplication.shared.delegate as? AppDelegate)
         window?.clipsToBounds = true
         setupCastLogging()
 
-        if useCastContainerViewController {
-          let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
-          guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
-                  as? UINavigationController else { return false }
-          let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
-                  as GCKUICastContainerViewController
-          castContainerVC.miniMediaControlsItemEnabled = true
-          window = UIWindow(frame: UIScreen.main.bounds)
-          window?.rootViewController = castContainerVC
-          window?.makeKeyAndVisible()
-        } else {
-          let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-          rootContainerVC?.miniMediaControlsViewEnabled = true
-        }
+//        if useCastContainerViewController {
+//          let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
+//          guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
+//                  as? UINavigationController else { return false }
+//          let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
+//                  as GCKUICastContainerViewController
+//          castContainerVC.miniMediaControlsItemEnabled = true
+//          window = UIWindow(frame: UIScreen.main.bounds)
+//          window?.rootViewController = castContainerVC
+//          window?.makeKeyAndVisible()
+//        } else {
+//          let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+//          rootContainerVC?.miniMediaControlsViewEnabled = true
+//        }
 
-        NotificationCenter.default.addObserver(self, selector: #selector(syncWithUserDefaults),
-                                               name: UserDefaults.didChangeNotification,
-                                               object: nil)
-        syncWithUserDefaults()
+//        NotificationCenter.default.addObserver(self, selector: #selector(syncWithUserDefaults),
+//                                               name: UserDefaults.didChangeNotification,
+//                                               object: nil)
+//        syncWithUserDefaults()
         GCKCastContext.sharedInstance().sessionManager.add(self)
         GCKCastContext.sharedInstance().imagePicker = self
         GeneratedPluginRegistrant.register(with: self)

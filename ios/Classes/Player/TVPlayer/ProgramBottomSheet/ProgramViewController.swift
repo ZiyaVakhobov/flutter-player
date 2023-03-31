@@ -53,20 +53,13 @@ class ProgramViewController: UIViewController {
         div.backgroundColor = .gray.withAlphaComponent(0.6)
         return div
     }()
-    var cancelLabel : UILabel = {
-        let label = UILabel()
-        label.text = "Отменить"
-        label.textColor = .white
-        label.isUserInteractionEnabled = true
-        label.font = UIFont.systemFont(ofSize: 15,weight: .medium)
-        return label
-    }()
 
     lazy var cancelView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
         return view
     }()
+    
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
         cancelBtn.backgroundColor = .clear
@@ -124,9 +117,10 @@ class ProgramViewController: UIViewController {
         stackView.backgroundColor = .clear
         return stackView
     }()
+    
     lazy var horizontalStackView: UIStackView = {
         let stackView = UIStackView()
-        stackView.addArrangedSubviews(cancelBtn, cancelLabel)
+        stackView.addArrangedSubviews(cancelBtn)
         stackView.axis = .horizontal
         stackView.distribution = .fill
         stackView.spacing = 29
@@ -136,9 +130,13 @@ class ProgramViewController: UIViewController {
     
     lazy var menuView: UIView = {
         let view = UIView()
+        view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
+        view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         view.backgroundColor = Colors.mainBackground
         return view
     }()
+    
     var menuHeight =  UIScreen.main.bounds.height * 0.80
     var isPresenting = false
     
@@ -147,6 +145,7 @@ class ProgramViewController: UIViewController {
         modalPresentationStyle = .custom
         transitioningDelegate = self
     }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
