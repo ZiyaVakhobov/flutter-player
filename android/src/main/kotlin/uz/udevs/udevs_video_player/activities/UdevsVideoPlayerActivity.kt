@@ -791,7 +791,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
-                    if (playerConfiguration!.isLive) {
+                    if (playerConfiguration.isLive) {
                         playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -901,6 +901,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         currentOrientation = newConfig.orientation
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
+            if (playerConfiguration.isLive) {
+                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            }
             title?.text = title1?.text
             title?.visibility = View.VISIBLE
             title1?.text = ""
