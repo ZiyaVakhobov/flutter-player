@@ -22,28 +22,28 @@ let kPrefEnableMediaNotifications = "enable_media_notifications"
              return .all
         }
     
-    var isCastControlBarsEnabled: Bool {
-        get {
-          if useCastContainerViewController {
-            let castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
-            return castContainerVC!.miniMediaControlsItemEnabled
-          } else {
-            let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-            return rootContainerVC!.miniMediaControlsViewEnabled
-          }
-        }
-        set(notificationsEnabled) {
-          if useCastContainerViewController {
-            var castContainerVC: GCKUICastContainerViewController?
-            castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
-            castContainerVC?.miniMediaControlsItemEnabled = notificationsEnabled
-          } else {
-            var rootContainerVC: RootContainerViewController?
-            rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-            rootContainerVC?.miniMediaControlsViewEnabled = notificationsEnabled
-          }
-        }
-      }
+//    var isCastControlBarsEnabled: Bool {
+//        get {
+//          if useCastContainerViewController {
+//            let castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
+//            return castContainerVC!.miniMediaControlsItemEnabled
+//          } else {
+//            let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+//            return rootContainerVC!.miniMediaControlsViewEnabled
+//          }
+//        }
+//        set(notificationsEnabled) {
+//          if useCastContainerViewController {
+//            var castContainerVC: GCKUICastContainerViewController?
+//            castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
+//            castContainerVC?.miniMediaControlsItemEnabled = notificationsEnabled
+//          } else {
+//            var rootContainerVC: RootContainerViewController?
+//            rootContainerVC = (window?.rootViewController as? RootContainerViewController)
+//            rootContainerVC?.miniMediaControlsViewEnabled = notificationsEnabled
+//          }
+//        }
+//      }
     
     override func application(
         _ application: UIApplication,
@@ -191,9 +191,7 @@ extension AppDelegate: GCKLoggerDelegate {
 extension AppDelegate: GCKSessionManagerListener {
   func sessionManager(_: GCKSessionManager, didEnd _: GCKSession, withError error: Error?) {
     if error == nil {
-      if let view = window?.rootViewController?.view {
-        Toast.displayMessage("Session ended", for: 3, in: view)
-      }
+      
     } else {
       let message = "Session ended unexpectedly:\n\(error?.localizedDescription ?? "")"
       showAlert(withTitle: "Session error", message: message)
