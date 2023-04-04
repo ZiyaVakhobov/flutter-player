@@ -22,33 +22,12 @@ let kPrefEnableMediaNotifications = "enable_media_notifications"
              return .all
         }
     
-//    var isCastControlBarsEnabled: Bool {
-//        get {
-//          if useCastContainerViewController {
-//            let castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
-//            return castContainerVC!.miniMediaControlsItemEnabled
-//          } else {
-//            let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-//            return rootContainerVC!.miniMediaControlsViewEnabled
-//          }
-//        }
-//        set(notificationsEnabled) {
-//          if useCastContainerViewController {
-//            var castContainerVC: GCKUICastContainerViewController?
-//            castContainerVC = (window?.rootViewController as? GCKUICastContainerViewController)
-//            castContainerVC?.miniMediaControlsItemEnabled = notificationsEnabled
-//          } else {
-//            var rootContainerVC: RootContainerViewController?
-//            rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-//            rootContainerVC?.miniMediaControlsViewEnabled = notificationsEnabled
-//          }
-//        }
-//      }
-    
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+              
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(AVAudioSession.Category.playback)
@@ -72,31 +51,6 @@ let kPrefEnableMediaNotifications = "enable_media_notifications"
         GCKCastContext.setSharedInstanceWith(options)
         GCKCastContext.sharedInstance().useDefaultExpandedMediaControls = true
 
-        // Theme the cast button using UIAppearance.
-        GCKUICastButton.appearance().tintColor = UIColor.gray
-
-        window?.clipsToBounds = true
-        setupCastLogging()
-
-//        if useCastContainerViewController {
-//          let appStoryboard = UIStoryboard(name: "Main", bundle: nil)
-//          guard let navigationController = appStoryboard.instantiateViewController(withIdentifier: "MainNavigation")
-//                  as? UINavigationController else { return false }
-//          let castContainerVC = GCKCastContext.sharedInstance().createCastContainerController(for: navigationController)
-//                  as GCKUICastContainerViewController
-//          castContainerVC.miniMediaControlsItemEnabled = true
-//          window = UIWindow(frame: UIScreen.main.bounds)
-//          window?.rootViewController = castContainerVC
-//          window?.makeKeyAndVisible()
-//        } else {
-//          let rootContainerVC = (window?.rootViewController as? RootContainerViewController)
-//          rootContainerVC?.miniMediaControlsViewEnabled = true
-//        }
-
-//        NotificationCenter.default.addObserver(self, selector: #selector(syncWithUserDefaults),
-//                                               name: UserDefaults.didChangeNotification,
-//                                               object: nil)
-//        syncWithUserDefaults()
         GCKCastContext.sharedInstance().sessionManager.add(self)
         GCKCastContext.sharedInstance().imagePicker = self
         GeneratedPluginRegistrant.register(with: self)
