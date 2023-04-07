@@ -602,7 +602,7 @@ class PlayerView: UIView {
     
     private func addVideoPortaitConstraints() {
         if playerConfiguration.isLive {
-            self.playerLayer.videoGravity = .resize
+            self.playerLayer.videoGravity = .resizeAspectFill
         } else {
             self.playerLayer.videoGravity = .resizeAspect
         }

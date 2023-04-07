@@ -792,7 +792,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
                     if (playerConfiguration.isLive) {
-                        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        playerView?.resizeMode=AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
@@ -902,7 +902,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             if (playerConfiguration.isLive) {
-                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                playerView?.resizeMode=AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
             title?.text = title1?.text
             title?.visibility = View.VISIBLE
