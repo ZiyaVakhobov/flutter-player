@@ -47,7 +47,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var url: String?
     var qualityLabelText = ""
     var speedLabelText = ""
-    var subtitleLabelText = ""
+    var subtitleLabelText = "Субтитле"
     var selectedSeason: Int = 0
     var selectSesonNum: Int = 0
     var isRegular: Bool = false
@@ -56,6 +56,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var seasons : [Season] = [Season]()
     var qualityDelegate: QualityDelegate!
     var speedDelegte: SpeedDelegate!
+    var subtitleDelegte: SubtitleDelegate!
     var playerConfiguration: PlayerConfiguration!
     private var isVolume = false
     private var volumeViewSlider: UISlider!
@@ -136,7 +137,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     override func viewWillAppear(_ animated: Bool) {
-//        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         let hasConnectedSession: Bool = (sessionManager.hasConnectedSession())
         if hasConnectedSession, (playbackMode != .remote) {
             populateMediaInfo(false, playPosition: 0)
@@ -253,7 +253,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         } else {
             let castSession = sessionManager.currentCastSession
             if castSession != nil {
-                let remoteMediaClient = sessionManager.currentSession?.remoteMediaClient
+                _ = sessionManager.currentSession?.remoteMediaClient
                 mediaLoadRequestDataBuilder.mediaInformation = buildMediaInfo(position: position, url: url ?? "")
                 mediaLoadRequestDataBuilder.startTime = position
             }
@@ -445,6 +445,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         vc.modalPresentationStyle = .custom
         vc.delegete = self
         vc.speedDelegate = self
+        vc.subtitleDelegate = self
         vc.settingModel = [
             SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: selectedQualityText),
             SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText),
@@ -527,7 +528,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     private func showSubtitleBottomSheet(){
-           var subtitles = playerView.setSubtitleCurrentItem()
+           let subtitles = playerView.setSubtitleCurrentItem()
            let bottomSheetVC = BottomSheetViewController()
            bottomSheetVC.modalPresentationStyle = .overCurrentContext
            bottomSheetVC.items = subtitles
@@ -708,7 +709,7 @@ extension VideoPlayerViewController: GCKSessionManagerListener {
     }
 }
 
-extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate {
+extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate , SubtitleDelegate {
     
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
         var resolutions: [String:String] = [:]
@@ -757,6 +758,10 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     }
     func qualityBottomSheet() {
         showQualityBottomSheet()
+    }
+    
+    func subtitleBottomSheet() {
+        showSubtitleBottomSheet()
     }
 }
 // 1170
