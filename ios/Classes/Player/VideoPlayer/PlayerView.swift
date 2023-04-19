@@ -417,6 +417,17 @@ class PlayerView: UIView {
         self.player.automaticallyWaitsToMinimizeStalling = true
     }
     
+    func setSubtitleCurrentItem() -> [String]{
+        var subtitles = player.currentItem?.tracks(type: .subtitle) ?? ["None"]
+        subtitles.insert("None", at: 0)
+        
+        return subtitles
+    }
+    
+    func getSubtitleTrackIsEmpty(selectedSubtitleLabel: String) -> Bool{
+        return (player.currentItem?.select(type: .subtitle, name: selectedSubtitleLabel)) != nil
+    }
+    
     func changeSpeed(rate: Float){
         self.playerRate = rate
         self.player.preroll(atRate: self.playerRate, completionHandler: nil)

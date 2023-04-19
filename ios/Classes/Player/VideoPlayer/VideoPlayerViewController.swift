@@ -47,6 +47,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var url: String?
     var qualityLabelText = ""
     var speedLabelText = ""
+    var subtitleLabelText = ""
     var selectedSeason: Int = 0
     var selectSesonNum: Int = 0
     var isRegular: Bool = false
@@ -61,8 +62,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     private var playerRate: Float = 1.0
     private var selectedSpeedText = "1.0x"
     var selectedQualityText = "Auto"
-    ///TODO:
-    var subtitle = ""
+    private var selectedSubtitle = "None"
     
     private var playerView: PlayerView = {
         return PlayerView()
@@ -447,7 +447,8 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         vc.speedDelegate = self
         vc.settingModel = [
             SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: selectedQualityText),
-            SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText)
+            SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText),
+            SettingModel(leftIcon: Svg.subtitle.uiImage, title: subtitleLabelText, configureLabel: selectedSubtitle)
         ]
         self.present(vc, animated: true, completion: nil)
     }
@@ -480,7 +481,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             showSpeedBottomSheet()
             break
         case 2:
-            ///TODO:
             showSubtitleBottomSheet()
             break
         case 3:
@@ -515,11 +515,31 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             }
             break
         case .subtitle:
+            var subtitles = playerView.setSubtitleCurrentItem()
+            let selectedSubtitleLabel = subtitles[index]
+            if (playerView.getSubtitleTrackIsEmpty(selectedSubtitleLabel: selectedSubtitleLabel)){
+                    selectedSubtitle = selectedSubtitleLabel
+            }
             break
         case .audio:
             break
         }
     }
+    
+    private func showSubtitleBottomSheet(){
+           var subtitles = playerView.setSubtitleCurrentItem()
+           let bottomSheetVC = BottomSheetViewController()
+           bottomSheetVC.modalPresentationStyle = .overCurrentContext
+           bottomSheetVC.items = subtitles
+           bottomSheetVC.labelText = "Субтитле"
+           bottomSheetVC.bottomSheetType = .subtitle
+           bottomSheetVC.selectedIndex = subtitles.firstIndex(of: selectedSubtitle) ?? 0
+           bottomSheetVC.cellDelegate = self
+           DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+               self.present(bottomSheetVC, animated: false, completion:nil)
+           }
+       }
+
     
     func showQualityBottomSheet(){
         let resList = resolutions ?? ["480p": playerConfiguration.url]
@@ -556,15 +576,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             self.present(bottomSheetVC, animated: false, completion:nil)
         }
     }
-    ///TODO:
-    func showSubtitleBottomSheet() {
-        let subtitleBottomSheetViewController = SubtitleBottomSheetViewController()
-
-         subtitleBottomSheetViewController.subtitle = subtitle
-         subtitleBottomSheetViewController.modalPresentationStyle = .overCurrentContext
-         subtitleBottomSheetViewController.modalTransitionStyle = .crossDissolve
-         present(subtitleBottomSheetViewController, animated: true, completion: nil)
-         }
     
     func getMegogoStream(parameters:[String:String], id:String) -> MegogoStreamResponse? {
         var megogoResponse:MegogoStreamResponse?
@@ -749,23 +760,3 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     }
 }
 // 1170
-
-///TODO:
-class SubtitleBottomSheetViewController: UIViewController {
-
-    // MARK: - IBOutlets
-    @IBOutlet private weak var subtitleLabel: UILabel!
-
-    // MARK: - Properties
-    var subtitle: String? {
-        didSet {
-            subtitleLabel.text = subtitle
-        }
-    }
-
-    // MARK: - View Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Additional setup for the bottom sheet view controller
-    }
-}

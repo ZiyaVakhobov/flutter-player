@@ -34,8 +34,6 @@ struct PlayerConfiguration{
     var authorization: String
     var autoText: String
     var baseUrl: String
-    ///TODO:
-    var subtitle: String
     
     init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramsInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String) {
         self.initialResolution = initialResolution
@@ -65,8 +63,6 @@ struct PlayerConfiguration{
         self.autoText = autoText
         self.baseUrl = baseUrl
         self.url = url
-        ///TODO:
-        self.subtitle
     }
     
     static func fromMap(map : [String:Any])->PlayerConfiguration {
@@ -111,9 +107,7 @@ struct PlayerConfiguration{
                                    authorization: map["authorization"] as! String,
                                    autoText: map["autoText"] as! String,
                                    baseUrl: map["baseUrl"] as! String,
-                                   url: (map["initialResolution"] as! [String:String]).values.first ?? "",
-                                   ///TODO:
-                                   subtitle: map["subtitle"] as! String
+                                   url: (map["initialResolution"] as! [String:String]).values.first ?? ""
                                    
         )
     }

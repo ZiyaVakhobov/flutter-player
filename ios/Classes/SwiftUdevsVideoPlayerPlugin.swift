@@ -138,8 +138,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             vc.resolutions = sortedResolutions
             vc.selectedQualityText = playerConfiguration.autoText
             vc.seasons  = playerConfiguration.seasons
-            ///TODO:
-            vc.subtitle = playerConfiguration.subtitle
             SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
             return
         }
