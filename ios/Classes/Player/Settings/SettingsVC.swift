@@ -108,9 +108,9 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         tableView.contentInsetAdjustmentBehavior = .never
         if UIDevice.current.userInterfaceIdiom == .phone {
-            menuHeight = 300
+            menuHeight = 200
         }else {
-            menuHeight = 360
+            menuHeight = 300
         }
         
         view.addSubview(backdropView)

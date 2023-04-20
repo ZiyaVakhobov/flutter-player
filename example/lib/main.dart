@@ -164,8 +164,8 @@ class _MainPageState extends State<MainPage> {
               playerConfig: PlayerConfiguration(
             baseUrl: "https://api.spec.uzd.udevs.io/v1/",
             initialResolution: {
-              "240p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
+              "240p":"http://d3rlna7iyyu8wu.cloudfront.net/skip_armstrong/skip_armstrong_multi_language_subs.m3u8"
+                  // "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
             },
             resolutions: {},
             qualityText: 'Качество',
