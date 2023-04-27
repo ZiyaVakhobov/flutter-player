@@ -31,7 +31,6 @@ class PlayerConfiguration {
   String autoText;
   String baseUrl;
   bool fromCache;
-  String subtitle;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
@@ -62,7 +61,6 @@ class PlayerConfiguration {
     map['autoText'] = autoText;
     map['baseUrl'] = baseUrl;
     map['fromCache'] = fromCache;
-    map['subtitle'] = subtitle;
     return map;
   }
 
@@ -96,7 +94,6 @@ class PlayerConfiguration {
         'autoText: $autoText '
         'baseUrl: $baseUrl, '
         'fromCache: $fromCache, '
-        'subtitle: $subtitle '
         '}';
   }
 
@@ -128,6 +125,5 @@ class PlayerConfiguration {
     required this.autoText,
     required this.baseUrl,
     required this.fromCache,
-    required this.subtitle,
   });
 }

@@ -191,7 +191,6 @@ class _MainPageState extends State<MainPage> {
             authorization: '',
             autoText: 'Автонастройка',
             fromCache: true,
-            subtitle: '',
           )) ??
           'nothing';
       if (kDebugMode) {
