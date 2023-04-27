@@ -379,6 +379,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func close(duration : Double){
+//        if UIApplication.shared.statusBarOrientation.isLandscape{
+//            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+//            print("====>screen mode: \(UIApplication.shared.statusBarOrientation.isLandscape)")
+//        }
         portraitOrientation()
         self.dismiss(animated: true, completion: nil)
         delegate?.getDuration(duration: duration)
