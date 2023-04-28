@@ -440,7 +440,7 @@ class PlayerView: UIView {
     }
     
     @objc func exitButtonPressed(_ sender: UIButton){
-//        delegate?.changeOrientation()
+        delegate?.changeOrientation()
         purgeMediaPlayer();
         removeMediaPlayerObservers();
         delegate?.close(duration: player.currentTime().seconds)
