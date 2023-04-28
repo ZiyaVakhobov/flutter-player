@@ -106,6 +106,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("view did load")
         url = playerConfiguration.url
         title = playerConfiguration.title
         let resList = resolutions ?? ["480p":playerConfiguration.url]
@@ -379,11 +380,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func close(duration : Double){
-//        if UIApplication.shared.statusBarOrientation.isLandscape{
-//            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
-//            print("====>screen mode: \(UIApplication.shared.statusBarOrientation.isLandscape)")
-//        }
-        portraitOrientation()
+        if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
+            portraitOrientation()
+        }
         self.dismiss(animated: true, completion: nil)
         delegate?.getDuration(duration: duration)
     }
