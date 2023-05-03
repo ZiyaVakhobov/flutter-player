@@ -845,7 +845,7 @@ class PlayerView: UIView {
     }
     
     func handleMediaPlayerReady() {
-        print("handleMediaPlayerReady \(pendingPlay)")
+//        print("handleMediaPlayerReady \(pendingPlay)")
         if(!playerConfiguration.isLive){
             if let duration = player.currentItem?.duration, CMTIME_IS_INDEFINITE(duration) {
                 purgeMediaPlayer()
@@ -866,7 +866,7 @@ class PlayerView: UIView {
         }
         
         if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
-            print("seeking to pending position \(pendingPlayPosition)")
+//            print("seeking to pending position \(pendingPlayPosition)")
             player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
                 if self?.playerState == .starting {
                     self?.pendingPlay = true

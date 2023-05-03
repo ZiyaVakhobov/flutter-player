@@ -108,7 +108,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         view.backgroundColor = .clear
         tableView.contentInsetAdjustmentBehavior = .never
         if UIDevice.current.userInterfaceIdiom == .phone {
-            menuHeight = 200
+            menuHeight = 140
         }else {
             menuHeight = 300
         }
@@ -149,7 +149,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
             make.left.right.equalTo(view.safeAreaLayoutGuide)
             make.top.equalTo(contentView).offset(-16)
             make.width.equalTo(contentView).offset(50)
-            make.height.equalTo(250)
+            make.height.equalTo(menuHeight)
         }
         
         

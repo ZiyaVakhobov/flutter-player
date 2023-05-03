@@ -106,7 +106,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("view did load")
         url = playerConfiguration.url
         title = playerConfiguration.title
         let resList = resolutions ?? ["480p":playerConfiguration.url]
@@ -117,7 +116,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 sortedResolutions.insert("1080p", at: 1)
             }
         }
-        portraitOrientation()
         view.backgroundColor = .black
         
         playerView.delegate = self
@@ -381,7 +379,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     
     func close(duration : Double){
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
-            portraitOrientation()
+            changeOrientation()
         }
         self.dismiss(animated: true, completion: nil)
         delegate?.getDuration(duration: duration)
@@ -404,25 +402,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 }
         } else {
             UIDevice.current.setValue(value, forKey: "orientation")
-            UIViewController.attemptRotationToDeviceOrientation()
-        }
-    }
-    
-    func portraitOrientation(){
-        if #available(iOS 16.0, *) {
-            DispatchQueue.main.async {
-                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-                    return
-                }
-                self.setNeedsUpdateOfSupportedInterfaceOrientations()
-                windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .portrait)){
-                        error in
-                        print(error)
-                        print(windowScene.effectiveGeometry)
-                }
-            }
-        } else {
-            UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
             UIViewController.attemptRotationToDeviceOrientation()
         }
     }
@@ -450,7 +429,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         vc.settingModel = [
             SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: selectedQualityText),
             SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText),
-            SettingModel(leftIcon: Svg.subtitle.uiImage, title: subtitleLabelText, configureLabel: selectedSubtitle)
+//            SettingModel(leftIcon: Svg.subtitle.uiImage, title: subtitleLabelText, configureLabel: selectedSubtitle)
         ]
         self.present(vc, animated: true, completion: nil)
     }
