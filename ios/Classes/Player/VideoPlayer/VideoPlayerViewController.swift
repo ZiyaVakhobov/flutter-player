@@ -390,7 +390,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             value = UIInterfaceOrientation.portrait.rawValue
         }
         if #available(iOS 16.0, *) {
-            DispatchQueue.main.async {
                 guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
                     return
                 }
@@ -400,7 +399,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                         print(error)
                         print(windowScene.effectiveGeometry)
                 }
-            }
         } else {
             UIDevice.current.setValue(value, forKey: "orientation")
             UIViewController.attemptRotationToDeviceOrientation()
