@@ -73,6 +73,7 @@ import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
+import kotlin.math.log
 
 
 class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
@@ -115,6 +116,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var audioManager: AudioManager? = null
     private var gestureDetector: GestureDetector? = null
     private var scaleGestureDetector: ScaleGestureDetector? = null
+    private var isSettingsBottomSheetOpened: Boolean = false
+    private var isQualitySpeedBottomSheetOpened: Boolean = false
+    private val allOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
     private var brightness: Double = 15.0
     private var maxBrightness: Double = 31.0
     private var volume: Double = 0.0
@@ -219,7 +223,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         volumeSeekBar?.max = maxVolume.toInt()
         maxVolume += 1.0
         volumeSeekBar?.progress = volume.toInt()
-
         playVideo()
     }
 
@@ -428,6 +431,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         player?.playWhenReady = false
         if (isInPictureInPictureMode) {
             player?.playWhenReady = true
+            dismissAllBottomSheets()
         }
         mCastContext!!.sessionManager.removeSessionManagerListener(
             mSessionManagerListener!!, CastSession::class.java
@@ -673,6 +677,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 val params =
                     PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
                 enterPictureInPictureMode(params)
+
             } else {
                 Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show()
             }
@@ -793,7 +798,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 } else {
                     if (playerConfiguration.isLive) {
                         ///TODO:
-                        playerView?.resizeMode=AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
@@ -904,7 +909,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             setFullScreen()
             if (playerConfiguration.isLive) {
                 ///TODO:
-                playerView?.resizeMode=AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
             title?.text = title1?.text
             title?.visibility = View.VISIBLE
@@ -981,6 +986,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
+        allOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -1009,6 +1015,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showEpisodesBottomSheet() {
         currentBottomSheet = BottomSheet.EPISODES
         val bottomSheetDialog = BottomSheetDialog(this)
+        allOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
         backButtonEpisodeBottomSheet = bottomSheetDialog.findViewById(R.id.episode_sheet_back)
@@ -1079,6 +1086,14 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
     }
 
+    private fun dismissAllBottomSheets() {
+        for (bottomSheet in allOpenedBottomSheets) {
+            bottomSheet.dismiss()
+        }
+        allOpenedBottomSheets.clear()
+    }
+
+
     private var speeds =
         mutableListOf("0.25x", "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x")
     private var currentQuality = ""
@@ -1088,8 +1103,13 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private var backButtonSettingsBottomSheet: ImageView? = null
     private fun showSettingsBottomSheet() {
+        if (isSettingsBottomSheetOpened) {
+            return
+        }
+        isSettingsBottomSheetOpened = true
         currentBottomSheet = BottomSheet.SETTINGS
         val bottomSheetDialog = BottomSheetDialog(this)
+        allOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
         backButtonSettingsBottomSheet = bottomSheetDialog.findViewById(R.id.settings_sheet_back)
@@ -1134,6 +1154,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
+            isSettingsBottomSheetOpened = false;
             currentBottomSheet = BottomSheet.NONE
         }
     }
@@ -1142,8 +1163,13 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showQualitySpeedSheet(
         initialValue: String, list: ArrayList<String>, fromQuality: Boolean
     ) {
+        if (isQualitySpeedBottomSheetOpened) {
+            return
+        }
+        isQualitySpeedBottomSheetOpened = true;
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
+        allOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
@@ -1157,6 +1183,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         backButtonQualitySpeedBottomSheet?.setOnClickListener {
             bottomSheetDialog.dismiss()
         }
+
         if (fromQuality) {
             bottomSheetDialog.findViewById<TextView>(R.id.quality_speed_text)?.text =
                 playerConfiguration.qualityText
@@ -1242,19 +1269,21 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.SETTINGS
+            isQualitySpeedBottomSheetOpened = false
         }
     }
 
-    override fun onDown(p0: MotionEvent?): Boolean = false
-    override fun onShowPress(p0: MotionEvent?) = Unit
+    override fun onDown(p0: MotionEvent): Boolean = false
+
+    override fun onShowPress(p0: MotionEvent) = Unit
 
     private var lastClicked: Long = -1L
-    override fun onSingleTapUp(event: MotionEvent?): Boolean {
+    override fun onSingleTapUp(event: MotionEvent): Boolean {
         lastClicked = if (lastClicked == -1L) {
             System.currentTimeMillis()
         } else {
             if (isDoubleClicked(lastClicked)) {
-                if (event!!.x < sWidth / 2) {
+                if (event.x < sWidth / 2) {
                     player?.seekTo(player!!.currentPosition - 10000)
                 } else {
                     player?.seekTo(player!!.currentPosition + 10000)
@@ -1276,14 +1305,14 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun isDoubleClicked(lastClicked: Long): Boolean =
         lastClicked - System.currentTimeMillis() <= 300
 
-    override fun onLongPress(p0: MotionEvent?) = Unit
-    override fun onFling(p0: MotionEvent?, p1: MotionEvent?, p2: Float, p3: Float): Boolean = false
+    override fun onLongPress(p0: MotionEvent) = Unit
+    override fun onFling(p0: MotionEvent, p1: MotionEvent, p2: Float, p3: Float): Boolean = false
 
     override fun onScroll(
-        event: MotionEvent?, event1: MotionEvent?, distanceX: Float, distanceY: Float
+        event: MotionEvent, event1: MotionEvent, distanceX: Float, distanceY: Float
     ): Boolean {
         if (abs(distanceX) < abs(distanceY)) {
-            if (event!!.x < sWidth / 2) {
+            if (event.x < sWidth / 2) {
                 layoutBrightness?.visibility = View.VISIBLE
                 layoutVolume?.visibility = View.GONE
                 val increase = distanceY > 0
@@ -1312,16 +1341,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private var scaleFactor: Float = 0f
-    override fun onScale(detector: ScaleGestureDetector?): Boolean {
-        scaleFactor = detector?.scaleFactor!!
+    override fun onScale(detector: ScaleGestureDetector): Boolean {
+        scaleFactor = detector.scaleFactor
         return true
     }
 
-    override fun onScaleBegin(p0: ScaleGestureDetector?): Boolean {
+    override fun onScaleBegin(p0: ScaleGestureDetector): Boolean {
         return true
     }
 
-    override fun onScaleEnd(p0: ScaleGestureDetector?) {
+    override fun onScaleEnd(p0: ScaleGestureDetector) {
         if (scaleFactor > 1) {
             playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         } else {
