@@ -86,6 +86,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private lateinit var playerConfiguration: PlayerConfiguration
     private var close: ImageView? = null
     private var pip: ImageView? = null
+    private var shareMovieLinkIv: ImageView? = null
     private var cast: MediaRouteButton? = null
     private var more: ImageView? = null
     private var title: TextView? = null
@@ -118,7 +119,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var scaleGestureDetector: ScaleGestureDetector? = null
     private var isSettingsBottomSheetOpened: Boolean = false
     private var isQualitySpeedBottomSheetOpened: Boolean = false
-    private val allOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
+    private val listOfAllOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
     private var brightness: Double = 15.0
     private var maxBrightness: Double = 31.0
     private var volume: Double = 0.0
@@ -132,7 +133,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var titleText = ""
     private var url: String? = null
     private var sameWithStreamingContent = false
-
     private var mLocation: PlaybackLocation? = null
     private var mPlaybackState: PlaybackState? = null
     private var mSessionManagerListener: SessionManagerListener<CastSession>? = null
@@ -550,6 +550,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeViews() {
+        shareMovieLinkIv = findViewById(R.id.iv_share_movie)
         playerView = findViewById(R.id.exo_player_view)
         customPlayback = findViewById(R.id.custom_playback)
         layoutBrightness = findViewById(R.id.layout_brightness)
@@ -558,7 +559,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         layoutVolume = findViewById(R.id.layout_volume)
         volumeSeekBar = findViewById(R.id.volume_seek)
         volumeSeekBar?.isEnabled = false
-
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
         cast = findViewById(R.id.video_cast)
@@ -581,6 +581,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         exoPosition = findViewById(R.id.exo_position)
         live = findViewById(R.id.live)
         if (playerConfiguration.isLive) {
+            shareMovieLinkIv?.visibility = View.GONE
             live?.visibility = View.VISIBLE
         }
         episodesButton = findViewById(R.id.button_episodes)
@@ -601,6 +602,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (playerConfiguration.isLive) {
             tvProgramsButton?.visibility = View.VISIBLE
             tvProgramsText?.text = playerConfiguration.tvProgramsText
+
         }
         zoom = findViewById(R.id.zoom)
         orientation = findViewById(R.id.orientation)
@@ -626,6 +628,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             return@setOnTouchListener true
         }
     }
+
 
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     private fun initializeClickListeners() {
@@ -654,6 +657,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
             return@setOnTouchListener true
         }
+
+        shareMovieLinkIv?.setOnClickListener() {
+            shareMovieLink()
+        }
+
         close?.setOnClickListener {
             if (player?.isPlaying == true) {
                 player?.stop()
@@ -816,6 +824,15 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         val params = PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50)).build()
         enterPictureInPictureMode(params)
+    }
+
+    private fun shareMovieLink() {
+        val url = playerConfiguration.movieShareLink
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "text/html"
+        intent.putExtra(Intent.EXTRA_TEXT, url)
+        val chooser = Intent.createChooser(intent, "Share using...")
+        startActivity(chooser)
     }
 
     override fun onPictureInPictureModeChanged(
@@ -986,7 +1003,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
-        allOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -1015,7 +1032,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showEpisodesBottomSheet() {
         currentBottomSheet = BottomSheet.EPISODES
         val bottomSheetDialog = BottomSheetDialog(this)
-        allOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
         backButtonEpisodeBottomSheet = bottomSheetDialog.findViewById(R.id.episode_sheet_back)
@@ -1087,10 +1104,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun dismissAllBottomSheets() {
-        for (bottomSheet in allOpenedBottomSheets) {
+        for (bottomSheet in listOfAllOpenedBottomSheets) {
             bottomSheet.dismiss()
         }
-        allOpenedBottomSheets.clear()
+        listOfAllOpenedBottomSheets.clear()
     }
 
 
@@ -1109,7 +1126,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         isSettingsBottomSheetOpened = true
         currentBottomSheet = BottomSheet.SETTINGS
         val bottomSheetDialog = BottomSheetDialog(this)
-        allOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
         backButtonSettingsBottomSheet = bottomSheetDialog.findViewById(R.id.settings_sheet_back)
@@ -1169,7 +1186,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         isQualitySpeedBottomSheetOpened = true;
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
-        allOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)

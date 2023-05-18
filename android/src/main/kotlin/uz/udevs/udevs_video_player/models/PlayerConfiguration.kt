@@ -58,4 +58,6 @@ data class PlayerConfiguration(
     val baseUrl: String,
     @SerializedName("fromCache")
     val fromCache: Boolean,
+    @SerializedName("movieShareLink")
+    val movieShareLink: String,
 ) : Serializable

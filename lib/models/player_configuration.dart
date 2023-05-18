@@ -30,6 +30,7 @@ class PlayerConfiguration {
   String authorization;
   String autoText;
   String baseUrl;
+  String movieShareLink;
   bool fromCache;
 
   Map<String, dynamic> toJson() {
@@ -61,6 +62,7 @@ class PlayerConfiguration {
     map['autoText'] = autoText;
     map['baseUrl'] = baseUrl;
     map['fromCache'] = fromCache;
+    map['movieShareLink'] = movieShareLink;
     return map;
   }
 
@@ -94,6 +96,7 @@ class PlayerConfiguration {
         'autoText: $autoText '
         'baseUrl: $baseUrl, '
         'fromCache: $fromCache, '
+        'movieShareLink: $movieShareLink, '
         '}';
   }
 
@@ -125,5 +128,6 @@ class PlayerConfiguration {
     required this.autoText,
     required this.baseUrl,
     required this.fromCache,
+    required this.movieShareLink,
   });
 }
