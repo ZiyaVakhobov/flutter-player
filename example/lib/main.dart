@@ -33,7 +33,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
-  download1() async {
+  void download1() async {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: DownloadConfiguration(

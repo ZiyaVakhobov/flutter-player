@@ -799,11 +799,12 @@ class PlayerView: UIView {
         //
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
+        if (!playerConfiguration.isLive) {
+            shareButton.rightToLeft(of: settingsButton)
+            shareButton.centerY(to: topView)
+        }
         
-        shareButton.rightToLeft(of: settingsButton)
-        shareButton.centerY(to: topView)
-        
-        castButton.rightToLeft(of: shareButton)
+        castButton.rightToLeft(of: playerConfiguration.isLive ? settingsButton: shareButton)
         castButton.centerY(to: topView)
         
         pipButton.leftToRight(of: exitButton)
@@ -811,7 +812,7 @@ class PlayerView: UIView {
         
         titleLabelLandacape.centerY(to: topView)
         titleLabelLandacape.centerX(to: topView)
-        titleLabelLandacape.rightToLeft(of: castButton, offset: 32)
+        titleLabelLandacape.rightToLeft(of: castButton, offset:  playerConfiguration.isLive ?0:32)
         titleLabelLandacape.leftToRight(of: pipButton)
         titleLabelLandacape.layoutMargins = .horizontal(8)
         titleLabelPortrait.centerX(to: overlayView)
