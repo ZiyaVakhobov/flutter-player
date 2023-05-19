@@ -25,6 +25,7 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func sliderValueChanged(value: Float)
     func volumeChanged(value: Float)
     func isCheckPlay()
+    func share()
 }
 
 enum LocalPlayerState: Int {
@@ -178,6 +179,13 @@ class PlayerView: UIView {
         let button = IconButton()
         button.setImage(Svg.more.uiImage, for: .normal)
         button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
+        return button
+    }()
+    
+    private var shareButton: IconButton = {
+        let button = IconButton()
+        button.setImage(Svg.share.uiImage, for: .normal)
+        button.addTarget(self, action: #selector(share(_ :)), for: .touchUpInside)
         return button
     }()
     
@@ -453,6 +461,10 @@ class PlayerView: UIView {
         delegate?.settingsPressed()
     }
     
+    @objc func share(_ sender : UIButton){
+        delegate?.share()
+    }
+    
     @objc func changeOrientation(_ sender: UIButton){
         delegate?.changeOrientation()
     }
@@ -671,6 +683,7 @@ class PlayerView: UIView {
         topView.addSubview(exitButton)
         topView.addSubview(titleLabelLandacape)
         topView.addSubview(settingsButton)
+        topView.addSubview(shareButton)
         topView.addSubview(pipButton)
         topView.addSubview(castButton)
     }
@@ -787,7 +800,10 @@ class PlayerView: UIView {
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
         
-        castButton.rightToLeft(of: settingsButton)
+        shareButton.rightToLeft(of: settingsButton)
+        shareButton.centerY(to: topView)
+        
+        castButton.rightToLeft(of: shareButton)
         castButton.centerY(to: topView)
         
         pipButton.leftToRight(of: exitButton)
@@ -795,7 +811,7 @@ class PlayerView: UIView {
         
         titleLabelLandacape.centerY(to: topView)
         titleLabelLandacape.centerX(to: topView)
-        titleLabelLandacape.rightToLeft(of: castButton)
+        titleLabelLandacape.rightToLeft(of: castButton, offset: 32)
         titleLabelLandacape.leftToRight(of: pipButton)
         titleLabelLandacape.layoutMargins = .horizontal(8)
         titleLabelPortrait.centerX(to: overlayView)

@@ -385,6 +385,16 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         delegate?.getDuration(duration: duration)
     }
     
+    func share() {
+        if let link = NSURL(string: playerConfiguration.movieShareLink)
+        {
+            let objectsToShare = [link] as [Any]
+            let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+            activityVC.excludedActivityTypes = [UIActivity.ActivityType.airDrop, UIActivity.ActivityType.addToReadingList]
+            self.present(activityVC, animated: true, completion: nil)
+        }
+    }
+    
     func changeOrientation(){
         var value = UIInterfaceOrientation.landscapeRight.rawValue
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
