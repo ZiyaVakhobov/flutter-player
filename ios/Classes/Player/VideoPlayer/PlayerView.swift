@@ -186,6 +186,7 @@ class PlayerView: UIView {
         let button = IconButton()
         button.setImage(Svg.share.uiImage, for: .normal)
         button.addTarget(self, action: #selector(share(_ :)), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     
@@ -799,7 +800,10 @@ class PlayerView: UIView {
         //
         settingsButton.right(to: topView)
         settingsButton.centerY(to: topView)
-        if (!playerConfiguration.isLive) {
+        if (playerConfiguration.isLive) {
+            shareButton.isHidden = true
+        } else {
+            shareButton.isHidden = false
             shareButton.rightToLeft(of: settingsButton)
             shareButton.centerY(to: topView)
         }
