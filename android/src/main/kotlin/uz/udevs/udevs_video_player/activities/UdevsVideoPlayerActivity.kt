@@ -91,7 +91,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var pip: ImageView? = null
     private var cast: ImageView? = null
     private var shareMovieLinkIv: ImageView? = null
-    private var cast: MediaRouteButton? = null
     private var more: ImageView? = null
     private var title: TextView? = null
     private var title1: TextView? = null
@@ -577,7 +576,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         cast = findViewById(R.id.tv_channels)
         if (playerConfiguration.isLive) {
             tvChannelsButton?.visibility = View.VISIBLE
-            tvChannelsText?.text = playerConfiguration.tvChannelsText
         }
 //        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
         more = findViewById(R.id.video_more)
