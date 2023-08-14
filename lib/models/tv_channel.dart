@@ -1,4 +1,4 @@
-class TvChannels {
+class TvChannel {
   String id;
   String image;
   String name;
@@ -13,7 +13,7 @@ class TvChannels {
     return map;
   }
 
-  TvChannels({
+  TvChannel({
     required this.id,
     required this.image,
     required this.name,

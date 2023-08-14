@@ -2,7 +2,7 @@ import 'dart:core';
 
 import 'package:udevs_video_player/models/programs_info.dart';
 import 'package:udevs_video_player/models/season.dart';
-import 'package:udevs_video_player/models/tv_channels.dart';
+import 'package:udevs_video_player/models/tv_channel.dart';
 
 class PlayerConfiguration {
   Map<String, String> initialResolution;
@@ -33,7 +33,7 @@ class PlayerConfiguration {
   String baseUrl;
   String movieShareLink;
   bool fromCache;
-  List<TvChannels> tvChannels;
+  List<TvChannel> tvChannels;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
