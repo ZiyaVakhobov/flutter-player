@@ -2,7 +2,6 @@ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -43,6 +42,7 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.mediarouter.app.MediaRouteButton
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
@@ -67,12 +67,15 @@ import uz.udevs.udevs_video_player.models.BottomSheet
 import uz.udevs.udevs_video_player.models.MegogoStreamResponse
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
 import uz.udevs.udevs_video_player.models.PremierStreamResponse
+import uz.udevs.udevs_video_player.models.TvChannelResponse
 import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
+import uz.udevs.udevs_video_player.adapters.*
+import uz.udevs.udevs_video_player.models.*
 import kotlin.math.log
 
 
@@ -86,6 +89,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private lateinit var playerConfiguration: PlayerConfiguration
     private var close: ImageView? = null
     private var pip: ImageView? = null
+    private var cast: ImageView? = null
     private var shareMovieLinkIv: ImageView? = null
     private var cast: MediaRouteButton? = null
     private var more: ImageView? = null
@@ -105,6 +109,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var nextText: TextView? = null
     private var tvProgramsButton: LinearLayout? = null
     private var tvProgramsText: TextView? = null
+    private var tvChannelsButton: LinearLayout? = null
+    private var tvChannelsText: TextView? = null
     private var zoom: ImageView? = null
     private var orientation: ImageView? = null
     private var exoProgress: DefaultTimeBar? = null
@@ -138,6 +144,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var mSessionManagerListener: SessionManagerListener<CastSession>? = null
     private var mCastSession: CastSession? = null
     private var mCastContext: CastContext? = null
+    private var channelIndex: Int = 0
 
     enum class PlaybackLocation {
         LOCAL, REMOTE
@@ -179,6 +186,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
         seasonIndex = playerConfiguration.seasonIndex
         episodeIndex = playerConfiguration.episodeIndex
+        channelIndex = playerConfiguration.selectChannelIndex
         currentQuality =
             if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
         titleText = playerConfiguration.title
@@ -238,9 +246,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
                         return true
                     }
+
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
                         return true
                     }
+
                     capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
                         return true
                     }
@@ -511,6 +521,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                             playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
                         }
                     }
+
                     Player.STATE_READY -> {
                         if (mLocation == PlaybackLocation.REMOTE && customSeekBar?.visibility == View.GONE) {
                             performViewsOnConnect()
@@ -521,9 +532,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                             playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
                         }
                     }
+
                     Player.STATE_ENDED -> {
                         playPause?.setImageResource(R.drawable.ic_play)
                     }
+
                     Player.STATE_IDLE -> {
                         mPlaybackState = PlaybackState.IDLE
                     }
@@ -561,8 +574,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         volumeSeekBar?.isEnabled = false
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
-        cast = findViewById(R.id.video_cast)
-        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
+        cast = findViewById(R.id.tv_channels)
+        if (playerConfiguration.isLive) {
+            tvChannelsButton?.visibility = View.VISIBLE
+            tvChannelsText?.text = playerConfiguration.tvChannelsText
+        }
+//        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title1 = findViewById(R.id.video_title1)
@@ -734,6 +751,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 }
             }
         }
+        ///TODO:
+        cast?.setOnClickListener {
+            showChannelsBottomSheet()
+        }
         episodesButton?.setOnClickListener {
             if (playerConfiguration.seasons.isNotEmpty())
                 showEpisodesBottomSheet()
@@ -787,14 +808,17 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     zoom?.setImageResource(R.drawable.ic_fit)
                     playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
+
                 AspectRatioFrameLayout.RESIZE_MODE_FILL -> {
                     zoom?.setImageResource(R.drawable.ic_crop_fit)
                     playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 }
+
                 AspectRatioFrameLayout.RESIZE_MODE_FIT -> {
                     zoom?.setImageResource(R.drawable.ic_stretch)
                     playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                 }
+
                 AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT -> {}
                 AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH -> {}
             }
@@ -805,7 +829,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
                     if (playerConfiguration.isLive) {
-                        ///TODO:
                         playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -919,13 +942,45 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         })
     }
 
+    private fun getSingleTvChannel(index: Int) {
+        retrofitService?.getSingleTvChannel(
+            playerConfiguration.authorization,
+            playerConfiguration.channels[index].id,
+            playerConfiguration.ip,
+        )?.enqueue(object : Callback<TvChannelResponse> {
+            override fun onResponse(
+                call: Call<TvChannelResponse>, response: Response<TvChannelResponse>
+            ) {
+                val body = response.body()
+                if (body != null) {
+                    val map: HashMap<String, String> = hashMapOf()
+                    map["Auto"] = body.channelStreamAll
+                    playerConfiguration.resolutions = map
+
+                    url = body.channelStreamAll
+//                    title?.text = playerConfiguration.channels[index].name
+//                    title1?.text = playerConfiguration.channels[index].name
+                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+                    val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
+                    player?.setMediaSource(hlsMediaSource)
+                    player?.prepare()
+                    player?.playWhenReady
+                }
+            }
+
+            override fun onFailure(call: Call<TvChannelResponse>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         currentOrientation = newConfig.orientation
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             if (playerConfiguration.isLive) {
-                ///TODO:
                 playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
             title?.text = title1?.text
@@ -945,12 +1000,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
                 }
+
                 BottomSheet.SETTINGS -> {
                     backButtonSettingsBottomSheet?.visibility = View.VISIBLE
                 }
+
                 BottomSheet.TV_PROGRAMS -> {}
                 BottomSheet.QUALITY_OR_SPEED -> backButtonQualitySpeedBottomSheet?.visibility =
                     View.VISIBLE
+
+                BottomSheet.CHANNELS -> {}
                 BottomSheet.NONE -> {}
             }
         } else {
@@ -967,12 +1026,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.GONE
                 }
+
                 BottomSheet.SETTINGS -> {
                     backButtonSettingsBottomSheet?.visibility = View.GONE
                 }
+
                 BottomSheet.TV_PROGRAMS -> {}
                 BottomSheet.QUALITY_OR_SPEED -> backButtonSettingsBottomSheet?.visibility =
                     View.GONE
+
+                BottomSheet.CHANNELS -> {}
                 BottomSheet.NONE -> {}
             }
         }
@@ -1097,6 +1160,34 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         TabLayoutMediator(tabLayout!!, viewPager) { tab, position ->
             tab.text = playerConfiguration.seasons[position].title
         }.attach()
+        bottomSheetDialog.show()
+        bottomSheetDialog.setOnDismissListener {
+            currentBottomSheet = BottomSheet.NONE
+        }
+    }
+
+    private fun showChannelsBottomSheet() {
+        currentBottomSheet = BottomSheet.CHANNELS
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_channels)
+        val viewPager = bottomSheetDialog.findViewById<RecyclerView>(R.id.bottom_sheet_channels_rv)
+        viewPager?.adapter = ChannelsRvAdapter(
+            this,
+            playerConfiguration.channels,
+            object : ChannelsRvAdapter.OnClickListener {
+                @SuppressLint("SetTextI18n")
+                override fun onClick(index: Int) {
+                    if (index == channelIndex) {
+                        bottomSheetDialog.dismiss()
+                    } else {
+                        channelIndex = index
+                        getSingleTvChannel(index)
+                        bottomSheetDialog.dismiss()
+                    }
+                }
+            },
+        )
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE

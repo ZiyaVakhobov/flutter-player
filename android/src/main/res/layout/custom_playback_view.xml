@@ -62,7 +62,17 @@
                 android:layout_height="30dp"
                 android:mediaRouteTypes="user"
                 android:src="@drawable/ic_cast"
-                android:visibility="visible" />
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/tv_channels"
+                android:layout_width="50dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:padding="2dp"
+                android:src="@drawable/ic_cast"
+                tools:ignore="ContentDescription" />
 
 
             <ImageView
