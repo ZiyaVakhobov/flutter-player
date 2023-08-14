@@ -956,8 +956,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     playerConfiguration.resolutions = map
 
                     url = body.channelStreamAll
-//                    title?.text = playerConfiguration.channels[index].name
-//                    title1?.text = playerConfiguration.channels[index].name
+                    title?.text = playerConfiguration.channels[index].name
+                    title1?.text = playerConfiguration.channels[index].name
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
