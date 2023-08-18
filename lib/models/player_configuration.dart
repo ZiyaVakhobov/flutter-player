@@ -34,6 +34,8 @@ class PlayerConfiguration {
   String movieShareLink;
   bool fromCache;
   List<TvChannel> tvChannels;
+  String ip;
+  int selectChannelIndex;
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
@@ -66,6 +68,8 @@ class PlayerConfiguration {
     map['fromCache'] = fromCache;
     map['movieShareLink'] = movieShareLink;
     map['channels'] = tvChannels;
+    map['ip'] = ip;
+    map['selectChannelIndex'] = selectChannelIndex;
     return map;
   }
 
@@ -101,6 +105,8 @@ class PlayerConfiguration {
         'fromCache: $fromCache, '
         'movieShareLink: $movieShareLink, '
         'channels: $tvChannels, '
+        'ip: $ip'
+        'selectChannelIndex: $selectChannelIndex'
         '}';
   }
 
@@ -134,5 +140,7 @@ class PlayerConfiguration {
     required this.fromCache,
     required this.movieShareLink,
     required this.tvChannels,
+    required this.ip,
+    required this.selectChannelIndex,
   });
 }
