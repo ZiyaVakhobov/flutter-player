@@ -82,7 +82,7 @@ struct PlayerConfiguration{
         var channelsMap : [Dictionary<String, Any>]?
         programsInfoListMap = map["programsInfoList"] as! [Dictionary<String, Any>]
         seasonsMap = map["seasons"] as! [Dictionary<String, Any>]
-        channelsMap = map["channels"] as? [Dictionary<String, Any>]
+        channelsMap = map["channels"] as! [Dictionary<String, Any>]
         programsInfoListMap?.forEach({ data in
             let program = ProgramInfo.fromMap(map: data)
             programInfos.append(program)
@@ -124,7 +124,9 @@ struct PlayerConfiguration{
                                    baseUrl: map["baseUrl"] as! String,
                                    url: (map["initialResolution"] as! [String:String]).values.first ?? "",
                                    movieShareLink: map["movieShareLink"] as! String,
-                                   channels: channels, ip: map["ip"] as! String, selectChannelIndex: map["selectChannelIndex"] as! Int
+                                   channels: channels,
+                                   ip: map["ip"] as! String,
+                                   selectChannelIndex: map["selectChannelIndex"] as! Int,
                                    
         )
     }
