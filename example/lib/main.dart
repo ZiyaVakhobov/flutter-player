@@ -194,6 +194,8 @@ class _MainPageState extends State<MainPage> {
             autoText: 'Автонастройка',
             fromCache: true,
             tvChannels: [],
+            selectChannelIndex: 0,
+            ip: "",
           )) ??
           'nothing';
       if (kDebugMode) {
