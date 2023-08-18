@@ -126,7 +126,7 @@ struct PlayerConfiguration{
                                    movieShareLink: map["movieShareLink"] as! String,
                                    channels: channels,
                                    ip: map["ip"] as! String,
-                                   selectChannelIndex: map["selectChannelIndex"] as! Int,
+                                   selectChannelIndex: map["selectChannelIndex"] as! Int
                                    
         )
     }
