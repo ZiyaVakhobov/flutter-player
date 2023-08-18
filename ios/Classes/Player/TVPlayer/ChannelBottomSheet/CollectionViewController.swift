@@ -8,7 +8,7 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-protocol ChannelTappedDelegate{
+protocol ChannelTappedDelegate {
     func onChannelTapped(channelIndex : Int)
 }
 
@@ -21,7 +21,7 @@ class CollectionViewController: UIViewController {
     var channelsCount: Int?
     var delegate : ChannelTappedDelegate?
     
-    var channels = [Channels]()
+    var channels = [Channel]()
     
     let deviceIdiom = UIScreen.main.traitCollection.userInterfaceIdiom
     
@@ -48,37 +48,15 @@ class CollectionViewController: UIViewController {
         collectionView.reloadData()
         return collectionView
     }()
+    
     let menuView = UIView()
-    let menuHeight = UIDevice.current.userInterfaceIdiom == .pad ? 250 : UIScreen.main.bounds.height * 0.60
+    let menuHeight = 200.0
     var isPresenting = false
     
-    var backView: UIView =  {
+    var backView : UIView =  {
         let view = UIView()
-        view.backgroundColor = Colors.mainColor
+        view.backgroundColor = Colors.primary73
         return view
-    }()
-    
-    var mainTitle: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.boldSystemFont(ofSize: 17)
-        label.text = "Телеканалы"
-        label.textColor = .white
-        return label
-    }()
-    var headerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.clear
-        return view
-    }()
-    
-    lazy var cancelBtn: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "ic_exit",in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self),compatibleWith: nil), for: .normal)
-        button.imageView?.contentMode = .scaleAspectFill
-        button.tintColor = .white
-        button.addTarget(self, action: #selector(tap), for: .touchUpInside)
-        button.addTarget(self, action: #selector(tap), for: .touchUpInside)
-        return button
     }()
     
     lazy var backdropView: UIView = {
@@ -91,46 +69,19 @@ class CollectionViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         view.backgroundColor = .clear
+        backView.layer.cornerRadius = 16
         view.addSubview(collectionView)
-        
         view.addSubview(backdropView)
         view.addSubview(menuView)
         menuView.backgroundColor = Colors.backgroudColor
         menuView.addSubview(backView)
         backView.addSubview(collectionView)
-        backView.addSubview(headerView)
-        headerView.addSubview(mainTitle)
-        headerView.addSubview(cancelBtn)
         menuView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         backdropView.addGestureRecognizer(tapGesture)
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            mainTitle.snp.makeConstraints { make in
-                make.left.equalToSuperview().inset(50)
-                make.centerY.equalToSuperview()
-            }
-        } else {
-            mainTitle.snp.makeConstraints { make in
-                make.left.equalToSuperview().inset(10)
-                make.centerY.equalToSuperview()
-            }
-        }
-        
-        
-        cancelBtn.snp.makeConstraints { make in
-            make.right.equalToSuperview().offset(-16)
-            make.centerY.equalToSuperview()
-        }
-        
-        headerView.snp.makeConstraints { make in
-            make.width.equalTo(backView).inset(16)
-            make.centerX.equalTo(backView)
-            make.height.equalTo(56)
-            make.top.equalTo(backView)
-        }
+   
     }
     
     @objc func tap() {
@@ -146,7 +97,7 @@ class CollectionViewController: UIViewController {
         collectionView.snp.makeConstraints { make in
             make.left.right.equalTo(backView)
             make.bottom.equalTo(backView).offset(-30)
-            make.height.equalTo(backView).multipliedBy(0.6)
+            make.height.equalTo(backView).multipliedBy(0.8)
         }
         
         menuView.snp.makeConstraints { make in
@@ -170,7 +121,7 @@ class CollectionViewController: UIViewController {
                 make.left.right.equalTo(view.safeAreaLayoutGuide)
                 make.height.equalTo(collectionView.snp_height).multipliedBy(0.5)
             }
-        }else {
+        } else {
             collectionView.snp.makeConstraints { make in
                 make.left.right.equalTo(view.safeAreaLayoutGuide)
                 make.width.equalTo(collectionView.snp_width).multipliedBy(0.3)
@@ -182,39 +133,29 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return channels.count
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! channelCollectionCell
         cell.backgroundColor = Colors.channels
         cell.layer.cornerRadius = 8
         cell.model = channels[indexPath.row]
-        let time = channels[indexPath.row].remindedTime.floatValue
-        let timeFormat = Int(time).secondsToTime()
-        if (time == 0.0) {
-            cell.timeLbl.text = "\(timeFormat)"
-        }else {
-            cell.timeLbl.text = "-\(timeFormat)"
-        }
-        let url = URL(string: channels[indexPath.row].logoImage)
+        let url = URL(string: channels[indexPath.row].image ?? "")
+        let channelName = channels[indexPath.row].name
         cell.channelImage.sd_setImage(with: url, completed: nil)
-        cell.progressView.progress = stringToFloat(value: channels[indexPath.row].passedPercentage) / 100
+        cell.channelName.text = channelName
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         delegate?.onChannelTapped(channelIndex: indexPath.row)
         dismiss(animated: true, completion: nil)
     }
-    func stringToFloat(value : String) -> Float {
-        let numberFormatter = NumberFormatter()
-        let number = numberFormatter.number(from: value)
-        let numberFloatValue = number?.floatValue
-        return numberFloatValue ?? 0.0
-    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 343, height: 126)
+        return CGSize(width: 104, height: 130)
     }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        return UIEdgeInsets(top: 12, left: 16, bottom: 16, right: 16)
     }
 }
 

@@ -19,4 +19,5 @@ class Colors {
     static let seasonColor = UIColor(red: 46, green: 46, blue: 48)
     static let black = UIColor(red:0, green: 0, blue: 0)
     static let white = UIColor(red:1, green: 1, blue: 1)
+    static let primary73 = UIColor(red: 2/255, green: 12/255, blue: 36/255, alpha: 0.73)
 }

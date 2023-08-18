@@ -50,6 +50,66 @@ struct Networking {
         return result
     }
     
+    func getChannel(_ baseUrl: String, token: String, sessionId: String, parameters: [String: String]) -> Result<ChannelResponse, NetworkError> {
+        var components = URLComponents(string: baseUrl)!
+        components.queryItems = parameters.map { (key, value) in
+            URLQueryItem(name: key, value: value)
+        }
+        components.percentEncodedQuery = components.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        request.setValue(token, forHTTPHeaderField: "Authorization")
+        request.setValue(sessionId, forHTTPHeaderField: "SessionId")
+        
+        var result: Result<ChannelResponse, NetworkError>!
+        let semaphore = DispatchSemaphore(value: 0)
+        session.dataTask(with: request){data,_,__ in
+            guard let json = data else{
+                result = .failure(.NoDataAvailable)
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(ChannelResponse.self, from: Data(json))
+                print("response")
+                print(response)
+                result = .success(response)
+            }
+            catch{
+                result = .failure(.CanNotProcessData)
+            }
+            semaphore.signal()
+        }.resume()
+        _ = semaphore.wait(wallTimeout: .distantFuture)
+        return result
+    }
+    
+    func getStreamUrl(_ baseUrl: String) -> Result<String, NetworkError> {
+        var components = URLComponents(string: baseUrl)!
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        
+        var result: Result<String, NetworkError>!
+        let semaphore = DispatchSemaphore(value: 0)
+        session.dataTask(with: request){data,_,__ in
+            guard let json = data else{
+                result = .failure(.NoDataAvailable)
+                return
+            }
+            do {
+                let decoder = JSONDecoder()
+                let response = try decoder.decode(String.self, from: Data(json))
+                result = .success(response)
+            }
+            catch{
+                result = .failure(.CanNotProcessData)
+            }
+            semaphore.signal()
+        }.resume()
+        _ = semaphore.wait(wallTimeout: .distantFuture)
+        return result
+    }
+    
     func getPremierStream(_ baseUrl:String, token:String, sessionId:String) -> Result<PremierStreamResponse, NetworkError> {
         let url = URL(string: baseUrl)!
         var request = URLRequest(url: url)

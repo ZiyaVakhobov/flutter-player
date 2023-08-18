@@ -20,7 +20,7 @@ struct PlayerConfiguration{
     var seasons: [Season]
     var isLive: Bool
     var tvProgramsText: String
-    var programsInfoList: [ProgramsInfo]
+    var programsInfoList: [ProgramInfo]
     var showController: Bool
     var playVideoFromAsset: Bool
     var assetPath: String?
@@ -35,8 +35,11 @@ struct PlayerConfiguration{
     var autoText: String
     var baseUrl: String
     var movieShareLink: String
+    var channels: [Channel]
+    var ip: String
+    var selectChannelIndex: Int
     
-    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramsInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String) {
+    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String,channels: [Channel], ip : String, selectChannelIndex: Int) {
         self.initialResolution = initialResolution
         self.resolutions = resolutions
         self.qualityText = qualityText
@@ -65,22 +68,32 @@ struct PlayerConfiguration{
         self.baseUrl = baseUrl
         self.url = url
         self.movieShareLink = movieShareLink
+        self.channels = channels
+        self.ip = ip
+        self.selectChannelIndex = selectChannelIndex
     }
     
     static func fromMap(map : [String:Any])->PlayerConfiguration {
         var season : [Season] = []
-        var programInfos: [ProgramsInfo] = []
+        var channels : [Channel] = []
+        var programInfos: [ProgramInfo] = []
         var programsInfoListMap : [Dictionary<String, Any>]?
         var seasonsMap : [Dictionary<String, Any>]?
+        var channelsMap : [Dictionary<String, Any>]?
         programsInfoListMap = map["programsInfoList"] as! [Dictionary<String, Any>]
         seasonsMap = map["seasons"] as! [Dictionary<String, Any>]
+        channelsMap = map["channels"] as? [Dictionary<String, Any>]
         programsInfoListMap?.forEach({ data in
-            let program = ProgramsInfo.fromMap(map: data)
+            let program = ProgramInfo.fromMap(map: data)
             programInfos.append(program)
         })
         seasonsMap?.forEach({ data in
             let program = Season.fromMap(map: data)
             season.append(program)
+        })
+        channelsMap?.forEach({ data in
+            let program = Channel.fromMap(map: data)
+            channels.append(program)
         })
         
         return PlayerConfiguration(initialResolution: map["initialResolution"] as! [String:String],
@@ -110,7 +123,8 @@ struct PlayerConfiguration{
                                    autoText: map["autoText"] as! String,
                                    baseUrl: map["baseUrl"] as! String,
                                    url: (map["initialResolution"] as! [String:String]).values.first ?? "",
-                                   movieShareLink: map["movieShareLink"] as! String
+                                   movieShareLink: map["movieShareLink"] as! String,
+                                   channels: channels, ip: map["ip"] as! String, selectChannelIndex: map["selectChannelIndex"] as! Int
                                    
         )
     }
@@ -159,14 +173,14 @@ struct Movie{
     }
 }
 
-struct ProgramsInfo {
+struct ProgramInfo {
     var day: String
     var tvPrograms: [TvProgram]?
     init(day: String, tvPrograms: [TvProgram]? = nil) {
         self.day = day
         self.tvPrograms = tvPrograms
     }
-    static func fromMap(map : [String:Any])->ProgramsInfo{
+    static func fromMap(map : [String:Any])->ProgramInfo{
         var tv: [TvProgram] = []
         var tvPrograms: [Dictionary<String, Any>]?
         tvPrograms = map["tvPrograms"] as! [Dictionary<String, Any>]?
@@ -174,7 +188,7 @@ struct ProgramsInfo {
             let tvProgram = TvProgram.fromMap(map: data as! [String:String])
             tv.append(tvProgram)
         }
-        return ProgramsInfo(day: map["day"] as! String,tvPrograms: tv )
+        return ProgramInfo(day: map["day"] as! String,tvPrograms: tv )
     }
 }
 
@@ -188,5 +202,23 @@ struct TvProgram{
     
     static func fromMap(map : [String:String])->TvProgram{
         return TvProgram(scheduledTime: map["scheduledTime"]!, programTitle: map["programTitle"]!)
+    }
+}
+
+struct Channel{
+    var id: String?
+    var image: String?
+    var name: String?
+    var resolutions: [String:String]
+    
+    init(id: String? = nil, name: String? = nil, image: String? = nil, resolutions: [String : String]) {
+        self.id = id
+        self.name = name
+        self.image = image
+        self.resolutions = resolutions
+    }
+    
+    static func fromMap(map : [String:Any])-> Channel{
+        return Channel(id: (map["id"] as? String),name:(map["name"] as? String), image: (map["image"] as? String), resolutions: (map["resolutions"] as! [String:String]))
     }
 }
