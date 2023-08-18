@@ -50,6 +50,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var subtitleLabelText = "Субтитле"
     var selectedSeason: Int = 0
     var selectSesonNum: Int = 0
+    var selectChannelIndex: Int = 0
     var isRegular: Bool = false
     var resolutions: [String:String]?
     var sortedResolutions: [String] = []
@@ -420,6 +421,15 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         selectedSeason = index
     }
     
+    //MARK: - ****** Channels *******
+    func channelsButtonPressed(){
+        let episodeVC = CollectionViewController()
+        episodeVC.modalPresentationStyle = .custom
+        episodeVC.channels = self.playerConfiguration.channels
+        episodeVC.delegate = self
+        self.present(episodeVC, animated: true, completion: nil)
+    }
+    
     //MARK: - ****** SEASONS *******
     func episodesButtonPressed(){
         let episodeVC = EpisodeCollectionUI()
@@ -597,6 +607,31 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         return premierSteamResponse
     }
     
+    func getChannel(id : String) -> ChannelResponse? {
+        let _url : String = playerConfiguration.baseUrl+"tv/channel/\(id)"
+        var channelResponse: ChannelResponse?
+        let result = Networking.sharedInstance.getChannel(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId,parameters: ["client_ip" : playerConfiguration.ip])
+        switch result {
+        case .failure(let error):
+            print(error)
+        case .success(let success):
+            channelResponse = success
+        }
+        return channelResponse
+    }
+    
+    func getStreamUrl(url : String) -> String? {
+        var channelResponse: String?
+        let result = Networking.sharedInstance.getStreamUrl(url)
+        switch result {
+        case .failure(let error):
+            print(error)
+        case .success(let success):
+            channelResponse = success
+        }
+        return channelResponse
+    }
+    
     func playSeason(_resolutions : [String:String],startAt:Int64?,_episodeIndex:Int,_seasonIndex:Int ){
         self.selectedSeason = _seasonIndex
         self.selectSesonNum = _episodeIndex
@@ -699,7 +734,18 @@ extension VideoPlayerViewController: GCKSessionManagerListener {
     }
 }
 
-extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate , SubtitleDelegate {
+extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate , SubtitleDelegate,ChannelTappedDelegate {
+    func onChannelTapped(channelIndex: Int) {
+        if self.selectChannelIndex == channelIndex { return }
+        let channel : Channel = self.playerConfiguration.channels[channelIndex];
+        let success : ChannelResponse? = getChannel(id: channel.id ?? "")
+        if success != nil {
+            self.selectChannelIndex = channelIndex
+            self.url = success?.channelStreamIos ?? ""
+            self.resolutions = ["Auto": success?.channelStreamIos ?? ""]
+            self.playerView.changeUrl(url: self.url, title: channel.name ?? "")
+        }
+    }
     
     func onEpisodeCellTapped(seasonIndex: Int, episodeIndex: Int) {
         var resolutions: [String:String] = [:]

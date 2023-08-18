@@ -16,6 +16,7 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func close(duration: Double)
     func settingsPressed()
     func episodesButtonPressed()
+    func channelsButtonPressed()
     func showPressed()
     func changeOrientation()
     func togglePictureInPictureMode()
@@ -223,6 +224,17 @@ class PlayerView: UIView {
         return button
     }()
     
+    private var channelsButton: UIButton = {
+        let button = UIButton()
+        button.setImage(Svg.channels.uiImage, for: .normal)
+        button.setTitle("", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.setTitleColor(.white, for: .normal)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.addTarget(self, action: #selector(channelsButtonPressed(_:)), for: .touchUpInside)
+        return button
+    }()
+    
     private var showsBtn: UIButton = {
         let button = UIButton()
         button.setImage(Svg.programmes.uiImage, for: .normal)
@@ -315,6 +327,7 @@ class PlayerView: UIView {
             episodesButton.isHidden = true
         } else {
             showsBtn.isHidden = true
+            channelsButton.isHidden = true
         }
         if #available(iOS 13.0, *) {
             setSliderThumbTintColor(Colors.mainColor)
@@ -473,6 +486,10 @@ class PlayerView: UIView {
     @objc func episodesButtonPressed(_ sender: UIButton){
         delegate?.episodesButtonPressed()
     }
+    
+    @objc func channelsButtonPressed(_ sender: UIButton){
+       delegate?.channelsButtonPressed()
+   }
     
     @objc func showPressed(_ sender: UIButton){
         delegate?.showPressed()
@@ -675,6 +692,7 @@ class PlayerView: UIView {
         bottomView.addSubview(seperatorLabel)
         bottomView.addSubview(timeSlider)
         bottomView.addSubview(episodesButton)
+        bottomView.addSubview(channelsButton)
         bottomView.addSubview(showsBtn)
         bottomView.addSubview(landscapeButton)
         bottomView.addSubview(liveStackView)
@@ -690,7 +708,6 @@ class PlayerView: UIView {
     }
     
     func addConstraints(area:UILayoutGuide) {
-        addVideoPortaitConstraints()
         addBottomViewConstraints(area: area)
         addTopViewConstraints(area: area)
         addControlButtonConstraints()
@@ -760,6 +777,8 @@ class PlayerView: UIView {
         
         seperatorLabel.leftToRight(of: currentTimeLabel)
         seperatorLabel.centerY(to: currentTimeLabel)
+        channelsButton.leftToRight(of: liveStackView, offset: 20)
+        channelsButton.centerY(to: landscapeButton)
         
         durationTimeLabel.leftToRight(of: seperatorLabel)
         durationTimeLabel.centerY(to: seperatorLabel)
