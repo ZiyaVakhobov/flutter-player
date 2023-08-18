@@ -89,7 +89,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private lateinit var playerConfiguration: PlayerConfiguration
     private var close: ImageView? = null
     private var pip: ImageView? = null
-    private var cast: ImageView? = null
+    private var cast: MediaRouteButton? = null
     private var shareMovieLinkIv: ImageView? = null
     private var more: ImageView? = null
     private var title: TextView? = null
@@ -108,6 +108,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var nextText: TextView? = null
     private var tvProgramsButton: LinearLayout? = null
     private var tvProgramsText: TextView? = null
+    private var tvChannels: ImageView? = null
     private var tvChannelsButton: LinearLayout? = null
     private var tvChannelsText: TextView? = null
     private var zoom: ImageView? = null
@@ -573,11 +574,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         volumeSeekBar?.isEnabled = false
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
-        cast = findViewById(R.id.tv_channels)
+        cast = findViewById(R.id.video_cast)
+        tvChannels = findViewById(R.id.tv_channels)
         if (playerConfiguration.isLive) {
             tvChannelsButton?.visibility = View.VISIBLE
         }
-//        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
+        CastButtonFactory.setUpMediaRouteButton(applicationContext, cast!!)
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title1 = findViewById(R.id.video_title1)
@@ -750,7 +752,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         }
         ///TODO:
-        cast?.setOnClickListener {
+        tvChannels?.setOnClickListener {
             showChannelsBottomSheet()
         }
         episodesButton?.setOnClickListener {
