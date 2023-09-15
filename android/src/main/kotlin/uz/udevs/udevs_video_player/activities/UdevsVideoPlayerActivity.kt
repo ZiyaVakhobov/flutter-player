@@ -106,11 +106,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var episodesText: TextView? = null
     private var nextButton: LinearLayout? = null
     private var nextText: TextView? = null
-    private var tvProgramsButton: LinearLayout? = null
-    private var tvProgramsText: TextView? = null
+    private var tvProgramsButton: ImageView? = null
     private var tvChannels: ImageView? = null
     private var tvChannelsButton: LinearLayout? = null
-    private var tvChannelsText: TextView? = null
     private var zoom: ImageView? = null
     private var orientation: ImageView? = null
     private var exoProgress: DefaultTimeBar? = null
@@ -174,8 +172,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 if (isNetworkAvailable(context!!)) {
                     Log.d(tag, "Reconnect player: Internet bor")
                     rePlayVideo()
-                } else {
-//                    Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -625,11 +621,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 nextText?.text = playerConfiguration.nextButtonText
             }
         tvProgramsButton = findViewById(R.id.button_tv_programs)
-        tvProgramsText = findViewById(R.id.text_tv_programs)
         if (playerConfiguration.isLive) {
             tvProgramsButton?.visibility = View.VISIBLE
-            tvProgramsText?.text = playerConfiguration.tvProgramsText
-
+            tvChannels?.visibility = View.VISIBLE
         }
         zoom = findViewById(R.id.zoom)
         orientation = findViewById(R.id.orientation)
@@ -1216,7 +1210,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 // Handle tab selection here
                 val selectedCategory = tab?.text.toString()
                 // Filter and update your RecyclerView based on the selected category
-                filterAndUpdateRecyclerView(selectedCategory)
+//                filterAndUpdateRecyclerView(selectedCategory)
 //                tab?.customView?.background = ContextCompat.getDrawable(this@UdevsVideoPlayerActivity, R.drawable.custom_tab_background)
             }
 
