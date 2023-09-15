@@ -65,17 +65,6 @@
                 android:visibility="gone" />
 
             <ImageView
-                android:id="@+id/video_cast"
-                android:layout_width="50dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="10dp"
-                android:padding="2dp"
-                android:src="@drawable/ic_cast"
-                tools:ignore="ContentDescription" />
-
-
-            <ImageView
                 android:id="@+id/iv_share_movie"
                 android:layout_width="50dp"
                 android:layout_height="25dp"
@@ -263,24 +252,6 @@
                     tools:ignore="HardcodedText"
                     tools:targetApi="p" />
 
-                <androidx.mediarouter.app.MediaRouteButton
-                    android:id="@+id/video_cast"
-                    android:layout_width="50dp"
-                    android:layout_height="30dp"
-                    android:mediaRouteTypes="user"
-                    android:src="@drawable/ic_cast"
-                    android:visibility="gone" />
-
-                <ImageView
-                    android:id="@+id/tv_channels"
-                    android:layout_width="50dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="10dp"
-                    android:padding="2dp"
-                    android:src="@drawable/ic_channels"
-                    tools:ignore="ContentDescription" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -342,51 +313,43 @@
                         tools:ignore="HardcodedText" />
                 </LinearLayout>
 
-                <LinearLayout
+                <ImageView
                     android:id="@+id/button_tv_programs"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:gravity="center_vertical"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="6dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_tv_programs"
                     android:visibility="gone"
-                    tools:ignore="UseCompoundDrawables">
+                    tools:ignore="ContentDescription" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="7dp"
-                        android:src="@drawable/ic_tv_programs"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/text_tv_programs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/semibold"
-                        android:text="TV programmes"
-                        android:textColor="@color/white"
-                        android:textSize="15sp"
-                        tools:ignore="HardcodedText" />
-                </LinearLayout>
+                <ImageView
+                    android:id="@+id/tv_channels"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="6dp"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_channels"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/zoom"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginEnd="5dp"
-                    android:padding="5dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="6dp"
+                    android:padding="4dp"
                     android:src="@drawable/ic_fit"
                     android:visibility="gone"
                     tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/orientation"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:padding="5dp"
                     android:src="@drawable/ic_landscape"
                     tools:ignore="ContentDescription" />
-
             </LinearLayout>
         </LinearLayout>
 
