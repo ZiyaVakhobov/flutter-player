@@ -26,13 +26,13 @@ import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
@@ -77,9 +77,8 @@ import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
 import uz.udevs.udevs_video_player.adapters.*
 import uz.udevs.udevs_video_player.models.*
-import kotlin.math.log
 
-
+@UnstableApi
 class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
 
@@ -135,7 +134,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var seasonIndex: Int = 0
     private var episodeIndex: Int = 0
     private var retrofitService: RetrofitService? = null
-    private val TAG = "TAG1"
+    private val tag = "TAG1"
     private var currentOrientation: Int = Configuration.ORIENTATION_PORTRAIT
     private var titleText = ""
     private var url: String? = null
@@ -173,7 +172,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             override fun onReceive(context: Context?, intent: Intent?) {
                 super.onReceive(context, intent)
                 if (isNetworkAvailable(context!!)) {
-                    Log.d(TAG, "Reconnect player: Internet bor")
+                    Log.d(tag, "Reconnect player: Internet bor")
                     rePlayVideo()
                 } else {
 //                    Toast.makeText(context, "Internet yo'q", Toast.LENGTH_SHORT).show()
@@ -205,10 +204,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             } else {
                 PlaybackLocation.LOCAL
             }
-        Log.d(TAG, "onCreate: ${remoteMediaClient?.mediaInfo?.contentUrl}")
+        Log.d(tag, "onCreate: ${remoteMediaClient?.mediaInfo?.contentUrl}")
         if (mLocation == PlaybackLocation.REMOTE) {
             playerConfiguration.resolutions.values.forEach {
-                Log.d(TAG, "onCreate: $it")
+                Log.d(tag, "onCreate: $it")
                 if (it == remoteMediaClient?.mediaInfo?.contentUrl) {
                     url = it
                     sameWithStreamingContent = true
@@ -293,7 +292,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             override fun onSessionResuming(session: CastSession, sessionId: String) {}
             override fun onSessionSuspended(session: CastSession, reason: Int) {}
             private fun onApplicationConnected(castSession: CastSession) {
-                Log.d(TAG, "onApplicationConnected: $mPlaybackState")
+                Log.d(tag, "onApplicationConnected: $mPlaybackState")
                 mCastSession = castSession
                 mLocation = PlaybackLocation.REMOTE
                 player?.pause()
@@ -304,7 +303,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
 
             private fun onApplicationDisconnected() {
-                Log.d(TAG, "onApplicationDisconnected: $mPlaybackState")
+                Log.d(tag, "onApplicationDisconnected: $mPlaybackState")
                 mPlaybackState = PlaybackState.IDLE
                 mLocation = PlaybackLocation.LOCAL
                 performViewsOnDisconnect()
@@ -321,7 +320,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         exoProgress?.visibility = View.GONE
         customSeekBar?.visibility = View.VISIBLE
         customSeekBar?.isEnabled = true
-        Log.d(TAG, "performViewsOnConnect: ${(player!!.duration / 1000).toInt()}")
+        Log.d(tag, "performViewsOnConnect: ${(player!!.duration / 1000).toInt()}")
         customSeekBar?.max =
             if (player?.duration != null) (player!!.duration / 1000).toInt() else 0
         customSeekBar?.progress =
@@ -395,7 +394,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val remoteMediaClient = mCastSession!!.remoteMediaClient ?: return
         remoteMediaClient.addProgressListener(object : RemoteMediaClient.ProgressListener {
             override fun onProgressUpdated(current: Long, max: Long) {
-                Log.d(TAG, "loadRemoteMedia: $max -> $current")
+                Log.d(tag, "loadRemoteMedia: $max -> $current")
                 customSeekBar?.progress = (current / 1000).toInt()
                 videoPosition?.text = MyHelper().formatDuration(current / 1000)
                 listener = this
@@ -440,7 +439,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onPause() {
         super.onPause()
         player?.playWhenReady = false
-        if (isInPictureInPictureMode) {
+        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                isInPictureInPictureMode
+            } else {
+                false
+            }
+        ) {
             player?.playWhenReady = true
             dismissAllBottomSheets()
         }
@@ -473,7 +477,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onStop() {
         super.onStop()
-        if (isInPictureInPictureMode) {
+        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                isInPictureInPictureMode
+            } else {
+                false
+            }
+        ) {
             removeProgressListener()
             unregisterCallBack()
             player?.release()
@@ -496,7 +505,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         player?.prepare()
         player?.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
-                Log.d(TAG, "onPlayerError: ${error.errorCode}")
+                Log.d(tag, "onPlayerError: ${error.errorCode}")
                 player?.pause()
             }
 
@@ -1169,14 +1178,17 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     private fun getCategories(): List<String> {
         // Implement this function to return a list of categories
-        return listOf("Category1", "Category2", "Category3", "Category4", "Category5", "Category6", "Category10") // Example categories
+        return listOf(
+            "Category1",
+            "Category2",
+            "Category3",
+            "Category4",
+            "Category5",
+            "Category6",
+            "Category10"
+        ) // Example categories
     }
 
-//    private fun getChannelsForCategory(category: String): List<TvChannel> {
-//        // Implement this function to return channels filtered by the selected category
-//        // You can use the 'category' parameter to filter your channel list
-////        return playerConfiguration.channels.filter { it.category == category }
-//    }
 
     private fun showChannelsBottomSheet() {
         currentBottomSheet = BottomSheet.CHANNELS
@@ -1187,7 +1199,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val viewPager = bottomSheetDialog.findViewById<RecyclerView>(R.id.bottom_sheet_channels_rv)
         val categoryList = getCategories()
         for (category in categoryList) {
-//            tabLayout?.addTab(tabLayout.newTab().setText(category))
             val tab = tabLayout?.newTab()
             val customView = LayoutInflater.from(this).inflate(R.layout.custom_tab_item, null)
             val tabText = customView.findViewById<TextView>(R.id.tab_text)
@@ -1246,9 +1257,6 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         TODO("Not yet implemented")
     }
 
-//    private fun ChannelsRvAdapter(context: UdevsVideoPlayerActivity, list: List<TvChannel>): RecyclerView.Adapter<*>? {
-//
-//    }
 
     private fun dismissAllBottomSheets() {
         for (bottomSheet in listOfAllOpenedBottomSheets) {
