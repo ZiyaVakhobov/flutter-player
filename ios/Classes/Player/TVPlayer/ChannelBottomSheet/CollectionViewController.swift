@@ -50,12 +50,12 @@ class CollectionViewController: UIViewController {
     }()
     
     let menuView = UIView()
-    let menuHeight = 200.0
+    let menuHeight = 160.0
     var isPresenting = false
     
-    var backView : UIView =  {
+    lazy var backView : UIView =  {
         let view = UIView()
-        view.backgroundColor = Colors.primary73
+        view.backgroundColor = Colors.channelsBackground
         return view
     }()
     
@@ -96,8 +96,8 @@ class CollectionViewController: UIViewController {
         super.viewDidLayoutSubviews()
         collectionView.snp.makeConstraints { make in
             make.left.right.equalTo(backView)
-            make.bottom.equalTo(backView).offset(-30)
-            make.height.equalTo(backView).multipliedBy(0.8)
+            make.bottom.equalTo(backView)
+            make.height.equalTo(backView)
         }
         
         menuView.snp.makeConstraints { make in
@@ -105,11 +105,13 @@ class CollectionViewController: UIViewController {
             make.bottom.equalToSuperview().inset(0)
             make.right.left.equalToSuperview()
         }
+        
         backView.snp.makeConstraints { make in
             make.left.right.equalTo(menuView)
             make.bottom.top.equalTo(menuView)
         }
     }
+    
     func setupUI() {
         view.addSubview(collectionView)
         collectionView.backgroundColor = .clear
@@ -129,6 +131,7 @@ class CollectionViewController: UIViewController {
         }
     }
 }
+
 extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return channels.count
@@ -136,13 +139,11 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! channelCollectionCell
-        cell.backgroundColor = Colors.channels
+        cell.backgroundColor = .clear
         cell.layer.cornerRadius = 8
         cell.model = channels[indexPath.row]
         let url = URL(string: channels[indexPath.row].image ?? "")
-        let channelName = channels[indexPath.row].name
         cell.channelImage.sd_setImage(with: url, completed: nil)
-        cell.channelName.text = channelName
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

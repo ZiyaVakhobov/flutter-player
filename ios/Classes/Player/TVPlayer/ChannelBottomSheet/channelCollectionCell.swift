@@ -26,21 +26,9 @@ class channelCollectionCell: UICollectionViewCell {
         return image
     }()
     
-    lazy var channelName: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-   
-    
     override init(frame: CGRect) {
         super.init(frame: .zero)
-        
         contentView.addSubview(channelImage)
-        contentView.addSubview(channelName)
         contentView.backgroundColor = .clear
         setupUI()
     }
@@ -50,13 +38,6 @@ class channelCollectionCell: UICollectionViewCell {
             make.height.equalTo(104)
             make.width.equalTo(104)
         }
-
-        channelName.snp.makeConstraints { make in
-                make.top.equalTo(channelImage.snp.bottom).offset(8)
-                make.centerX.equalToSuperview()
-                make.leading.trailing.equalToSuperview().inset(8)
-                make.bottom.equalToSuperview().inset(8)
-            }
     }
     
     required init?(coder: NSCoder) {

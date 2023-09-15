@@ -322,7 +322,7 @@ class PlayerView: UIView {
     private func uiSetup(){
         configureVolume()
         episodesButton.setTitle(" "+playerConfiguration.episodeButtonText, for: .normal)
-        showsBtn.setTitle(" "+playerConfiguration.tvProgramsText, for: .normal)
+        showsBtn.setTitle("", for: .normal)
         if playerConfiguration.isLive {
             episodesButton.isHidden = true
         } else {
@@ -777,7 +777,7 @@ class PlayerView: UIView {
         
         seperatorLabel.leftToRight(of: currentTimeLabel)
         seperatorLabel.centerY(to: currentTimeLabel)
-        channelsButton.leftToRight(of: liveStackView, offset: 20)
+        channelsButton.rightToLeft(of: landscapeButton, offset: -8)
         channelsButton.centerY(to: landscapeButton)
         
         durationTimeLabel.leftToRight(of: seperatorLabel)
@@ -787,8 +787,8 @@ class PlayerView: UIView {
         episodesButton.rightToLeft(of: landscapeButton, offset: -8)
         episodesButton.centerY(to: landscapeButton)
         
-        showsBtn.rightToLeft(of: landscapeButton, offset: -8)
-        showsBtn.centerY(to: landscapeButton)
+        showsBtn.rightToLeft(of: channelsButton, offset: -16)
+        showsBtn.centerY(to: channelsButton)
         
         liveStackView.bottomToTop(of: timeSlider)
         liveStackView.spacing = 24
