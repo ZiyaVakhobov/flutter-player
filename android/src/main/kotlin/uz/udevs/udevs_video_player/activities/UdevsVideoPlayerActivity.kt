@@ -26,6 +26,7 @@ import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -1166,12 +1167,59 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
     }
 
+    private fun getCategories(): List<String> {
+        // Implement this function to return a list of categories
+        return listOf("Category1", "Category2", "Category3", "Category4", "Category5", "Category6", "Category10") // Example categories
+    }
+
+//    private fun getChannelsForCategory(category: String): List<TvChannel> {
+//        // Implement this function to return channels filtered by the selected category
+//        // You can use the 'category' parameter to filter your channel list
+////        return playerConfiguration.channels.filter { it.category == category }
+//    }
+
     private fun showChannelsBottomSheet() {
         currentBottomSheet = BottomSheet.CHANNELS
         val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_channels)
+        val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_category_tabs)
         val viewPager = bottomSheetDialog.findViewById<RecyclerView>(R.id.bottom_sheet_channels_rv)
+        val categoryList = getCategories()
+        for (category in categoryList) {
+//            tabLayout?.addTab(tabLayout.newTab().setText(category))
+            val tab = tabLayout?.newTab()
+            val customView = LayoutInflater.from(this).inflate(R.layout.custom_tab_item, null)
+            val tabText = customView.findViewById<TextView>(R.id.tab_text)
+            tabText.text = category // Set the tab text
+            tab?.customView = customView // Set the custom view
+
+            if (tab != null) {
+                tabLayout.addTab(tab)
+            }
+        }
+        tabLayout?.getTabAt(0)?.select()
+
+        tabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                // Handle tab selection here
+                val selectedCategory = tab?.text.toString()
+                // Filter and update your RecyclerView based on the selected category
+                filterAndUpdateRecyclerView(selectedCategory)
+//                tab?.customView?.background = ContextCompat.getDrawable(this@UdevsVideoPlayerActivity, R.drawable.custom_tab_background)
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+//                tab?.customView?.background = ContextCompat.getDrawable(this@UdevsVideoPlayerActivity, R.drawable.default_tab_background)
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                // Handle tab reselection here
+            }
+        })
+        val initialCategory = categoryList[0] // Choose the initial category
+
+//        viewPager?.adapter = ChannelsRvAdapter(this, getChannelsForCategory(initialCategory))
         viewPager?.adapter = ChannelsRvAdapter(
             this,
             playerConfiguration.channels,
@@ -1193,6 +1241,14 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             currentBottomSheet = BottomSheet.NONE
         }
     }
+
+    private fun filterAndUpdateRecyclerView(selectedCategory: String) {
+        TODO("Not yet implemented")
+    }
+
+//    private fun ChannelsRvAdapter(context: UdevsVideoPlayerActivity, list: List<TvChannel>): RecyclerView.Adapter<*>? {
+//
+//    }
 
     private fun dismissAllBottomSheets() {
         for (bottomSheet in listOfAllOpenedBottomSheets) {

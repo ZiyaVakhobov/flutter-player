@@ -18,6 +18,17 @@
         app:cardBackgroundColor="@color/second_black"
         app:cardCornerRadius="100dp" />
 
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tv_category_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabGravity="start"
+        app:tabIndicatorColor="@color/blue"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="@color/blue"
+        app:tabTextAppearance="@style/TvProgramTabText"
+        app:tabTextColor="@color/white" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bottom_sheet_channels_rv"
         android:layout_width="match_parent"
