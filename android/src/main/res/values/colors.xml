@@ -11,7 +11,7 @@
     <color name="hint">#ADFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="second_black">#111B33</color>
-    <color name="channels_background">#100E19</color>
+    <color name="channels_background">#66100E19</color>
 
     <color name="main">#1c192c</color>
     <color name="main_dark">#100E19</color>
