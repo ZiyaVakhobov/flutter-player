@@ -38,8 +38,9 @@ struct PlayerConfiguration{
     var channels: [Channel]
     var ip: String
     var selectChannelIndex: Int
+    var tvCategories: [TvCategories]
     
-    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String,channels: [Channel], ip : String, selectChannelIndex: Int) {
+    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String,channels: [Channel], ip : String, selectChannelIndex: Int, tvCategories: [TvCategories]) {
         self.initialResolution = initialResolution
         self.resolutions = resolutions
         self.qualityText = qualityText
@@ -71,18 +72,22 @@ struct PlayerConfiguration{
         self.channels = channels
         self.ip = ip
         self.selectChannelIndex = selectChannelIndex
+        self.tvCategories = tvCategories
     }
     
     static func fromMap(map : [String:Any])->PlayerConfiguration {
         var season : [Season] = []
         var channels : [Channel] = []
         var programInfos: [ProgramInfo] = []
+        var tvCategories: [TvCategories] = []
         var programsInfoListMap : [Dictionary<String, Any>]?
+        var tvCategoriesMap : [Dictionary<String, Any>]?
         var seasonsMap : [Dictionary<String, Any>]?
         var channelsMap : [Dictionary<String, Any>]?
         programsInfoListMap = map["programsInfoList"] as! [Dictionary<String, Any>]
         seasonsMap = map["seasons"] as! [Dictionary<String, Any>]
         channelsMap = map["channels"] as! [Dictionary<String, Any>]
+        tvCategoriesMap = map["tvCategories"] as! [Dictionary<String, Any>]
         programsInfoListMap?.forEach({ data in
             let program = ProgramInfo.fromMap(map: data)
             programInfos.append(program)
@@ -94,6 +99,10 @@ struct PlayerConfiguration{
         channelsMap?.forEach({ data in
             let program = Channel.fromMap(map: data)
             channels.append(program)
+        })
+        tvCategoriesMap?.forEach({ data in
+            let program = TvCategories.fromMap(map: data)
+            tvCategories.append(program)
         })
         
         return PlayerConfiguration(initialResolution: map["initialResolution"] as! [String:String],
@@ -126,7 +135,8 @@ struct PlayerConfiguration{
                                    movieShareLink: map["movieShareLink"] as! String,
                                    channels: channels,
                                    ip: map["ip"] as! String,
-                                   selectChannelIndex: map["selectChannelIndex"] as! Int
+                                   selectChannelIndex: map["selectChannelIndex"] as! Int,
+                                   tvCategories: tvCategories
                                    
         )
     }
@@ -153,7 +163,7 @@ struct Season {
     }
 }
 
-struct Movie{
+struct Movie {
     var id: String?
     var title: String?
     var description: String?
@@ -222,5 +232,18 @@ struct Channel{
     
     static func fromMap(map : [String:Any])-> Channel{
         return Channel(id: (map["id"] as? String),name:(map["name"] as? String), image: (map["image"] as? String), resolutions: (map["resolutions"] as! [String:String]))
+    }
+}
+struct TvCategories{
+    var id: String?
+    var title: String?
+    
+    init(id: String? = nil, title: String? = nil) {
+        self.id = id
+        self.title = title
+    }
+    
+    static func fromMap(map : [String:Any])-> TvCategories{
+        return TvCategories(id: (map["id"] as? String),title: map["title"] as? String)
     }
 }

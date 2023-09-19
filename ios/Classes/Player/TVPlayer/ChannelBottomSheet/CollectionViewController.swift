@@ -22,7 +22,7 @@ class CollectionViewController: UIViewController {
     var delegate : ChannelTappedDelegate?
     
     var channels = [Channel]()
-    var tv = [String]()
+    var tv = [TvCategories]()
     
     let deviceIdiom = UIScreen.main.traitCollection.userInterfaceIdiom
     
@@ -111,12 +111,12 @@ class CollectionViewController: UIViewController {
         super.viewDidLayoutSubviews()
         tvView.snp.makeConstraints { make in
             make.left.right.top.equalTo(backView)
-            make.height.equalTo(32)
+            make.height.equalTo(36)
         }
         
         channelView.snp.makeConstraints { make in
             make.left.right.bottom.equalTo(backView)
-            make.top.equalTo(backView).offset(36)
+            make.top.equalTo(backView).offset(40)
             make.height.equalTo(120)
         }
         
@@ -140,12 +140,12 @@ class CollectionViewController: UIViewController {
         if UIDevice.current.userInterfaceIdiom == .phone {
             tvView.snp.makeConstraints { make in
                 make.left.right.equalTo(0)
-                make.height.equalTo(32)
+                make.height.equalTo(36)
             }
         } else {
             tvView.snp.makeConstraints { make in
                 make.left.right.equalTo(view.safeAreaLayoutGuide)
-                make.height.equalTo(32)
+                make.height.equalTo(36)
             }
         }
         
@@ -156,7 +156,6 @@ class CollectionViewController: UIViewController {
         
         if UIDevice.current.userInterfaceIdiom == .phone {
             channelView.snp.makeConstraints { make in
-//                make.top.equalTo(backView).offset(48)
                 make.left.right.equalTo(view.safeAreaLayoutGuide)
                 make.height.equalTo(channelView.snp_height).multipliedBy(0.5)
             }
@@ -188,9 +187,9 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if (collectionView == self.tvView){
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "tvView", for: indexPath) as! tvCollectionCell
-            cell.backgroundColor = .blue
+            cell.backgroundColor = .clear
             cell.model = tv[indexPath.row]
-            cell.label.text = tv[indexPath.row]
+            cell.label.text = tv[indexPath.row].title ?? ""
             return cell
         } else if collectionView == self.channelView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionView", for: indexPath) as! channelCollectionCell
@@ -205,13 +204,25 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        delegate?.onChannelTapped(channelIndex: indexPath.row)
-        dismiss(animated: true, completion: nil)
+        if collectionView == self.tvView {
+            print(tv[indexPath.row].id)
+            print(tv[indexPath.row].title) 
+        
+        } else {
+            delegate?.onChannelTapped(channelIndex: indexPath.row)
+            dismiss(animated: true, completion: nil)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if(collectionView == self.tvView){
-           return CGSize(width: 132, height: 32)
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "tvView", for: indexPath) as! tvCollectionCell
+            cell.backgroundColor = .clear
+            cell.model = tv[indexPath.row]
+            cell.label.text = tv[indexPath.row].title ?? ""
+            cell.label.sizeToFit()
+            let cellWidth = cell.label.frame.width + 32
+            return CGSize(width: cellWidth, height: 32)
         } else if (collectionView == self.channelView){
            return CGSize(width: 104, height: 130)
         }

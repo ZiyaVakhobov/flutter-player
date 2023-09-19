@@ -2,9 +2,13 @@ import 'dart:core';
 
 import 'package:udevs_video_player/models/programs_info.dart';
 import 'package:udevs_video_player/models/season.dart';
-import 'package:udevs_video_player/models/tv_channel.dart';
 
 import 'tv_categories.dart';
+
+export 'programs_info.dart';
+export 'season.dart';
+export 'tv_categories.dart';
+export 'tv_channel.dart';
 
 class PlayerConfiguration {
   const PlayerConfiguration({
@@ -36,7 +40,6 @@ class PlayerConfiguration {
     required this.baseUrl,
     required this.fromCache,
     required this.movieShareLink,
-    required this.tvChannels,
     required this.ip,
     required this.selectChannelIndex,
     required this.tvCategories,
@@ -70,7 +73,6 @@ class PlayerConfiguration {
   final String baseUrl;
   final String movieShareLink;
   final bool fromCache;
-  final List<TvChannel> tvChannels;
   final List<TvCategories> tvCategories;
   final String ip;
   final int selectChannelIndex;
@@ -105,7 +107,6 @@ class PlayerConfiguration {
     map['baseUrl'] = baseUrl;
     map['fromCache'] = fromCache;
     map['movieShareLink'] = movieShareLink;
-    map['channels'] = tvChannels;
     map['ip'] = ip;
     map['selectChannelIndex'] = selectChannelIndex;
     map['tvCategories'] = tvCategories.map((v) => v.toJson()).toList();
@@ -142,7 +143,7 @@ class PlayerConfiguration {
       'baseUrl: $baseUrl, '
       'fromCache: $fromCache, '
       'movieShareLink: $movieShareLink, '
-      'channels: $tvChannels, '
+      'channels: $tvCategories, '
       'ip: $ip'
       'selectChannelIndex: $selectChannelIndex'
       '}';

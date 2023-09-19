@@ -8,18 +8,17 @@ import UIKit
 
 class tvCollectionCell: UICollectionViewCell {
     
-    var model : String? {
+    var model : TvCategories? {
         didSet{
         }
     }
     
     lazy var label: UILabel = {
         let label = UILabel()
-        label.textColor = .red
         label.textColor = .white
         label.textAlignment = .center
-        label.numberOfLines = 2
-        label.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        label.numberOfLines = 1
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         return label
     }()
     
@@ -32,8 +31,8 @@ class tvCollectionCell: UICollectionViewCell {
     
     func setupUI(){
         label.snp.makeConstraints { make in
-            make.height.equalTo(36)
-            make.width.equalTo(104)
+            make.height.equalTo(32)
+//            make.width.equalTo(104)
         }
     }
     
