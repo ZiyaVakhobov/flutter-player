@@ -426,7 +426,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         let episodeVC = CollectionViewController()
         episodeVC.modalPresentationStyle = .custom
         episodeVC.channels = self.playerConfiguration.channels
-        episodeVC.tv = ["Все каналы", "Кино и сериалы","Познавательные", "Новостные", "Музыкальные","Федеральные" ]
+        episodeVC.tv = self.playerConfiguration.tvCategories
         episodeVC.delegate = self
         self.present(episodeVC, animated: true, completion: nil)
     }
