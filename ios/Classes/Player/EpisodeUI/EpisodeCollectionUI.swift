@@ -12,7 +12,7 @@ protocol EpisodeDelegate{
     func onEpisodeCellTapped(seasonIndex : Int, episodeIndex : Int)
 }
 
-class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason{
+class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICollectionViewDelegate{
     
     var seasons = [Season]()
     var closeText : String = ""

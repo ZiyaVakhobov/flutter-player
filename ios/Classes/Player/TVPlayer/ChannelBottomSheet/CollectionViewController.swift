@@ -22,6 +22,7 @@ class CollectionViewController: UIViewController {
     var delegate : ChannelTappedDelegate?
     
     var channels = [Channel]()
+    var tv = [String]()
     
     let deviceIdiom = UIScreen.main.traitCollection.userInterfaceIdiom
     
@@ -37,25 +38,39 @@ class CollectionViewController: UIViewController {
         case carPlay // CarPlay style UI
     }
     
-    lazy var collectionView: UICollectionView = {
+    lazy var channelView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero,collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.register(channelCollectionCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.register(channelCollectionCell.self, forCellWithReuseIdentifier: "collectionView")
+        collectionView.backgroundColor = .clear
+        collectionView.reloadData()
+        return collectionView
+    }()
+    
+    lazy var tvView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        let collectionView = UICollectionView(frame: .zero,collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.register(tvCollectionCell.self, forCellWithReuseIdentifier: "tvView")
+        collectionView.backgroundColor = .clear
         collectionView.reloadData()
         return collectionView
     }()
     
     let menuView = UIView()
-    let menuHeight = 160.0
+    let menuHeight = 200.0
     var isPresenting = false
     
     lazy var backView : UIView =  {
         let view = UIView()
-        view.backgroundColor = Colors.channelsBackground
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -70,13 +85,13 @@ class CollectionViewController: UIViewController {
         setupUI()
         view.backgroundColor = .clear
         backView.layer.cornerRadius = 16
-        view.addSubview(collectionView)
         view.addSubview(backdropView)
         view.addSubview(menuView)
-        menuView.backgroundColor = Colors.backgroudColor
+        menuView.backgroundColor = Colors.white
         menuView.addSubview(backView)
-        backView.addSubview(collectionView)
-        menuView.backgroundColor = .clear
+        backView.addSubview(tvView)
+        backView.addSubview(channelView)
+//        menuView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -94,10 +109,15 @@ class CollectionViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        collectionView.snp.makeConstraints { make in
-            make.left.right.equalTo(backView)
-            make.bottom.equalTo(backView)
-            make.height.equalTo(backView)
+        tvView.snp.makeConstraints { make in
+            make.left.right.top.equalTo(backView)
+            make.height.equalTo(32)
+        }
+        
+        channelView.snp.makeConstraints { make in
+            make.left.right.bottom.equalTo(backView)
+            make.top.equalTo(backView).offset(36)
+            make.height.equalTo(120)
         }
         
         menuView.snp.makeConstraints { make in
@@ -113,52 +133,96 @@ class CollectionViewController: UIViewController {
     }
     
     func setupUI() {
-        view.addSubview(collectionView)
-        collectionView.backgroundColor = .clear
-        collectionView.delegate = self
-        collectionView.dataSource = self
+        view.addSubview(tvView)
+        tvView.delegate = self
+        tvView.dataSource = self
         
         if UIDevice.current.userInterfaceIdiom == .phone {
-            collectionView.snp.makeConstraints { make in
-                make.left.right.equalTo(view.safeAreaLayoutGuide)
-                make.height.equalTo(collectionView.snp_height).multipliedBy(0.5)
+            tvView.snp.makeConstraints { make in
+                make.left.right.equalTo(0)
+                make.height.equalTo(32)
             }
         } else {
-            collectionView.snp.makeConstraints { make in
+            tvView.snp.makeConstraints { make in
                 make.left.right.equalTo(view.safeAreaLayoutGuide)
-                make.width.equalTo(collectionView.snp_width).multipliedBy(0.3)
+                make.height.equalTo(32)
+            }
+        }
+        
+        view.addSubview(channelView)
+        channelView.delegate = self
+        channelView.dataSource = self
+        
+        
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            channelView.snp.makeConstraints { make in
+//                make.top.equalTo(backView).offset(48)
+                make.left.right.equalTo(view.safeAreaLayoutGuide)
+                make.height.equalTo(channelView.snp_height).multipliedBy(0.5)
+            }
+        } else {
+            channelView.snp.makeConstraints { make in
+                make.left.right.equalTo(view.safeAreaLayoutGuide)
+                make.width.equalTo(channelView.snp_width).multipliedBy(0.3)
             }
         }
     }
 }
 
+
+
 extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return channels.count
+        if (collectionView == self.tvView) {
+            return tv.count
+        } else {
+            return channels.count
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! channelCollectionCell
-        cell.backgroundColor = .clear
-        cell.layer.cornerRadius = 8
-        cell.model = channels[indexPath.row]
-        let url = URL(string: channels[indexPath.row].image ?? "")
-        cell.channelImage.sd_setImage(with: url, completed: nil)
-        return cell
+        if (collectionView == self.tvView){
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "tvView", for: indexPath) as! tvCollectionCell
+            cell.backgroundColor = .blue
+            cell.model = tv[indexPath.row]
+            cell.label.text = tv[indexPath.row]
+            return cell
+        } else if collectionView == self.channelView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionView", for: indexPath) as! channelCollectionCell
+            cell.backgroundColor = .clear
+            cell.layer.cornerRadius = 8
+            cell.model = channels[indexPath.row]
+            let url = URL(string: channels[indexPath.row].image ?? "")
+            cell.channelImage.sd_setImage(with: url, completed: nil)
+            return cell
+        }
+        return UICollectionViewCell()
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         delegate?.onChannelTapped(channelIndex: indexPath.row)
         dismiss(animated: true, completion: nil)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 104, height: 130)
+        if(collectionView == self.tvView){
+           return CGSize(width: 132, height: 32)
+        } else if (collectionView == self.channelView){
+           return CGSize(width: 104, height: 130)
+        }
+        return CGSize(width: 0, height: 0)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 12, left: 16, bottom: 16, right: 16)
     }
 }
+
 
 //MARK: Transition animation
 extension CollectionViewController: UIViewControllerTransitioningDelegate, UIViewControllerAnimatedTransitioning  {

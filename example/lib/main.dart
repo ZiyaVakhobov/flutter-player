@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
-import 'package:udevs_video_player/models/media_item_download.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'package:udevs_video_player_example/second_page.dart';
 
@@ -36,11 +35,12 @@ class _MainPageState extends State<MainPage> {
   void download1() async {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
-              downloadConfig: DownloadConfiguration(
-            title: 'She-Hulk 2',
-            url:
-                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-          )) ??
+            downloadConfig: const DownloadConfiguration(
+              title: 'She-Hulk 2',
+              url:
+                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+            ),
+          ) ??
           'nothing';
       if (kDebugMode) {
         print('result: $s');
@@ -50,10 +50,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  download2() async {
+  void download2() async {
     try {
       var s = await _udevsVideoPlayerPlugin.downloadVideo(
-              downloadConfig: DownloadConfiguration(
+              downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk 2',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/a04c9257216b2f2085c88be31a13e5d7/240p/index.m3u8',
@@ -67,10 +67,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  pauseDownload() async {
+  void pauseDownload() async {
     try {
       var s = await _udevsVideoPlayerPlugin.pauseDownload(
-              downloadConfig: DownloadConfiguration(
+              downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
@@ -84,10 +84,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  resumeDownload() async {
+  void resumeDownload() async {
     try {
       var s = await _udevsVideoPlayerPlugin.resumeDownload(
-              downloadConfig: DownloadConfiguration(
+              downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
@@ -101,10 +101,10 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  removeDownload() async {
+  void removeDownload() async {
     try {
       var s = await _udevsVideoPlayerPlugin.removeDownload(
-              downloadConfig: DownloadConfiguration(
+              downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
@@ -122,7 +122,7 @@ class _MainPageState extends State<MainPage> {
     int state = -1;
     try {
       state = await _udevsVideoPlayerPlugin.getStateDownload(
-              downloadConfig: DownloadConfiguration(
+              downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
                 'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
@@ -141,11 +141,12 @@ class _MainPageState extends State<MainPage> {
     bool isDownloaded = false;
     try {
       isDownloaded = await _udevsVideoPlayerPlugin.isDownloadVideo(
-          downloadConfig: DownloadConfiguration(
-        title: 'She-Hulk',
-        url:
-            'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-      ));
+        downloadConfig: const DownloadConfiguration(
+          title: 'She-Hulk',
+          url:
+              'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
+        ),
+      );
       if (kDebugMode) {
         print('result: $isDownloaded');
       }
@@ -161,42 +162,44 @@ class _MainPageState extends State<MainPage> {
   playVideo() async {
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
-              playerConfig: PlayerConfiguration(
-            movieShareLink: "https://uzd.udevs.io/movie/7963?type=premier",
-            baseUrl: "https://api.spec.uzd.udevs.io/v1/",
-            initialResolution: {
-              "240p":
-                  "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
-            },
-            resolutions: {},
-            qualityText: 'Качество',
-            speedText: 'Скорость',
-            lastPosition: 0,
-            title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
-            isSerial: true,
-            episodeButtonText: 'Эпизоды',
-            nextButtonText: 'След.эпизод',
-            seasons: [],
-            isLive: false,
-            tvProgramsText: 'Телеканалы',
-            programsInfoList: [],
-            showController: true,
-            playVideoFromAsset: false,
-            assetPath: '',
-            seasonIndex: 0,
-            episodeIndex: 0,
-            isMegogo: false,
-            isPremier: false,
-            videoId: '',
-            sessionId: '',
-            megogoAccessToken: '',
-            authorization: '',
-            autoText: 'Автонастройка',
-            fromCache: true,
-            tvChannels: [],
-            selectChannelIndex: 0,
-            ip: "",
-          )) ??
+            playerConfig: const PlayerConfiguration(
+              movieShareLink: "https://uzd.udevs.io/movie/7963?type=premier",
+              baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+              initialResolution: {
+                "240p":
+                    "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
+              },
+              resolutions: {},
+              qualityText: 'Качество',
+              speedText: 'Скорость',
+              lastPosition: 0,
+              title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
+              isSerial: true,
+              episodeButtonText: 'Эпизоды',
+              nextButtonText: 'След.эпизод',
+              seasons: [],
+              isLive: false,
+              tvProgramsText: 'Телеканалы',
+              programsInfoList: [],
+              showController: true,
+              playVideoFromAsset: false,
+              assetPath: '',
+              seasonIndex: 0,
+              episodeIndex: 0,
+              isMegogo: false,
+              isPremier: false,
+              videoId: '',
+              sessionId: '',
+              megogoAccessToken: '',
+              authorization: '',
+              autoText: 'Автонастройка',
+              fromCache: true,
+              tvChannels: [],
+              selectChannelIndex: 0,
+              ip: "",
+              tvCategories: [],
+            ),
+          ) ??
           'nothing';
       if (kDebugMode) {
         print('result: $s');
@@ -249,14 +252,16 @@ class _MainPageState extends State<MainPage> {
           ElevatedButton(
             onPressed: () async {
               var state = await getStateDownload();
-              print('download state: $state');
+              if (kDebugMode) {
+                print('download state: $state');
+              }
             },
             child: const Text('Get state'),
           ),
           StreamBuilder(
             stream: currentProgressDownloadAsStream(),
             builder: (context, snapshot) {
-              var data = snapshot.data as MediaItemDownload?;
+              var data = snapshot.data;
               return Column(
                 children: [
                   Text(
@@ -282,7 +287,7 @@ class _MainPageState extends State<MainPage> {
           FutureBuilder(
             future: checkIsDownloaded(),
             builder: (context, snapshot) {
-              var data = snapshot.data as bool?;
+              var data = snapshot.data;
               return Text((data ?? false) ? 'Downloaded' : 'Not downloaded');
             },
           ),

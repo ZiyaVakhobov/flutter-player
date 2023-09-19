@@ -1,21 +1,19 @@
 class DownloadConfiguration {
-  String title;
-  String url;
+  const DownloadConfiguration({
+    this.title = '',
+    required this.url,
+  });
+
+  final String title;
+  final String url;
 
   Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
+    final map = <String, dynamic>{};
     map['title'] = title;
     map['url'] = url;
     return map;
   }
 
   @override
-  String toString() {
-    return 'DownloadConfiguration{title: $title, url: $url}';
-  }
-
-  DownloadConfiguration({
-    this.title = '',
-    required this.url,
-  });
+  String toString() => 'DownloadConfiguration{title: $title, url: $url}';
 }
