@@ -4,41 +4,18 @@
     android:id="@+id/bottom_sheet_channels"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/tv_programs_background"
-    android:orientation="vertical"
-    android:paddingTop="8dp">
-
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="48dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center"
-        android:background="@color/transparent"
-        android:elevation="0dp"
-        app:cardBackgroundColor="@color/second_black"
-        app:cardCornerRadius="100dp" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tv_category_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabGravity="start"
-        app:tabIndicatorColor="@color/blue"
-        app:tabMode="scrollable"
-        app:tabSelectedTextColor="@color/blue"
-        app:tabTextAppearance="@style/TvProgramTabText"
-        app:tabTextColor="@color/white" />
+    android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bottom_sheet_channels_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:itemCount="1"
+        tools:itemCount="4"
         tools:listitem="@layout/item_channel" />
-
 
 </LinearLayout>

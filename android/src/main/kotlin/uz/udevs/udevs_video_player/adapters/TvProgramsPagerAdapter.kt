@@ -11,7 +11,7 @@ import uz.udevs.udevs_video_player.models.ProgramsInfo
 
 class TvProgramsPagerAdapter(
     var context: Context,
-    var programsInfoList: List<ProgramsInfo>,
+    private var programsInfoList: List<ProgramsInfo>,
 ) :
     RecyclerView.Adapter<TvProgramsPagerAdapter.Vh>() {
     inner class Vh(itemView: View) : RecyclerView.ViewHolder(itemView) {

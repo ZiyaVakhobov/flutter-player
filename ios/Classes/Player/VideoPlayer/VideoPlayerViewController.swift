@@ -51,6 +51,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var selectedSeason: Int = 0
     var selectSesonNum: Int = 0
     var selectChannelIndex: Int = 0
+    var selectTvCategoryIndex: Int = 0
     var isRegular: Bool = false
     var resolutions: [String:String]?
     var sortedResolutions: [String] = []
@@ -425,9 +426,10 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func channelsButtonPressed(){
         let episodeVC = CollectionViewController()
         episodeVC.modalPresentationStyle = .custom
-        episodeVC.channels = self.playerConfiguration.channels
+        episodeVC.channels = self.playerConfiguration.tvCategories[selectTvCategoryIndex].channels
         episodeVC.tv = self.playerConfiguration.tvCategories
         episodeVC.delegate = self
+        episodeVC.tvCategoryIndex = selectTvCategoryIndex
         self.present(episodeVC, animated: true, completion: nil)
     }
     
@@ -735,13 +737,19 @@ extension VideoPlayerViewController: GCKSessionManagerListener {
     }
 }
 
-extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate , SubtitleDelegate,ChannelTappedDelegate {
-    func onChannelTapped(channelIndex: Int) {
-        if self.selectChannelIndex == channelIndex { return }
-        let channel : Channel = self.playerConfiguration.channels[channelIndex];
+extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDelegate, SubtitleDelegate, ChannelTappedDelegate {
+    
+    func onTvCategoryTapped(tvCategoryIndex: Int) {
+        self.selectTvCategoryIndex = tvCategoryIndex
+    }
+    
+    func onChannelTapped(channelIndex: Int, tvCategoryIndex: Int) {
+        if self.selectChannelIndex == channelIndex && self.selectTvCategoryIndex == tvCategoryIndex { return }
+        let channel = self.playerConfiguration.tvCategories[tvCategoryIndex].channels[channelIndex]
         let success : ChannelResponse? = getChannel(id: channel.id ?? "")
         if success != nil {
             self.selectChannelIndex = channelIndex
+            self.selectTvCategoryIndex = tvCategoryIndex
             self.url = success?.channelStreamIos ?? ""
             self.resolutions = ["Auto": success?.channelStreamIos ?? ""]
             self.playerView.changeUrl(url: self.url, title: channel.name ?? "")
