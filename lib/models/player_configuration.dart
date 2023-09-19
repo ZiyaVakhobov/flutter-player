@@ -42,6 +42,7 @@ class PlayerConfiguration {
     required this.movieShareLink,
     required this.ip,
     required this.selectChannelIndex,
+    this.selectTvCategoryIndex = 0,
     required this.tvCategories,
   });
 
@@ -76,6 +77,7 @@ class PlayerConfiguration {
   final List<TvCategories> tvCategories;
   final String ip;
   final int selectChannelIndex;
+  final int selectTvCategoryIndex;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -109,6 +111,7 @@ class PlayerConfiguration {
     map['movieShareLink'] = movieShareLink;
     map['ip'] = ip;
     map['selectChannelIndex'] = selectChannelIndex;
+    map['selectTvCategoryIndex'] = selectTvCategoryIndex;
     map['tvCategories'] = tvCategories.map((v) => v.toJson()).toList();
     return map;
   }

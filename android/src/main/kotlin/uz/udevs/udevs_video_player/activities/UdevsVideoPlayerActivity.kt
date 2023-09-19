@@ -143,6 +143,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private var mCastSession: CastSession? = null
     private var mCastContext: CastContext? = null
     private var channelIndex: Int = 0
+    private var tvCategoryIndex: Int = 0
 
     enum class PlaybackLocation {
         LOCAL, REMOTE
@@ -183,6 +184,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         seasonIndex = playerConfiguration.seasonIndex
         episodeIndex = playerConfiguration.episodeIndex
         channelIndex = playerConfiguration.selectChannelIndex
+        tvCategoryIndex = playerConfiguration.selectTvCategoryIndex
         currentQuality =
             if (playerConfiguration.initialResolution.isNotEmpty()) playerConfiguration.initialResolution.keys.first() else ""
         titleText = playerConfiguration.title
@@ -415,6 +417,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             .build()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (player?.isPlaying == true) {
             player?.stop()
@@ -946,10 +949,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         })
     }
 
-    private fun getSingleTvChannel(index: Int) {
+    private fun getSingleTvChannel(tvCIndex: Int, cIndex: Int) {
+        tvCategoryIndex = tvCIndex
+        channelIndex = cIndex
         retrofitService?.getSingleTvChannel(
             playerConfiguration.authorization,
-            playerConfiguration.channels[index].id,
+            playerConfiguration.tvCategories[tvCIndex].channels[cIndex].id,
             playerConfiguration.ip,
         )?.enqueue(object : Callback<TvChannelResponse> {
             override fun onResponse(
@@ -962,8 +967,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     playerConfiguration.resolutions = map
 
                     url = body.channelStreamAll
-                    title?.text = playerConfiguration.channels[index].name
-                    title1?.text = playerConfiguration.channels[index].name
+                    title?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
+                    title1?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
@@ -1099,7 +1104,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showEpisodesBottomSheet() {
         currentBottomSheet = BottomSheet.EPISODES
         val bottomSheetDialog = BottomSheetDialog(this)
-        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
         backButtonEpisodeBottomSheet = bottomSheetDialog.findViewById(R.id.episode_sheet_back)
@@ -1170,87 +1175,37 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
     }
 
-    private fun getCategories(): List<String> {
-        // Implement this function to return a list of categories
-        return listOf(
-            "Category1",
-            "Category2",
-            "Category3",
-            "Category4",
-            "Category5",
-            "Category6",
-            "Category10"
-        ) // Example categories
-    }
-
-
     private fun showChannelsBottomSheet() {
         currentBottomSheet = BottomSheet.CHANNELS
-        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.ChannelsBottomSheetDialog)
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog)
+        bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_channels)
+        bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        bottomSheetDialog.setContentView(R.layout.channels_page)
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_category_tabs)
-        val viewPager = bottomSheetDialog.findViewById<RecyclerView>(R.id.bottom_sheet_channels_rv)
-        val categoryList = getCategories()
-        for (category in categoryList) {
-            val tab = tabLayout?.newTab()
-            val customView = LayoutInflater.from(this).inflate(R.layout.custom_tab_item, null)
-            val tabText = customView.findViewById<TextView>(R.id.tab_text)
-            tabText.text = category // Set the tab text
-            tab?.customView = customView // Set the custom view
-
-            if (tab != null) {
-                tabLayout.addTab(tab)
-            }
-        }
-        tabLayout?.getTabAt(0)?.select()
-
-        tabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                // Handle tab selection here
-                val selectedCategory = tab?.text.toString()
-                // Filter and update your RecyclerView based on the selected category
-//                filterAndUpdateRecyclerView(selectedCategory)
-//                tab?.customView?.background = ContextCompat.getDrawable(this@UdevsVideoPlayerActivity, R.drawable.custom_tab_background)
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-//                tab?.customView?.background = ContextCompat.getDrawable(this@UdevsVideoPlayerActivity, R.drawable.default_tab_background)
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                // Handle tab reselection here
-            }
-        })
-        val initialCategory = categoryList[0] // Choose the initial category
-
-//        viewPager?.adapter = ChannelsRvAdapter(this, getChannelsForCategory(initialCategory))
-        viewPager?.adapter = ChannelsRvAdapter(
-            this,
-            playerConfiguration.channels,
-            object : ChannelsRvAdapter.OnClickListener {
-                @SuppressLint("SetTextI18n")
-                override fun onClick(index: Int) {
-                    if (index == channelIndex) {
-                        bottomSheetDialog.dismiss()
-                    } else {
-                        channelIndex = index
-                        getSingleTvChannel(index)
-                        bottomSheetDialog.dismiss()
-                    }
+        val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_category_view_pager)
+        viewPager?.adapter = TvCategoryPagerAdapter(
+            this, playerConfiguration.tvCategories,
+            object : TvCategoryPagerAdapter.OnClickListener {
+                override fun onClick(tvCIndex: Int, cIndex: Int) {
+                    getSingleTvChannel(tvCIndex, cIndex)
+                    bottomSheetDialog.dismiss()
                 }
             },
         )
+        viewPager?.currentItem = tvCategoryIndex
+        viewPager?.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        viewPager?.isUserInputEnabled = false
+
+        TabLayoutMediator(tabLayout!!, viewPager!!) { tab, position ->
+            tab.text = playerConfiguration.tvCategories[position].title
+        }.attach()
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
             currentBottomSheet = BottomSheet.NONE
         }
     }
-
-    private fun filterAndUpdateRecyclerView(selectedCategory: String) {
-        TODO("Not yet implemented")
-    }
-
 
     private fun dismissAllBottomSheets() {
         for (bottomSheet in listOfAllOpenedBottomSheets) {

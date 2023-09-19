@@ -11,12 +11,12 @@ import com.bumptech.glide.Glide
 import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.models.TvChannel
 
-class ChannelsRvAdapter(
+class TvChannelsRvAdapter(
     var context: Context,
     var list: List<TvChannel>,
-    var onClickListener: OnClickListener
+    private var onClickListener: OnClickListener
 ) :
-    RecyclerView.Adapter<ChannelsRvAdapter.Vh>() {
+    RecyclerView.Adapter<TvChannelsRvAdapter.Vh>() {
 
     inner class Vh(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val image: ImageView
@@ -49,5 +49,4 @@ class ChannelsRvAdapter(
     interface OnClickListener {
         fun onClick(index: Int)
     }
-
 }

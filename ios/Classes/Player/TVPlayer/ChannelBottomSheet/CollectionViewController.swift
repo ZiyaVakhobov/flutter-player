@@ -9,16 +9,14 @@ import SnapKit
 import SDWebImage
 
 protocol ChannelTappedDelegate {
-    func onChannelTapped(channelIndex : Int)
+    func onChannelTapped(channelIndex: Int, tvCategoryIndex: Int)
+    
+    func onTvCategoryTapped(tvCategoryIndex: Int)
 }
 
 class CollectionViewController: UIViewController {
     
-    var collectionCellTitle: String?
-    var collectionCellSubtitle: String?
-    var collectionTimeLbl: String?
-    var collectionCellImageText: String?
-    var channelsCount: Int?
+    var tvCategoryIndex: Int = 0
     var delegate : ChannelTappedDelegate?
     
     var channels = [Channel]()
@@ -70,7 +68,7 @@ class CollectionViewController: UIViewController {
     
     lazy var backView : UIView =  {
         let view = UIView()
-        view.backgroundColor = .clear
+        view.backgroundColor = Colors.channelsBackground
         return view
     }()
     
@@ -91,7 +89,6 @@ class CollectionViewController: UIViewController {
         menuView.addSubview(backView)
         backView.addSubview(tvView)
         backView.addSubview(channelView)
-//        menuView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -190,6 +187,8 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
             cell.backgroundColor = .clear
             cell.model = tv[indexPath.row]
             cell.label.text = tv[indexPath.row].title ?? ""
+            cell.label.textColor = indexPath.row == tvCategoryIndex ? Colors.mainColor : .white
+            cell.label.sizeToFit()
             return cell
         } else if collectionView == self.channelView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionView", for: indexPath) as! channelCollectionCell
@@ -205,11 +204,13 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == self.tvView {
-            print(tv[indexPath.row].id)
-            print(tv[indexPath.row].title) 
-        
+            tvCategoryIndex = indexPath.row
+            delegate?.onTvCategoryTapped(tvCategoryIndex: tvCategoryIndex)
+            channels = tv[indexPath.row].channels
+            self.tvView.reloadData()
+            self.channelView.reloadData()
         } else {
-            delegate?.onChannelTapped(channelIndex: indexPath.row)
+            delegate?.onChannelTapped(channelIndex: indexPath.row, tvCategoryIndex: tvCategoryIndex)
             dismiss(animated: true, completion: nil)
         }
     }
@@ -221,7 +222,7 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
             cell.model = tv[indexPath.row]
             cell.label.text = tv[indexPath.row].title ?? ""
             cell.label.sizeToFit()
-            let cellWidth = cell.label.frame.width + 32
+            let cellWidth = cell.label.frame.width + 24
             return CGSize(width: cellWidth, height: 32)
         } else if (collectionView == self.channelView){
            return CGSize(width: 104, height: 130)

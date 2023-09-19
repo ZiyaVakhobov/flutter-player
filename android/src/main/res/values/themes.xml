@@ -13,6 +13,15 @@
         <item name="android:fontFamily">@font/semibold</item>
     </style>
 
+    <style name="TvCategoryTabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">@font/semibold</item>
+    </style>
+
+    <style name="NoTabIndicator" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorHeight">0dp</item>
+    </style>
+
 
     <style name="TvChannelTabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
@@ -28,13 +37,13 @@
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/grey10</item>
 
-<!--        <item name="mediaRouteTheme">@style/CustomMediaRouterTheme</item>-->
-<!--        <item name="castIntroOverlayStyle">@style/CustomCastIntroOverlay</item>-->
-<!--        <item name="castMiniControllerStyle">@style/CustomCastMiniController</item>-->
-<!--        <item name="castExpandedControllerStyle">@style/CustomCastExpandedController</item>-->
-<!--        <item name="castExpandedControllerToolbarStyle">-->
-<!--            @style/ThemeOverlay.AppCompat.ActionBar-->
-<!--        </item>-->
+        <!--        <item name="mediaRouteTheme">@style/CustomMediaRouterTheme</item>-->
+        <!--        <item name="castIntroOverlayStyle">@style/CustomCastIntroOverlay</item>-->
+        <!--        <item name="castMiniControllerStyle">@style/CustomCastMiniController</item>-->
+        <!--        <item name="castExpandedControllerStyle">@style/CustomCastExpandedController</item>-->
+        <!--        <item name="castExpandedControllerToolbarStyle">-->
+        <!--            @style/ThemeOverlay.AppCompat.ActionBar-->
+        <!--        </item>-->
 
         <!-- The rest of your attributes -->
         <!--item name="android:seekBarStyle">@style/YellowSeekBar</item-->

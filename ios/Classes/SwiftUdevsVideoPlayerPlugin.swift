@@ -139,6 +139,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
             vc.selectedQualityText = playerConfiguration.autoText
             vc.seasons  = playerConfiguration.seasons
             vc.selectChannelIndex  = playerConfiguration.selectChannelIndex
+            vc.selectTvCategoryIndex  = playerConfiguration.selectTvCategoryIndex
             SwiftUdevsVideoPlayerPlugin.viewController.present(vc, animated: true,  completion: nil)
             return
         }
