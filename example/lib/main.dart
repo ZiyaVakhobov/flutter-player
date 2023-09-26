@@ -159,7 +159,7 @@ class _MainPageState extends State<MainPage> {
   Stream<MediaItemDownload> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
-  playVideo() async {
+  void playVideo() async {
     try {
       var s = await _udevsVideoPlayerPlugin.playVideo(
             playerConfig: const PlayerConfiguration(
@@ -208,6 +208,76 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  void playVideoTV() async {
+    try {
+      var s = await _udevsVideoPlayerPlugin.playVideo(
+            playerConfig: const PlayerConfiguration(
+              movieShareLink: "https://uzd.udevs.io/movie/7963?type=premier",
+              baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+              initialResolution: {
+                "240p":
+                    "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
+              },
+              resolutions: {},
+              qualityText: 'Качество',
+              speedText: 'Скорость',
+              lastPosition: 0,
+              title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
+              isSerial: true,
+              episodeButtonText: 'Эпизоды',
+              nextButtonText: 'След.эпизод',
+              seasons: [],
+              isLive: true,
+              tvProgramsText: 'Телеканалы',
+              programsInfoList: [],
+              showController: true,
+              playVideoFromAsset: false,
+              assetPath: '',
+              seasonIndex: 0,
+              episodeIndex: 0,
+              isMegogo: false,
+              isPremier: false,
+              videoId: '',
+              sessionId: '',
+              megogoAccessToken: '',
+              authorization: '',
+              autoText: 'Автонастройка',
+              fromCache: true,
+              selectChannelIndex: 0,
+              ip: "",
+              tvCategories: [
+                TvCategories(
+                  id: '',
+                  title: "Все",
+                  tvChannels: [
+                    TvChannel(
+                      name: 'Setanta Sports 1',
+                      id: 'c782939d-2ace-4075-96d1-c3eae0162370',
+                      image:
+                          'https://cdn.uzd.udevs.io/uzdigital/images/1738fe23-f629-4a69-ae16-617cf61fcf9d.png',
+                      resolutions: {},
+                    ),
+                    TvChannel(
+                      name: 'Setanta Sports 2',
+                      id: '8fd99b87-936c-47f6-8874-dda03521d69a',
+                      image:
+                          'https://cdn.uzd.udevs.io/uzdigital/images/1738fe23-f629-4a69-ae16-617cf61fcf9d.png',
+                      resolutions: {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ) ??
+          'nothing';
+      if (kDebugMode) {
+        print('result: $s');
+      }
+    } on PlatformException {
+      debugPrint('Failed to get platform version.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -220,6 +290,10 @@ class _MainPageState extends State<MainPage> {
           ElevatedButton(
             onPressed: playVideo,
             child: const Text('Play Video'),
+          ),
+          ElevatedButton(
+            onPressed: playVideoTV,
+            child: const Text('Play Video Tv'),
           ),
           ElevatedButton(
             onPressed: download1,

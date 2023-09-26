@@ -50,5 +50,4 @@ class channelCollectionCell: UICollectionViewCell {
         let numberFloatValue = number?.floatValue
         return numberFloatValue ?? 0.0
     }
-    
 }

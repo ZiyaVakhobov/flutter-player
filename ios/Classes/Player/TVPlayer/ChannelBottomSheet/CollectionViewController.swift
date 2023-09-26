@@ -85,7 +85,7 @@ class CollectionViewController: UIViewController {
         backView.layer.cornerRadius = 16
         view.addSubview(backdropView)
         view.addSubview(menuView)
-        menuView.backgroundColor = Colors.white
+        menuView.backgroundColor = .clear
         menuView.addSubview(backView)
         backView.addSubview(tvView)
         backView.addSubview(channelView)

@@ -128,7 +128,7 @@ struct PlayerConfiguration{
                                    url: (map["initialResolution"] as! [String:String]).values.first ?? "",
                                    movieShareLink: map["movieShareLink"] as! String,
                                    ip: map["ip"] as! String,
-                                   selectChannelIndex: map["selectChannelIndex"] as! Int, selectTvCategoryIndex: map["selectTvCategoryIndex"] as! Int,
+                                   selectChannelIndex: map["selectChannelIndex"] as? Int ?? 0, selectTvCategoryIndex: map["selectTvCategoryIndex"] as? Int ?? 0,
                                    tvCategories: tvCategories
                                    
         )
