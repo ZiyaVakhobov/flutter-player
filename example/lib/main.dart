@@ -13,17 +13,15 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Plugin example',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MainPage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Plugin example',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: const MainPage(),
+      );
 }
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -32,9 +30,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final _udevsVideoPlayerPlugin = UdevsVideoPlayer();
 
-  void download1() async {
+  Future<void> download1() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.downloadVideo(
+      final s = await _udevsVideoPlayerPlugin.downloadVideo(
             downloadConfig: const DownloadConfiguration(
               title: 'She-Hulk 2',
               url:
@@ -50,9 +48,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void download2() async {
+  Future<void> download2() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.downloadVideo(
+      final s = await _udevsVideoPlayerPlugin.downloadVideo(
               downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk 2',
             url:
@@ -67,9 +65,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void pauseDownload() async {
+  Future<void> pauseDownload() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.pauseDownload(
+      final s = await _udevsVideoPlayerPlugin.pauseDownload(
               downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
@@ -84,9 +82,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void resumeDownload() async {
+  Future<void> resumeDownload() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.resumeDownload(
+      final s = await _udevsVideoPlayerPlugin.resumeDownload(
               downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
@@ -101,9 +99,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void removeDownload() async {
+  Future<void> removeDownload() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.removeDownload(
+      final s = await _udevsVideoPlayerPlugin.removeDownload(
               downloadConfig: const DownloadConfiguration(
             title: 'She-Hulk',
             url:
@@ -159,21 +157,21 @@ class _MainPageState extends State<MainPage> {
   Stream<MediaItemDownload> currentProgressDownloadAsStream() =>
       _udevsVideoPlayerPlugin.currentProgressDownloadAsStream;
 
-  void playVideo() async {
+  Future<void> playVideo() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.playVideo(
+      final s = await _udevsVideoPlayerPlugin.playVideo(
             playerConfig: const PlayerConfiguration(
-              movieShareLink: "https://uzd.udevs.io/movie/7963?type=premier",
-              baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+              movieShareLink: 'https://uzd.udevs.io/movie/7963?type=premier',
+              baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
               initialResolution: {
-                "240p":
-                    "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
+                '240p':
+                    'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8'
               },
               resolutions: {},
               qualityText: 'Качество',
               speedText: 'Скорость',
               lastPosition: 0,
-              title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
+              title: 'S1 E1  "Женщина-Халк: Адвокат" ',
               isSerial: true,
               episodeButtonText: 'Эпизоды',
               nextButtonText: 'След.эпизод',
@@ -195,7 +193,7 @@ class _MainPageState extends State<MainPage> {
               autoText: 'Автонастройка',
               fromCache: true,
               selectChannelIndex: 0,
-              ip: "",
+              ip: '',
               tvCategories: [],
             ),
           ) ??
@@ -208,21 +206,28 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  void playVideoTV() async {
+  Future<void> playVideoTV() async {
     try {
-      var s = await _udevsVideoPlayerPlugin.playVideo(
+      final s = await _udevsVideoPlayerPlugin.playVideo(
             playerConfig: const PlayerConfiguration(
-              movieShareLink: "https://uzd.udevs.io/movie/7963?type=premier",
-              baseUrl: "https://api.spec.uzd.udevs.io/v1/",
+              movieShareLink: 'https://uzd.udevs.io/movie/7963?type=premier',
+              baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
               initialResolution: {
-                "240p":
-                    "https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8"
+                'Автонастройка':
+                    'https://st1.uzdigital.tv/Setanta1HD/video.m3u8?token=316ee910a8ba3e654e262f580299fc93f0367a3b-41666c6b50654d5a7a62747149497458-1695113748-1695102948&remote=94.232.24.122',
+                '1080p':
+                    'http://st1.uzdigital.tv/Setanta1HD/tracks-v1a1a2/mono.m3u8?remote=94.232.24.122&token=316ee910a8ba3e654e262f580299fc93f0367a3b-41666c6b50654d5a7a62747149497458-1695113748-1695102948&remote=94.232.24.122',
+                '576p':
+                    'http://st1.uzdigital.tv/Setanta1HD/tracks-v2a1a2/mono.m3u8?remote=94.232.24.122&token=316ee910a8ba3e654e262f580299fc93f0367a3b-41666c6b50654d5a7a62747149497458-1695113748-1695102948&remote=94.232.24.122'
               },
-              resolutions: {},
+              resolutions: {
+                'Автонастройка':
+                    'https://st1.uzdigital.tv/Setanta1HD/video.m3u8?token=316ee910a8ba3e654e262f580299fc93f0367a3b-41666c6b50654d5a7a62747149497458-1695113748-1695102948&remote=94.232.24.122'
+              },
               qualityText: 'Качество',
               speedText: 'Скорость',
               lastPosition: 0,
-              title: "S1 E1  \"Женщина-Халк: Адвокат\" ",
+              title: 'S1 E1  "Женщина-Халк: Адвокат" ',
               isSerial: true,
               episodeButtonText: 'Эпизоды',
               nextButtonText: 'След.эпизод',
@@ -244,11 +249,11 @@ class _MainPageState extends State<MainPage> {
               autoText: 'Автонастройка',
               fromCache: true,
               selectChannelIndex: 0,
-              ip: "",
+              ip: '',
               tvCategories: [
                 TvCategories(
                   id: '',
-                  title: "Все",
+                  title: 'Все',
                   tvChannels: [
                     TvChannel(
                       name: 'Setanta Sports 1',
@@ -279,95 +284,94 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Plugin example app')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          ElevatedButton(
-            onPressed: playVideo,
-            child: const Text('Play Video'),
-          ),
-          ElevatedButton(
-            onPressed: playVideoTV,
-            child: const Text('Play Video Tv'),
-          ),
-          ElevatedButton(
-            onPressed: download1,
-            child: const Text('Download1'),
-          ),
-          ElevatedButton(
-            onPressed: download2,
-            child: const Text('Download2'),
-          ),
-          ElevatedButton(
-            onPressed: pauseDownload,
-            child: const Text('Pause Download'),
-          ),
-          ElevatedButton(
-            onPressed: resumeDownload,
-            child: const Text('Resume Download'),
-          ),
-          ElevatedButton(
-            onPressed: removeDownload,
-            child: const Text('Remove Download'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const SecondPage()));
-            },
-            child: const Text('Got to next page'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              var state = await getStateDownload();
-              if (kDebugMode) {
-                print('download state: $state');
-              }
-            },
-            child: const Text('Get state'),
-          ),
-          StreamBuilder(
-            stream: currentProgressDownloadAsStream(),
-            builder: (context, snapshot) {
-              var data = snapshot.data;
-              return Column(
-                children: [
-                  Text(
-                    data == null
-                        ? 'Not downloading'
-                        : data.url !=
-                                'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8'
-                            ? 'Not downloading'
-                            : data.percent.toString(),
-                  ),
-                  Text(
-                    data == null
-                        ? 'Not downloading'
-                        : data.url !=
-                                'https://cdn.uzd.udevs.io/uzdigital/videos/a04c9257216b2f2085c88be31a13e5d7/240p/index.m3u8'
-                            ? 'Not downloading'
-                            : data.percent.toString(),
-                  ),
-                ],
-              );
-            },
-          ),
-          FutureBuilder(
-            future: checkIsDownloaded(),
-            builder: (context, snapshot) {
-              var data = snapshot.data;
-              return Text((data ?? false) ? 'Downloaded' : 'Not downloaded');
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Plugin example app')),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: playVideo,
+              child: const Text('Play Video'),
+            ),
+            ElevatedButton(
+              onPressed: playVideoTV,
+              child: const Text('Play Video Tv'),
+            ),
+            ElevatedButton(
+              onPressed: download1,
+              child: const Text('Download1'),
+            ),
+            ElevatedButton(
+              onPressed: download2,
+              child: const Text('Download2'),
+            ),
+            ElevatedButton(
+              onPressed: pauseDownload,
+              child: const Text('Pause Download'),
+            ),
+            ElevatedButton(
+              onPressed: resumeDownload,
+              child: const Text('Resume Download'),
+            ),
+            ElevatedButton(
+              onPressed: removeDownload,
+              child: const Text('Remove Download'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                      builder: (context) => const SecondPage()),
+                );
+              },
+              child: const Text('Got to next page'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final state = await getStateDownload();
+                if (kDebugMode) {
+                  print('download state: $state');
+                }
+              },
+              child: const Text('Get state'),
+            ),
+            StreamBuilder(
+              stream: currentProgressDownloadAsStream(),
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                return Column(
+                  children: [
+                    Text(
+                      data == null
+                          ? 'Not downloading'
+                          : data.url !=
+                                  'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8'
+                              ? 'Not downloading'
+                              : data.percent.toString(),
+                    ),
+                    Text(
+                      data == null
+                          ? 'Not downloading'
+                          : data.url !=
+                                  'https://cdn.uzd.udevs.io/uzdigital/videos/a04c9257216b2f2085c88be31a13e5d7/240p/index.m3u8'
+                              ? 'Not downloading'
+                              : data.percent.toString(),
+                    ),
+                  ],
+                );
+              },
+            ),
+            FutureBuilder(
+              future: checkIsDownloaded(),
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                return Text((data ?? false) ? 'Downloaded' : 'Not downloaded');
+              },
+            ),
+          ],
+        ),
+      );
 
   @override
   void dispose() {
