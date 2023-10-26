@@ -437,6 +437,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onPause() {
         super.onPause()
+        val isPlaying = player?.isPlaying ?: false
         player?.playWhenReady = false
         if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 isInPictureInPictureMode
@@ -444,7 +445,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 false
             }
         ) {
-            player?.playWhenReady = true
+            player?.playWhenReady = isPlaying
             dismissAllBottomSheets()
         }
         mCastContext!!.sessionManager.removeSessionManagerListener(
@@ -707,9 +708,13 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val params =
-                    PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9))
+                            .setAutoEnterEnabled(false).build()
+                    } else {
+                        PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
+                    }
                 enterPictureInPictureMode(params)
-
             } else {
                 Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show()
             }
@@ -852,7 +857,12 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (mLocation == PlaybackLocation.REMOTE) {
             return
         }
-        val params = PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50)).build()
+        val params = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50))
+                .setAutoEnterEnabled(false).build()
+        } else {
+            PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50)).build()
+        }
         enterPictureInPictureMode(params)
     }
 
