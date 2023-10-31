@@ -1132,6 +1132,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.episode_view_pager)
         viewPager?.adapter = EpisodePagerAdapter(viewPager!!, this,
             playerConfiguration.seasons,
+            seasonIndex,
+            episodeIndex,
             object : EpisodePagerAdapter.OnClickListener {
                 @SuppressLint("SetTextI18n")
                 override fun onClick(epIndex: Int, seasIndex: Int) {

@@ -17,7 +17,9 @@ import uz.udevs.udevs_video_player.models.Season
 class EpisodePagerAdapter(
     var viewPager: ViewPager2,
     var context: Context,
-    var seasons: List<Season>,
+    private var seasons: List<Season>,
+    private var seasonIndex: Int,
+    private var episodeIndex: Int,
     var onClickListener: OnClickListener
 ) :
     RecyclerView.Adapter<EpisodePagerAdapter.Vh>() {
@@ -37,6 +39,7 @@ class EpisodePagerAdapter(
                                 isScrollingRight && (rv.layoutManager as LinearLayoutManager).findLastCompletelyVisibleItemPosition() == rv.adapter!!.itemCount - 1 ||
                                         !isScrollingRight && (rv.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0
                         }
+
                         MotionEvent.ACTION_UP -> {
                             lastX = 0
                             viewPager.isUserInputEnabled = true
@@ -63,11 +66,15 @@ class EpisodePagerAdapter(
         holder.rv.adapter = EpisodesRvAdapter(
             context,
             seasons[position].movies,
+            position,
+            seasonIndex,
+            episodeIndex,
             object : EpisodesRvAdapter.OnClickListener {
                 override fun onClick(episodeIndex: Int) {
                     onClickListener.onClick(episodeIndex, position)
                 }
-            })
+            },
+        )
     }
 
     override fun getItemCount(): Int {

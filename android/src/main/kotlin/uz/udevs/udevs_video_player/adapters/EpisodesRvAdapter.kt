@@ -12,7 +12,14 @@ import uz.udevs.udevs_video_player.R
 import uz.udevs.udevs_video_player.models.Movie
 import uz.udevs.udevs_video_player.utils.MyHelper
 
-class EpisodesRvAdapter(var context: Context, var list: List<Movie>, var onClickListener: OnClickListener) :
+class EpisodesRvAdapter(
+    var context: Context,
+    var list: List<Movie>,
+    private var seasonIndex: Int,
+    private var currentSeasonIndex: Int,
+    private var episodeIndex: Int,
+    private var onClickListener: OnClickListener
+) :
     RecyclerView.Adapter<EpisodesRvAdapter.Vh>() {
 
     inner class Vh(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -38,6 +45,10 @@ class EpisodesRvAdapter(var context: Context, var list: List<Movie>, var onClick
 
     override fun onBindViewHolder(holder: Vh, position: Int) {
         holder.title.text = list[position].title
+        if (position == episodeIndex && currentSeasonIndex == seasonIndex) {
+            holder.title.setTextColor(context.resources.getColor(R.color.blue))
+            holder.description.setTextColor(context.resources.getColor(R.color.blue))
+        }
         holder.description.text = list[position].description
         holder.duration.text = MyHelper().formatDuration(list[position].duration)
         Glide.with(context)

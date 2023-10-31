@@ -13,7 +13,7 @@ enum SeasonBottomSheetType{
     case quality, speed, subtitle, audio,season
 }
 
-protocol BottomSheetCellDelegateSeason{
+protocol BottomSheetCellDelegateSeason {
     func onBottomSheetCellTapped(index : Int, type : SeasonBottomSheetType)
 }
 
@@ -22,6 +22,8 @@ class SeasonSelectionController: UIViewController, UITableViewDelegate, UITableV
     var labelText : String?
     var closeText : String = ""
     var selectedIndex = 0
+    var episodeIndex: Int = 0
+    var seasonIndex: Int = 0
     var cellDelegate : BottomSheetCellDelegateSeason?
     var bottomSheetType = SeasonBottomSheetType.season
     

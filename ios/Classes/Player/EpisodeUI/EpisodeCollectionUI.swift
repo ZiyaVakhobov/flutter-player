@@ -18,7 +18,8 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
     var closeText : String = ""
     var seasonText : String = ""
     let videoPlayer = VideoPlayerViewController()
-    var selectedSeasonIndex: Int = 0
+    var seasonIndex: Int = 0
+    var episodeIndex: Int = 0
     var delegate : EpisodeDelegate?
     
     let deviceIdiom = UIScreen.main.traitCollection.userInterfaceIdiom
@@ -90,7 +91,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
         let button = UIButton(type: .custom)
         button.imageView?.contentMode = .scaleAspectFit
         button.tintColor = .white
-        button.setTitle("\(selectedSeasonIndex + 1) \(seasonText)", for: .normal)
+        button.setTitle("\(seasonIndex + 1) \(seasonText)", for: .normal)
         button.setImage(Svg.down.uiImage, for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -135,7 +136,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
                 menuHeight = UIScreen.main.bounds.height * 0.4
             }
         }
-        seasonSelectBtn.setTitle("\(selectedSeasonIndex + 1) \(seasonText)", for: .normal)
+        seasonSelectBtn.setTitle("\(seasonIndex + 1) \(seasonText)", for: .normal)
         
         setupUI()
         
@@ -208,7 +209,8 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
         seasonVC.closeText = closeText
         seasonVC.cellDelegate = self
         seasonVC.bottomSheetType = .season
-        seasonVC.selectedIndex = selectedSeasonIndex
+        seasonVC.selectedIndex = seasonIndex
+        seasonVC.episodeIndex = episodeIndex
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.present(seasonVC, animated: false, completion:nil)
         }
@@ -247,21 +249,15 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.contentInsetAdjustmentBehavior = .never
-//        if UIDevice.current.userInterfaceIdiom == .phone {
-            collectionView.snp.makeConstraints { make in
+        collectionView.snp.makeConstraints { make in
                 make.height.equalTo(collectionView.snp_height).multipliedBy(0.5)
             }
-//        } else {
-//            collectionView.snp.makeConstraints { make in
-//                make.width.equalTo(collectionView.snp_width).multipliedBy(0.5)
-//            }
-//        }
     }
     
     func onBottomSheetCellTapped(index: Int, type: SeasonBottomSheetType) {
         videoPlayer.updateSeasonNum(index: index)
-        selectedSeasonIndex = index
-        seasonSelectBtn.setTitle("\(selectedSeasonIndex+1) сезон", for: .normal)
+        seasonIndex = index
+        seasonSelectBtn.setTitle("\(seasonIndex+1) сезон", for: .normal)
         DispatchQueue.main.async {
             self.collectionView.reloadData()
         }
@@ -286,15 +282,20 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
 
 extension EpisodeCollectionUI: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return seasons[selectedSeasonIndex].movies.count
+        return seasons[seasonIndex].movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! EpisodeCollectionCell
         cell.backgroundColor = .clear
         cell.layer.cornerRadius = 8
-        cell.episodes = seasons[selectedSeasonIndex].movies[indexPath.row]
-        let url = URL(string: seasons[selectedSeasonIndex].movies[indexPath.row].image ?? "")
+        if episodeIndex == indexPath.row {
+            cell.titleLbl.textColor = Colors.blue
+            cell.durationLbl.textColor = Colors.blue
+            cell.descriptionLabel.textColor = Colors.blue
+        }
+        cell.episodes = seasons[seasonIndex].movies[indexPath.row]
+        let url = URL(string: seasons[seasonIndex].movies[indexPath.row].image ?? "")
         cell.episodeImage.sd_setImage(with: url, completed: nil)
         return cell
     }
@@ -314,7 +315,7 @@ extension EpisodeCollectionUI: UICollectionViewDelegateFlowLayout, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        delegate?.onEpisodeCellTapped(seasonIndex: selectedSeasonIndex, episodeIndex: indexPath.row)
+        delegate?.onEpisodeCellTapped(seasonIndex: seasonIndex, episodeIndex: indexPath.row)
         dismiss(animated: true, completion: nil)
     }
     

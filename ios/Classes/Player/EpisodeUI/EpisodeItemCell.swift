@@ -66,6 +66,7 @@ class EpisodeCollectionCell: UICollectionViewCell {
         label.font = UIFont.systemFont(ofSize: 15,weight: .semibold)
         return label
     }()
+    
    lazy var durationLbl: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false

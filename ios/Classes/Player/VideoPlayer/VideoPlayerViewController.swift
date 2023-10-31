@@ -445,7 +445,8 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         episodeVC.modalPresentationStyle = .custom
         episodeVC.seasons = self.seasons
         episodeVC.delegate = self
-        episodeVC.selectedSeasonIndex = selectedSeason
+        episodeVC.seasonIndex = selectedSeason
+        episodeVC.episodeIndex = selectSesonNum
         self.present(episodeVC, animated: true, completion: nil)
     }
     
@@ -807,6 +808,7 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
     func speedBottomSheet() {
         showSpeedBottomSheet()
     }
+    
     func qualityBottomSheet() {
         showQualityBottomSheet()
     }
