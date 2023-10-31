@@ -68,7 +68,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     var selectedQualityText = "Auto"
     private var selectedSubtitle = "None"
     
-    private var playerView: PlayerView = {
+    lazy private var playerView: PlayerView = {
         return PlayerView()
     }()
 
@@ -122,7 +122,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             }
         }
         view.backgroundColor = .black
-        
+
         playerView.delegate = self
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
