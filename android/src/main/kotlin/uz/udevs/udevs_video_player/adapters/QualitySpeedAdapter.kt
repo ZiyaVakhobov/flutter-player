@@ -15,7 +15,7 @@ class QualitySpeedAdapter(
     private val currentValue: String,
     private val context: Context,
     private val items: ArrayList<String>,
-    var onClickListener: OnClickListener,
+    private var onClickListener: OnClickListener,
 ) : BaseAdapter() {
 
     override fun getCount(): Int {

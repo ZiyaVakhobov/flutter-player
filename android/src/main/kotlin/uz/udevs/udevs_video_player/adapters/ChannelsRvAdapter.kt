@@ -14,7 +14,7 @@ import uz.udevs.udevs_video_player.models.TvChannel
 class ChannelsRvAdapter(
     var context: Context,
     var list: List<TvChannel>,
-    var onClickListener: OnClickListener
+    private var onClickListener: OnClickListener
 ) :
     RecyclerView.Adapter<ChannelsRvAdapter.Vh>() {
 

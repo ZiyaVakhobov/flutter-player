@@ -23,7 +23,8 @@ class TvProgramsPagerAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Vh {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.tv_program_page, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.tv_program_page, parent, false)
         return Vh(view)
     }
 
