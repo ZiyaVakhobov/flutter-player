@@ -43,7 +43,6 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER
 import androidx.mediarouter.app.MediaRouteButton
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadRequestData
@@ -1439,10 +1438,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         lastClicked - System.currentTimeMillis() <= 300
 
     override fun onLongPress(p0: MotionEvent) = Unit
-    override fun onFling(p0: MotionEvent, p1: MotionEvent, p2: Float, p3: Float): Boolean = false
+
+    override fun onFling(e1: MotionEvent?, p0: MotionEvent, p2: Float, p3: Float): Boolean = false
 
     override fun onScroll(
-        event: MotionEvent, event1: MotionEvent, distanceX: Float, distanceY: Float
+        e1: MotionEvent?, event: MotionEvent, distanceX: Float, distanceY: Float
     ): Boolean {
         if (abs(distanceX) < abs(distanceY)) {
             if (event.x < sWidth / 2) {

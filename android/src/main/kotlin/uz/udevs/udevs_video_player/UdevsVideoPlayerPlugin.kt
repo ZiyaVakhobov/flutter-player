@@ -1,5 +1,6 @@
 package uz.udevs.udevs_video_player
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -42,17 +43,20 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var activity: Activity? = null
     private var resultMethod: Result? = null
     private var downloadTracker: DownloadTracker? = null
-    lateinit var renderersFactory: RenderersFactory
+    private lateinit var renderersFactory: RenderersFactory
     val gson = Gson()
 
-    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "udevs_video_player")
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        binding.platformViewRegistry.registerViewFactory(
+            "plugins.udevs/video_player_view", VideoPlayerViewFactory(binding.binaryMessenger)
+        )
+        channel = MethodChannel(binding.binaryMessenger, "udevs_video_player")
         channel.setMethodCallHandler(this)
-        downloadTracker = DownloadUtil.getDownloadTracker(flutterPluginBinding.applicationContext)
-        startDownloadService(flutterPluginBinding.applicationContext)
+        downloadTracker = DownloadUtil.getDownloadTracker(binding.applicationContext)
+        startDownloadService(binding.applicationContext)
         downloadTracker!!.addListener(this)
         renderersFactory =
-            DownloadUtil.buildRenderersFactory(flutterPluginBinding.applicationContext, false)
+            DownloadUtil.buildRenderersFactory(binding.applicationContext, false)
         val download = downloadTracker?.getDownload()
         if (download != null) {
             runnable = object : Runnable {
@@ -69,6 +73,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     override fun onMethodCall(call: MethodCall, result: Result) {
         if (call.method == "playVideo") {
             if (call.hasArgument("playerConfigJsonString")) {
@@ -104,31 +109,39 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     "downloadVideo" -> {
                         downloadTracker?.toggleDownload(mediaItem, renderersFactory)
                     }
+
                     "checkIsDownloadedVideo" -> {
                         val isDownloaded =
                             downloadTracker!!.isDownloaded(mediaItem)
                         result.success(isDownloaded)
                     }
+
                     "getCurrentProgressDownload" -> {
                         val progressDownload =
                             downloadTracker?.getCurrentProgressDownload(mediaItem)
                         result.success(progressDownload)
                     }
+
                     "pauseDownload" -> {
                         downloadTracker?.pauseDownloading(mediaItem)
                     }
+
                     "resumeDownload" -> {
                         downloadTracker?.resumeDownload(mediaItem)
                     }
+
                     "getStateDownload" -> {
                         result.success(downloadTracker?.getStateDownload(mediaItem))
                     }
+
                     "getBytesDownloaded" -> {
                         result.success(downloadTracker?.getBytesDownloaded(mediaItem))
                     }
+
                     "getContentBytesDownload" -> {
                         result.success(downloadTracker?.getContentBytesDownload(mediaItem))
                     }
+
                     "removeDownload" -> {
                         downloadTracker?.removeDownload(mediaItem)
                     }
@@ -179,6 +192,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
 
     /** Start the download service if it should be running but it's not currently.  */
+    @SuppressLint("UnsafeOptInUsageError")
     private fun startDownloadService(context: Context) {
         // Starting the service in the foreground causes notification flicker if there is no scheduled
         // action. Starting it in the background throws an exception if the app is in the background too
@@ -194,7 +208,9 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     val handler = Handler(Looper.getMainLooper())
-    var runnable: Runnable? = null
+    private var runnable: Runnable? = null
+
+    @SuppressLint("UnsafeOptInUsageError")
     override fun onDownloadsChanged(download: Download) {
         if (download.state == Download.STATE_DOWNLOADING) {
             runnable = object : Runnable {
@@ -216,12 +232,13 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private fun toJson(download: Download): String {
         var percent = download.percentDownloaded.roundToInt()
         if (download.state == Download.STATE_REMOVING) {
             percent = 0
         }
-        val toJson = gson.toJson(
+        return gson.toJson(
             MediaItemDownload(
                 download.request.id,
                 percent,
@@ -229,7 +246,6 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 download.bytesDownloaded
             )
         )
-        return toJson
     }
 
 }

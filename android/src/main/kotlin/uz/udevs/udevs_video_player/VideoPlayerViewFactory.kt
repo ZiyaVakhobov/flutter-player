@@ -7,9 +7,9 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
 
-class WebViewFactory(private val messenger: BinaryMessenger) :
+class VideoPlayerViewFactory(private val messenger: BinaryMessenger) :
     PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, id: Int, o: Any?): PlatformView {
-        return FlutterVideoPlayerView(context, messenger, id)
+        return VideoPlayerView(context, messenger, id)
     }
 }

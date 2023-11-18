@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
 import 'package:udevs_video_player_example/second_page.dart';
+import 'package:udevs_video_player_example/video_view_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -322,10 +323,21 @@ class _MainPageState extends State<MainPage> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                      builder: (context) => const SecondPage()),
+                    builder: (context) => const SecondPage(),
+                  ),
                 );
               },
               child: const Text('Got to next page'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const VideoPlayerPage(),
+                  ),
+                );
+              },
+              child: const Text('Got to video view page'),
             ),
             ElevatedButton(
               onPressed: () async {

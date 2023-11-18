@@ -11,15 +11,15 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.platform.PlatformView
+import uz.udevs.udevs_video_player.models.VideoViewModel
 
-class FlutterVideoPlayerView internal constructor(
+class VideoPlayerView internal constructor(
     context: Context,
     messenger: BinaryMessenger,
     id: Int
@@ -36,44 +36,55 @@ class FlutterVideoPlayerView internal constructor(
         // Init WebView
         player = ExoPlayer.Builder(context).build()
         playerView = PlayerView(context)
-        methodChannel = MethodChannel(messenger, "plugins.codingwithtashi/flutter_web_view_$id")
+        methodChannel = MethodChannel(messenger, "plugins.udevs/video_player_view_$id")
         // Init methodCall Listener
         methodChannel.setMethodCallHandler(this)
     }
 
     override fun onMethodCall(methodCall: MethodCall, result: MethodChannel.Result) {
         when (methodCall.method) {
-            "setUrl" -> setText(methodCall, result)
+            "setUrl" -> setUrl(methodCall, result)
+            "setAssets" -> setAssets(methodCall, result)
             else -> result.notImplemented()
         }
     }
 
     // set and load new Url
     @SuppressLint("UnsafeOptInUsageError")
-    private fun setText(methodCall: MethodCall, result: MethodChannel.Result) {
-        val url = methodCall.arguments as String
-
-        val uri = Uri.parse("asset:///flutter_assets/${url}")
-//        val uri = Uri.parse("https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/master.m3u8")
+    private fun setUrl(methodCall: MethodCall, result: MethodChannel.Result) {
+        val args = VideoViewModel(methodCall.arguments as Map<*, *>)
         val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(playerView.context)
-        val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(uri))
-//        val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-//            .createMediaSource(MediaItem.fromUri(uri))
+        val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(args.getUrl()))
         playerView.player = player
         playerView.keepScreenOn = true
         playerView.useController = false
-        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        playerView.resizeMode = args.getResizeMode()
+        player.setMediaSource(hlsMediaSource)
+        player.prepare()
+        player.playWhenReady = true
+        result.success(null)
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    private fun setAssets(methodCall: MethodCall, result: MethodChannel.Result) {
+        val args = VideoViewModel(methodCall.arguments as Map<*, *>)
+        val uri = Uri.parse("asset:///flutter_assets/${args.getUrl()}")
+        val dataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(playerView.context)
+        val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(MediaItem.fromUri(uri))
+        playerView.player = player
+        playerView.keepScreenOn = true
+        playerView.useController = false
+        playerView.resizeMode = args.getResizeMode()
         player.setMediaSource(mediaSource)
         player.prepare()
         player.playWhenReady = true
         result.success(null)
     }
 
-    // Destroy WebView when PlatformView is destroyed
     override fun dispose() {
         player.pause()
         player.release()
     }
-
 }
