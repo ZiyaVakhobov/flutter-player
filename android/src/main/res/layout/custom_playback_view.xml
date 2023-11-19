@@ -142,7 +142,10 @@
             <ProgressBar
                 android:id="@+id/video_progress_bar"
                 android:layout_width="60dp"
-                android:layout_height="60dp" />
+                android:layout_height="60dp"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/white"
+                android:indeterminateTintMode="src_atop" />
 
         </LinearLayout>
 
