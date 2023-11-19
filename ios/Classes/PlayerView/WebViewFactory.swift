@@ -4,10 +4,10 @@ import Flutter
 import UIKit
 
 class WebViewFactory: NSObject, FlutterPlatformViewFactory {
-    private var messenger: FlutterBinaryMessenger
+    private var registrar: FlutterPluginRegistrar
 
-    init(messenger: FlutterBinaryMessenger) {
-        self.messenger = messenger
+    init(registrar: FlutterPluginRegistrar) {
+        self.registrar = registrar
         super.init()
     }
 
@@ -20,6 +20,6 @@ class WebViewFactory: NSObject, FlutterPlatformViewFactory {
             frame: frame,
             viewIdentifier: viewId,
             arguments: args,
-            binaryMessenger: messenger)
+            registrar: registrar)
     }
 }

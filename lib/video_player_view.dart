@@ -19,13 +19,17 @@ class VideoPlayerView extends StatelessWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return AndroidView(
+          layoutDirection: TextDirection.ltr,
           viewType: 'plugins.udevs/video_player_view',
           onPlatformViewCreated: _onPlatformViewCreated,
         );
       case TargetPlatform.iOS:
         return UiKitView(
+          layoutDirection: TextDirection.ltr,
+          creationParams: const <String, dynamic>{},
           viewType: 'plugins.udevs/video_player_view',
           onPlatformViewCreated: _onPlatformViewCreated,
+          creationParamsCodec: const StandardMessageCodec(),
         );
       default:
         return Text(

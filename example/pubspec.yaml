@@ -1,6 +1,7 @@
 name: udevs_video_player_example
 description: Demonstrates how to use the udevs_video_player plugin.
 publish_to: 'none'
+version: 1.0.0
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
