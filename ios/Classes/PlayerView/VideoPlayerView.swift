@@ -4,7 +4,7 @@ import AVFoundation
 import Flutter
 import UIKit
 
-class FlutterWebView: NSObject, FlutterPlatformView {
+class VideoPlayerView: NSObject, FlutterPlatformView {
     private var viewId: Int64
     private var videoView : UIView
     private var videoViewController: VideoViewController

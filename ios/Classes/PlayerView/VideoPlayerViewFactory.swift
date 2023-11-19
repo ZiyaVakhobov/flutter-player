@@ -3,7 +3,7 @@ import Foundation
 import Flutter
 import UIKit
 
-class WebViewFactory: NSObject, FlutterPlatformViewFactory {
+class VideoPlayerViewFactory: NSObject, FlutterPlatformViewFactory {
     private var registrar: FlutterPluginRegistrar
 
     init(registrar: FlutterPluginRegistrar) {
@@ -16,7 +16,7 @@ class WebViewFactory: NSObject, FlutterPlatformViewFactory {
         viewIdentifier viewId: Int64,
         arguments args: Any?
     ) -> FlutterPlatformView {
-        return FlutterWebView(
+        return VideoPlayerView(
             frame: frame,
             viewIdentifier: viewId,
             arguments: args,

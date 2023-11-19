@@ -31,7 +31,7 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         channel = FlutterMethodChannel(name: "udevs_video_player", binaryMessenger: registrar.messenger())
         let instance = SwiftUdevsVideoPlayerPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel!)
-        let videoViewFactory = WebViewFactory(registrar: registrar)
+        let videoViewFactory = VideoPlayerViewFactory(registrar: registrar)
         registrar.register(videoViewFactory, withId: "plugins.udevs/video_player_view")
     }
     
