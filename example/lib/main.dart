@@ -391,3 +391,13 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 }
+
+
+/// flutter pub run flutter_launcher_icons:main
+/// flutter run -d windows
+/// flutter build apk --release
+/// flutter build apk --split-per-abi
+/// flutter build appbundle --release
+/// flutter pub run build_runner watch --delete-conflicting-outputs
+/// flutter pub ipa
+/// dart fix --apply
