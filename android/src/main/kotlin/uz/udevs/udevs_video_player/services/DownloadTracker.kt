@@ -1,5 +1,6 @@
 package uz.udevs.udevs_video_player.services
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -13,7 +14,7 @@ import java.io.IOException
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.math.roundToInt
 
-
+@SuppressLint("UnsafeOptInUsageError")
 class DownloadTracker(
     context: Context,
     dataSourceFactory: DataSource.Factory,

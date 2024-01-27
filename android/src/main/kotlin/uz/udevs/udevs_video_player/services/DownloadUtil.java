@@ -15,6 +15,7 @@
  */
 package uz.udevs.udevs_video_player.services;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.media3.database.DatabaseProvider;
@@ -47,7 +48,6 @@ public final class DownloadUtil {
 
     public static final String DOWNLOAD_NOTIFICATION_CHANNEL_ID = "download_channel";
     private static final boolean USE_CRONET_FOR_NETWORKING = true;
-    private static final String TAG = "DemoUtil";
     private static final String DOWNLOAD_CONTENT_DIRECTORY = "downloads";
     private static DataSource.@MonotonicNonNull Factory dataSourceFactory;
     private static DataSource.@MonotonicNonNull Factory httpDataSourceFactory;
@@ -55,6 +55,7 @@ public final class DownloadUtil {
     private static @MonotonicNonNull File downloadDirectory;
     private static @MonotonicNonNull Cache downloadCache;
     private static @MonotonicNonNull DownloadManager downloadManager;
+    @SuppressLint("StaticFieldLeak")
     private static @MonotonicNonNull DownloadTracker downloadTracker;
     private static @MonotonicNonNull DownloadNotificationHelper downloadNotificationHelper;
 
@@ -62,6 +63,7 @@ public final class DownloadUtil {
         return false;
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     public static RenderersFactory buildRenderersFactory(
             Context context, boolean preferExtensionRenderer) {
         @DefaultRenderersFactory.ExtensionRendererMode
@@ -105,6 +107,7 @@ public final class DownloadUtil {
         return dataSourceFactory;
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     public static synchronized DownloadNotificationHelper getDownloadNotificationHelper(
             Context context) {
         if (downloadNotificationHelper == null) {
@@ -124,6 +127,7 @@ public final class DownloadUtil {
         return downloadTracker;
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private static synchronized Cache getDownloadCache(Context context) {
         if (downloadCache == null) {
             File downloadContentDirectory =
@@ -135,6 +139,7 @@ public final class DownloadUtil {
         return downloadCache;
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private static synchronized void ensureDownloadManagerInitialized(Context context) {
         if (downloadManager == null) {
             downloadManager =
@@ -149,6 +154,7 @@ public final class DownloadUtil {
         }
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private static synchronized DatabaseProvider getDatabaseProvider(Context context) {
         if (databaseProvider == null) {
             databaseProvider = new StandaloneDatabaseProvider(context);
@@ -166,6 +172,7 @@ public final class DownloadUtil {
         return downloadDirectory;
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private static CacheDataSource.Factory buildReadOnlyCacheDataSource(
             DataSource.Factory upstreamFactory, Cache cache) {
         return new CacheDataSource.Factory()

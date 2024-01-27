@@ -17,6 +17,7 @@ package uz.udevs.udevs_video_player.services;
 
 import static uz.udevs.udevs_video_player.services.DownloadUtil.DOWNLOAD_NOTIFICATION_CHANNEL_ID;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Context;
 
@@ -37,6 +38,7 @@ import java.util.List;
 
 import uz.udevs.udevs_video_player.R;
 
+@SuppressLint("UnsafeOptInUsageError")
 public class MyDownloadService extends DownloadService {
 
     private static final int JOB_ID = 1;

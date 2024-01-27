@@ -11,8 +11,21 @@ class VideoPlayerPage extends StatefulWidget {
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Video Player View')),
-        body: VideoPlayerView(onMapViewCreated: _onMapViewCreated),
+        body: Stack(
+          children: [
+            VideoPlayerView(onMapViewCreated: _onMapViewCreated),
+            Positioned(
+              child: SafeArea(
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close),
+                ),
+              ),
+            )
+          ],
+        ),
       );
 
   // load default assets

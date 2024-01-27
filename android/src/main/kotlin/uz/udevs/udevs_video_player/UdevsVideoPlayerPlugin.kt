@@ -23,7 +23,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import uz.udevs.udevs_video_player.activities.UdevsVideoPlayerActivity
+import uz.udevs.udevs_video_player.activities.VideoPlayerActivity
 import uz.udevs.udevs_video_player.models.DownloadConfiguration
 import uz.udevs.udevs_video_player.models.MediaItemDownload
 import uz.udevs.udevs_video_player.models.PlayerConfiguration
@@ -44,7 +44,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var resultMethod: Result? = null
     private var downloadTracker: DownloadTracker? = null
     private lateinit var renderersFactory: RenderersFactory
-    val gson = Gson()
+    private val gson = Gson()
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         binding.platformViewRegistry.registerViewFactory(
@@ -82,7 +82,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val playerConfiguration =
                     gson.fromJson(playerConfigJsonString, PlayerConfiguration::class.java)
                 val intent =
-                    Intent(activity?.applicationContext, UdevsVideoPlayerActivity::class.java)
+                    Intent(activity?.applicationContext, VideoPlayerActivity::class.java)
                 intent.putExtra(EXTRA_ARGUMENT, playerConfiguration)
                 activity?.startActivityForResult(intent, PLAYER_ACTIVITY)
                 resultMethod = result

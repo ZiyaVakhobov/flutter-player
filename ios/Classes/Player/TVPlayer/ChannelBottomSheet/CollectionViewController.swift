@@ -187,7 +187,7 @@ extension CollectionViewController: UICollectionViewDelegateFlowLayout, UICollec
             cell.backgroundColor = .clear
             cell.model = tv[indexPath.row]
             cell.label.text = tv[indexPath.row].title ?? ""
-            cell.label.textColor = indexPath.row == tvCategoryIndex ? Colors.mainColor : .white
+            cell.label.textColor = indexPath.row == tvCategoryIndex ? Colors.primary : .white
             cell.label.sizeToFit()
             return cell
         } else if collectionView == self.channelView {

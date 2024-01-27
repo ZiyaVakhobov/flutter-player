@@ -24,6 +24,7 @@ import android.util.Rational
 import android.view.*
 import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -60,29 +61,21 @@ import retrofit2.Response
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.PLAYER_ACTIVITY_FINISH
 import uz.udevs.udevs_video_player.R
-import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
-import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
-import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
-import uz.udevs.udevs_video_player.models.BottomSheet
-import uz.udevs.udevs_video_player.models.MegogoStreamResponse
-import uz.udevs.udevs_video_player.models.PlayerConfiguration
-import uz.udevs.udevs_video_player.models.PremierStreamResponse
-import uz.udevs.udevs_video_player.models.TvChannelResponse
+import uz.udevs.udevs_video_player.adapters.*
+import uz.udevs.udevs_video_player.models.*
 import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import uz.udevs.udevs_video_player.utils.MyHelper
 import kotlin.math.abs
-import uz.udevs.udevs_video_player.adapters.*
-import uz.udevs.udevs_video_player.models.*
 
 @UnstableApi
-class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
+class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
 
-    private var playerView: PlayerView? = null
-    private var player: ExoPlayer? = null
+    private lateinit var playerView: PlayerView
+    private lateinit var player: ExoPlayer
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
     private lateinit var intentFilter: IntentFilter
     private lateinit var playerConfiguration: PlayerConfiguration
@@ -155,17 +148,18 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     @SuppressLint("AppCompatMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.player_activity)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        setContentView(R.layout.activity_player)
         actionBar?.hide()
         val window = window
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         window.statusBarColor = Color.BLACK
         window.navigationBarColor = Color.BLACK
 
-        // IntentFilter yaratish
+        // IntentFilter create
         intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
 
-        // NetworkChangeReceiver yaratish
+        // NetworkChangeReceiver create
         networkChangeReceiver = object : NetworkChangeReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 super.onReceive(context, intent)
@@ -176,7 +170,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         }
 
-        // BroadcastReceiver ni faollashtirish
+        // BroadcastReceiver active
         registerReceiver(networkChangeReceiver, intentFilter)
 
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
@@ -292,9 +286,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 Log.d(tag, "onApplicationConnected: $mPlaybackState")
                 mCastSession = castSession
                 mLocation = PlaybackLocation.REMOTE
-                player?.pause()
+                player.pause()
                 performViewsOnConnect()
-                loadRemoteMedia(player?.currentPosition ?: 0)
+                loadRemoteMedia(player.currentPosition)
                 registerCallBack()
                 listenToProgress()
             }
@@ -304,8 +298,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 mPlaybackState = PlaybackState.IDLE
                 mLocation = PlaybackLocation.LOCAL
                 performViewsOnDisconnect()
-                player?.seekTo((customSeekBar!!.progress * 1000).toLong())
-                player?.play()
+                player.seekTo((customSeekBar!!.progress * 1000).toLong())
+                player.play()
             }
         }
     }
@@ -317,11 +311,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         exoProgress?.visibility = View.GONE
         customSeekBar?.visibility = View.VISIBLE
         customSeekBar?.isEnabled = true
-        Log.d(tag, "performViewsOnConnect: ${(player!!.duration / 1000).toInt()}")
-        customSeekBar?.max =
-            if (player?.duration != null) (player!!.duration / 1000).toInt() else 0
-        customSeekBar?.progress =
-            if (player?.currentPosition != null) (player!!.currentPosition / 1000).toInt() else 0
+        Log.d(tag, "performViewsOnConnect: ${(player.duration / 1000).toInt()}")
+        customSeekBar?.max = (player.duration / 1000).toInt()
+        customSeekBar?.progress = (player.currentPosition / 1000).toInt()
         customSeekBar?.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {}
 
@@ -416,35 +408,33 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             .build()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (player?.isPlaying == true) {
-            player?.stop()
+    private val onBackPressedCallback: OnBackPressedCallback =
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (player.isPlaying) {
+                    player.stop()
+                }
+                val seconds = player.currentPosition / 1000
+                removeProgressListener()
+                unregisterCallBack()
+                val intent = Intent()
+                intent.putExtra("position", seconds)
+                setResult(PLAYER_ACTIVITY_FINISH, intent)
+                finish()
+            }
         }
-        var seconds = 0L
-        if (player?.currentPosition != null) {
-            seconds = player?.currentPosition!! / 1000
-        }
-        removeProgressListener()
-        unregisterCallBack()
-        val intent = Intent()
-        intent.putExtra("position", seconds)
-        setResult(PLAYER_ACTIVITY_FINISH, intent)
-        finish()
-        super.onBackPressed()
-    }
 
     override fun onPause() {
         super.onPause()
-        val isPlaying = player?.isPlaying ?: false
-        player?.playWhenReady = false
+        val isPlaying = player.isPlaying
+        player.playWhenReady = false
         if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 isInPictureInPictureMode
             } else {
                 false
             }
         ) {
-            player?.playWhenReady = isPlaying
+            player.playWhenReady = isPlaying
             dismissAllBottomSheets()
         }
         mCastContext!!.sessionManager.removeSessionManagerListener(
@@ -455,7 +445,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onResume() {
         setAudioFocus()
         if (mLocation == PlaybackLocation.LOCAL)
-            player?.playWhenReady = true
+            player.playWhenReady = true
         if (brightness != 0.0) setScreenBrightness(brightness.toInt())
         mCastContext!!.sessionManager.addSessionManagerListener(
             mSessionManagerListener!!, CastSession::class.java
@@ -471,7 +461,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     override fun onRestart() {
         super.onRestart()
         if (mLocation == PlaybackLocation.LOCAL)
-            player?.playWhenReady = true
+            player.playWhenReady = true
     }
 
     override fun onStop() {
@@ -484,7 +474,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         ) {
             removeProgressListener()
             unregisterCallBack()
-            player?.release()
+            player.release()
             finish()
         }
     }
@@ -496,16 +486,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
         player = ExoPlayer.Builder(this).build()
-        playerView?.player = player
-        playerView?.keepScreenOn = true
-        playerView?.useController = playerConfiguration.showController
-        player?.setMediaSource(hlsMediaSource)
-        player?.seekTo(playerConfiguration.lastPosition * 1000)
-        player?.prepare()
-        player?.addListener(object : Player.Listener {
+        playerView.player = player
+        playerView.keepScreenOn = true
+        playerView.useController = playerConfiguration.showController
+        player.setMediaSource(hlsMediaSource)
+        player.seekTo(playerConfiguration.lastPosition * 1000)
+        player.prepare()
+        player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Log.d(tag, "onPlayerError: ${error.errorCode}")
-                player?.pause()
+                player.pause()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -526,8 +516,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         mPlaybackState = PlaybackState.BUFFERING
                         playPause?.visibility = View.GONE
                         progressbar?.visibility = View.VISIBLE
-                        if (playerView?.isControllerFullyVisible == false) {
-                            playerView?.setShowBuffering(SHOW_BUFFERING_ALWAYS)
+                        if (!playerView.isControllerFullyVisible) {
+                            playerView.setShowBuffering(SHOW_BUFFERING_ALWAYS)
                         }
                     }
 
@@ -537,8 +527,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         }
                         playPause?.visibility = View.VISIBLE
                         progressbar?.visibility = View.GONE
-                        if (playerView?.isControllerFullyVisible == false) {
-                            playerView?.setShowBuffering(SHOW_BUFFERING_NEVER)
+                        if (!playerView.isControllerFullyVisible) {
+                            playerView.setShowBuffering(SHOW_BUFFERING_NEVER)
                         }
                     }
 
@@ -553,7 +543,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             }
         })
         if (mLocation == PlaybackLocation.LOCAL) {
-            player?.playWhenReady = true
+            player.playWhenReady = true
         } else {
             if (!sameWithStreamingContent) {
                 loadRemoteMedia(playerConfiguration.lastPosition)
@@ -564,8 +554,8 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     }
 
     private fun rePlayVideo() {
-        player?.prepare()
-        player?.play()
+        player.prepare()
+        player.play()
     }
 
     private var lastClicked1: Long = -1L
@@ -642,7 +632,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
             if (motionEvent.pointerCount == 2) {
                 scaleGestureDetector?.onTouchEvent(motionEvent)
-            } else if (playerView?.isControllerFullyVisible == false && motionEvent.pointerCount == 1) {
+            } else if (!playerView.isControllerFullyVisible && motionEvent.pointerCount == 1) {
                 gestureDetector?.onTouchEvent(motionEvent)
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
                     layoutBrightness?.visibility = View.GONE
@@ -663,18 +653,18 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 } else {
                     if (isDoubleClicked(lastClicked1)) {
                         if (motionEvent!!.x < sWidth / 2) {
-                            player?.seekTo(player!!.currentPosition - 10000)
+                            player.seekTo(player.currentPosition - 10000)
                         } else {
-                            player?.seekTo(player!!.currentPosition + 10000)
+                            player.seekTo(player.currentPosition + 10000)
                         }
                     } else {
-                        playerView?.hideController()
+                        playerView.hideController()
                     }
                     -1L
                 }
                 Handler(Looper.getMainLooper()).postDelayed({
                     if (lastClicked1 != -1L) {
-                        playerView?.hideController()
+                        playerView.hideController()
                         lastClicked1 = -1L
                     }
                 }, 300)
@@ -682,18 +672,16 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             return@setOnTouchListener true
         }
 
-        shareMovieLinkIv?.setOnClickListener() {
+        shareMovieLinkIv?.setOnClickListener {
             shareMovieLink()
         }
 
         close?.setOnClickListener {
-            if (player?.isPlaying == true) {
-                player?.stop()
+            if (player.isPlaying) {
+                player.stop()
             }
-            var seconds = 0L
-            if (player?.currentPosition != null) {
-                seconds = player?.currentPosition!! / 1000
-            }
+            val seconds = player.currentPosition / 1000
+
             removeProgressListener()
             unregisterCallBack()
             val intent = Intent()
@@ -723,7 +711,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         rewind?.setOnClickListener {
             if (mLocation == PlaybackLocation.LOCAL) {
-                if (player != null) player?.seekTo(player!!.currentPosition - 10000)
+                player.seekTo(player.currentPosition - 10000)
             } else {
                 val remoteMediaClient = mCastSession!!.remoteMediaClient
                 val seekOptions: MediaSeekOptions = MediaSeekOptions
@@ -735,7 +723,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         forward?.setOnClickListener {
             if (mLocation == PlaybackLocation.LOCAL) {
-                if (player != null) player?.seekTo(player!!.currentPosition + 10000)
+                player.seekTo(player.currentPosition + 10000)
             } else {
                 val remoteMediaClient = mCastSession!!.remoteMediaClient
                 val seekOptions: MediaSeekOptions = MediaSeekOptions
@@ -747,10 +735,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         playPause?.setOnClickListener {
             if (mLocation == PlaybackLocation.LOCAL) {
-                if (player?.isPlaying == true) {
-                    player?.pause()
+                if (player.isPlaying) {
+                    player.pause()
                 } else {
-                    player?.play()
+                    player.play()
                 }
             } else {
                 val remoteMediaClient = mCastSession!!.remoteMediaClient
@@ -798,10 +786,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                 val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                player?.setMediaSource(hlsMediaSource)
-                player?.prepare()
+                player.setMediaSource(hlsMediaSource)
+                player.prepare()
                 if (mLocation == PlaybackLocation.LOCAL) {
-                    player?.playWhenReady
+                    player.playWhenReady
                 } else {
                     loadRemoteMedia(0)
                 }
@@ -814,20 +802,20 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             if (mLocation == PlaybackLocation.REMOTE) {
                 return@setOnClickListener
             }
-            when (playerView?.resizeMode) {
+            when (playerView.resizeMode) {
                 AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> {
                     zoom?.setImageResource(R.drawable.ic_fit)
-                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
 
                 AspectRatioFrameLayout.RESIZE_MODE_FILL -> {
                     zoom?.setImageResource(R.drawable.ic_crop_fit)
-                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 }
 
                 AspectRatioFrameLayout.RESIZE_MODE_FIT -> {
                     zoom?.setImageResource(R.drawable.ic_stretch)
-                    playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+                    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                 }
 
                 AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT -> {}
@@ -840,7 +828,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 } else {
                     if (playerConfiguration.isLive) {
-                        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                     }
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
@@ -880,11 +868,11 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
             if (isInPictureInPictureMode) {
-                playerView?.hideController()
-                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                playerView.hideController()
+                playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             } else {
-                playerView?.showController()
-                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+                playerView.showController()
+                playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
             }
         }
     }
@@ -910,9 +898,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
-                    player?.setMediaSource(hlsMediaSource)
-                    player?.prepare()
-                    player?.playWhenReady
+                    player.setMediaSource(hlsMediaSource)
+                    player.prepare()
+                    player.playWhenReady
                 }
             }
 
@@ -946,9 +934,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality])))
-                    player?.setMediaSource(hlsMediaSource)
-                    player?.prepare()
-                    player?.playWhenReady
+                    player.setMediaSource(hlsMediaSource)
+                    player.prepare()
+                    player.playWhenReady
                 }
             }
 
@@ -981,9 +969,9 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                    player?.setMediaSource(hlsMediaSource)
-                    player?.prepare()
-                    player?.playWhenReady
+                    player.setMediaSource(hlsMediaSource)
+                    player.prepare()
+                    player.playWhenReady
                 }
             }
 
@@ -999,7 +987,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setFullScreen()
             if (playerConfiguration.isLive) {
-                playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
             title?.text = title1?.text
             title?.visibility = View.VISIBLE
@@ -1039,7 +1027,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
             nextButton?.visibility = View.GONE
             zoom?.visibility = View.GONE
             orientation?.setImageResource(R.drawable.ic_landscape)
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             when (currentBottomSheet) {
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.GONE
@@ -1084,7 +1072,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
         val bottomSheetDialog = BottomSheetDialog(this)
-        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -1166,10 +1154,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         val hlsMediaSource: HlsMediaSource =
                             HlsMediaSource.Factory(dataSourceFactory)
                                 .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                        player?.setMediaSource(hlsMediaSource)
-                        player?.prepare()
+                        player.setMediaSource(hlsMediaSource)
+                        player.prepare()
                         if (mLocation == PlaybackLocation.LOCAL) {
-                            player?.playWhenReady
+                            player.playWhenReady
                         } else {
                             loadRemoteMedia(0)
                         }
@@ -1241,7 +1229,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         isSettingsBottomSheetOpened = true
         currentBottomSheet = BottomSheet.SETTINGS
         val bottomSheetDialog = BottomSheetDialog(this)
-        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
         backButtonSettingsBottomSheet = bottomSheetDialog.findViewById(R.id.settings_sheet_back)
@@ -1286,7 +1274,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         }
         bottomSheetDialog.show()
         bottomSheetDialog.setOnDismissListener {
-            isSettingsBottomSheetOpened = false;
+            isSettingsBottomSheetOpened = false
             currentBottomSheet = BottomSheet.NONE
         }
     }
@@ -1298,10 +1286,10 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         if (isQualitySpeedBottomSheetOpened) {
             return
         }
-        isQualitySpeedBottomSheetOpened = true;
+        isQualitySpeedBottomSheetOpened = true
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
         val bottomSheetDialog = BottomSheetDialog(this)
-        listOfAllOpenedBottomSheets.add(bottomSheetDialog);
+        listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.quality_speed_sheet)
@@ -1364,25 +1352,25 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                     if (fromQuality) {
                         currentQuality = l[position]
                         qualityText?.text = currentQuality
-                        if (player?.isPlaying == true) {
-                            player?.pause()
+                        if (player.isPlaying) {
+                            player.pause()
                         }
-                        val currentPosition = player?.currentPosition
+                        val currentPosition = player.currentPosition
                         val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                         url =
                             if (playerConfiguration.isSerial) playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality] else playerConfiguration.resolutions[currentQuality]
                         val hlsMediaSource: HlsMediaSource =
                             HlsMediaSource.Factory(dataSourceFactory)
                                 .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                        player?.setMediaSource(hlsMediaSource)
-                        player?.seekTo(currentPosition!!)
+                        player.setMediaSource(hlsMediaSource)
+                        player.seekTo(currentPosition)
                         if (mLocation == PlaybackLocation.LOCAL) {
-                            player?.play()
+                            player.play()
                         } else {
                             if (playerConfiguration.isSerial) {
-                                loadRemoteMedia(currentPosition ?: 0)
+                                loadRemoteMedia(currentPosition)
                             } else {
-                                loadRemoteMedia(currentPosition ?: 0)
+                                loadRemoteMedia(currentPosition)
                             }
                         }
                     } else {
@@ -1391,7 +1379,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
                         }
                         currentSpeed = l[position]
                         speedText?.text = currentSpeed
-                        player?.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
+                        player.setPlaybackSpeed(currentSpeed.replace("x", "").toFloat())
                     }
                     bottomSheetDialog.dismiss()
                 }
@@ -1416,18 +1404,18 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
         } else {
             if (isDoubleClicked(lastClicked)) {
                 if (event.x < sWidth / 2) {
-                    player?.seekTo(player!!.currentPosition - 10000)
+                    player.seekTo(player.currentPosition - 10000)
                 } else {
-                    player?.seekTo(player!!.currentPosition + 10000)
+                    player.seekTo(player.currentPosition + 10000)
                 }
             } else {
-                playerView?.showController()
+                playerView.showController()
             }
             -1L
         }
         Handler(Looper.getMainLooper()).postDelayed({
             if (lastClicked != -1L) {
-                playerView?.showController()
+                playerView.showController()
                 lastClicked = -1L
             }
         }, 300)
@@ -1485,17 +1473,17 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onScaleEnd(p0: ScaleGestureDetector) {
         if (scaleFactor > 1) {
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         } else {
-            playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+            playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
     }
 
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_LOSS -> {
-                player?.pause()
-                playerView?.hideController()
+                player.pause()
+                playerView.hideController()
             }
         }
     }
@@ -1525,7 +1513,7 @@ class UdevsVideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureL
 
     override fun onDestroy() {
         super.onDestroy()
-        // BroadcastReceiver ni to'xtatish
+        // BroadcastReceiver on destroy
         unregisterReceiver(networkChangeReceiver)
     }
 }

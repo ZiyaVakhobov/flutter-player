@@ -76,8 +76,4 @@ class VideoPlayerViewController {
   }
 }
 
-enum ResizeMode {
-  fit,
-  fill,
-  zoom,
-}
+enum ResizeMode { fit, fill, zoom }

@@ -70,13 +70,13 @@ class PlayerView: UIView {
     
     private var videoView: UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
+        view.backgroundColor = Colors.backgroud
         return view
     }()
     
     private var overlayView: UIView = {
         let view = UIView()
-        view.backgroundColor = Colors.black03
+        view.backgroundColor = .clear
         return view
     }()
     
@@ -123,9 +123,9 @@ class PlayerView: UIView {
         return liveView
     }()
     
-    private var landscapeButton: IconButton = {
+    private var rotateButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.portrait.uiImage, for: .normal)
+        button.setImage(Svg.rotate.uiImage, for: .normal)
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
         return button
     }()
@@ -156,8 +156,8 @@ class PlayerView: UIView {
     
     private var timeSlider: UISlider = {
         let slider = UISlider()
-        slider.tintColor = Colors.mainColor
-        slider.maximumTrackTintColor = .lightGray
+        slider.tintColor = Colors.primary
+        slider.maximumTrackTintColor = Colors.white50
         slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
         return slider
     }()
@@ -207,7 +207,7 @@ class PlayerView: UIView {
     
     private var skipBackwardButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.replay.uiImage, for: .normal)
+        button.setImage(Svg.rewind.uiImage, for: .normal)
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
@@ -330,9 +330,9 @@ class PlayerView: UIView {
             channelsButton.isHidden = true
         }
         if #available(iOS 13.0, *) {
-            setSliderThumbTintColor(Colors.mainColor)
+            setSliderThumbTintColor(Colors.primary)
         } else {
-            timeSlider.thumbTintColor = Colors.moreColor
+            timeSlider.thumbTintColor = Colors.primary
             brightnessSlider.thumbTintColor = Colors.white
         }
         setTitle(title: playerConfiguration.title)
@@ -351,16 +351,38 @@ class PlayerView: UIView {
         return image
     }
     
+    fileprivate func makeCircleWithBorder(size: CGSize, backgroundColor: UIColor, borderColor: UIColor, borderWidth: CGFloat) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        let context = UIGraphicsGetCurrentContext()
+        
+        // Draw the circle with background color
+        context?.setFillColor(backgroundColor.cgColor)
+        context?.setStrokeColor(UIColor.clear.cgColor)
+        let bounds = CGRect(origin: .zero, size: size)
+        context?.addEllipse(in: bounds)
+        context?.drawPath(using: .fill)
+        
+        // Draw the border
+        context?.setLineWidth(borderWidth)
+        context?.setStrokeColor(borderColor.cgColor)
+        context?.addEllipse(in: bounds.insetBy(dx: borderWidth / 2, dy: borderWidth / 2))
+        context?.drawPath(using: .stroke)
+        
+        // Get the image from the context
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image
+    }
+    
     private func setSliderThumbTintColor(_ color: UIColor) {
         let circle = makeCircleWith(size: CGSize(width: 4, height: 4),
                                          backgroundColor: UIColor.white)
         brightnessSlider.setThumbImage(circle, for: .normal)
-        brightnessSlider.setThumbImage(circle, for: .highlighted)
         ///
-        let circleImage = makeCircleWith(size: CGSize(width: 24, height: 24),
-                                         backgroundColor: color)
+        let circleImage = makeCircleWithBorder(size: CGSize(width: 24, height: 24),
+                                               backgroundColor: color, borderColor: Colors.backgroud, borderWidth: 3)
         timeSlider.setThumbImage(circleImage, for: .normal)
-        timeSlider.setThumbImage(circleImage, for: .highlighted)
     }
     
     func loadMediaPlayer(asset:AVURLAsset){
@@ -649,14 +671,13 @@ class PlayerView: UIView {
         }
         titleLabelLandacape.isHidden = true
         titleLabelPortrait.isHidden = false
-        landscapeButton.setImage(Svg.portrait.uiImage, for: .normal)
+        rotateButton.setImage(Svg.rotate.uiImage, for: .normal)
     }
     
     private func addVideoLandscapeConstraints() {
         self.playerLayer.videoGravity = .resizeAspect
         titleLabelLandacape.isHidden = false
         titleLabelPortrait.isHidden = true
-        landscapeButton.setImage(Svg.horizontal.uiImage, for: .normal)
     }
     
     func addGestures(){
@@ -678,7 +699,7 @@ class PlayerView: UIView {
         overlayView.addSubview(skipBackwardButton)
         overlayView.addSubview(activityIndicatorView)
         overlayView.addSubview(bottomView)
-        overlayView.addSubview(landscapeButton)
+        overlayView.addSubview(rotateButton)
         overlayView.addSubview(topView)
         overlayView.addSubview(titleLabelPortrait)
         addTopViewSubviews()
@@ -694,7 +715,7 @@ class PlayerView: UIView {
         bottomView.addSubview(episodesButton)
         bottomView.addSubview(channelsButton)
         bottomView.addSubview(showsBtn)
-        bottomView.addSubview(landscapeButton)
+        bottomView.addSubview(rotateButton)
         bottomView.addSubview(liveStackView)
     }
     
@@ -765,27 +786,27 @@ class PlayerView: UIView {
             make.right.equalToSuperview().offset(-8)
         }
         
-        landscapeButton.bottomToTop(of: timeSlider, offset: 8)
-        landscapeButton.snp.makeConstraints { make in
+        rotateButton.bottomToTop(of: timeSlider, offset: 8)
+        rotateButton.snp.makeConstraints { make in
             make.right.equalTo(bottomView).offset(0)
         }
         
         currentTimeLabel.snp.makeConstraints { make in
             make.left.equalTo(bottomView).offset(8)
         }
-        currentTimeLabel.centerY(to: landscapeButton)
+        currentTimeLabel.centerY(to: rotateButton)
         
         seperatorLabel.leftToRight(of: currentTimeLabel)
         seperatorLabel.centerY(to: currentTimeLabel)
-        channelsButton.rightToLeft(of: landscapeButton, offset: -8)
-        channelsButton.centerY(to: landscapeButton)
+        channelsButton.rightToLeft(of: rotateButton, offset: -8)
+        channelsButton.centerY(to: rotateButton)
         
         durationTimeLabel.leftToRight(of: seperatorLabel)
         durationTimeLabel.centerY(to: seperatorLabel)
         
         
-        episodesButton.rightToLeft(of: landscapeButton, offset: -8)
-        episodesButton.centerY(to: landscapeButton)
+        episodesButton.rightToLeft(of: rotateButton, offset: -8)
+        episodesButton.centerY(to: rotateButton)
         
         showsBtn.rightToLeft(of: channelsButton, offset: -16)
         showsBtn.centerY(to: channelsButton)
@@ -793,7 +814,7 @@ class PlayerView: UIView {
         liveStackView.bottomToTop(of: timeSlider)
         liveStackView.spacing = 24
         liveStackView.leftToSuperview(offset: 2)
-        liveStackView.centerY(to: landscapeButton)
+        liveStackView.centerY(to: rotateButton)
         
         if !playerConfiguration.isSerial {
             episodesButton.isHidden = true
