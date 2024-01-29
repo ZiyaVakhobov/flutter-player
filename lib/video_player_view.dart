@@ -10,9 +10,11 @@ class VideoPlayerView extends StatelessWidget {
   const VideoPlayerView({
     super.key,
     required this.onMapViewCreated,
+    required this.url,
   });
 
   final FlutterVideoPayerViewCreatedCallback onMapViewCreated;
+  final String url;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,10 @@ class VideoPlayerView extends StatelessWidget {
       case TargetPlatform.iOS:
         return UiKitView(
           layoutDirection: TextDirection.ltr,
-          creationParams: const <String, dynamic>{},
+          creationParams: <String, dynamic>{
+            if (url.contains('http')) 'url': url,
+            if (url.contains('assets')) 'assets': url,
+          },
           viewType: 'plugins.udevs/video_player_view',
           onPlatformViewCreated: _onPlatformViewCreated,
           creationParamsCodec: const StandardMessageCodec(),
@@ -73,6 +78,25 @@ class VideoPlayerViewController {
         'resizeMode': resizeMode.name,
       },
     );
+  }
+
+  Future<void> pause() async => _channel.invokeMethod('pause');
+
+  Future<void> play() async => _channel.invokeMethod('play');
+
+  Future<void> mute() async => _channel.invokeMethod('mute');
+
+  Future<void> unMute() async => _channel.invokeMethod('un-mute');
+
+  Stream<dynamic>? listener() {
+    _channel.setMethodCallHandler(
+      (call) async {
+        if (call.method == 'finished') {
+          return call.arguments;
+        }
+      },
+    );
+    return null;
   }
 }
 

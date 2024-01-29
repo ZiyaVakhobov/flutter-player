@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:udevs_video_player/video_player_view.dart';
 
@@ -9,11 +10,26 @@ class VideoPlayerPage extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
+  VideoPlayerViewController? controller;
+
+  bool isPlay = true;
+  bool isMute = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Stack(
           children: [
-            VideoPlayerView(onMapViewCreated: _onMapViewCreated),
+            Align(
+              child: VideoPlayerView(
+                url: 'assets/splash.mp4',
+                onMapViewCreated: _onMapViewCreated,
+              ),
+            ),
             Positioned(
               child: SafeArea(
                 child: IconButton(
@@ -23,21 +39,57 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   icon: const Icon(Icons.close),
                 ),
               ),
+            ),
+            Align(
+              child: IconButton(
+                onPressed: () {
+                  if (isPlay) {
+                    controller?.pause();
+                  } else {
+                    controller?.play();
+                  }
+                  setState(() {
+                    isPlay = !isPlay;
+                  });
+                },
+                icon: isPlay
+                    ? const Icon(Icons.pause)
+                    : const Icon(Icons.play_arrow),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                child: IconButton(
+                  onPressed: () {
+                    if (isMute) {
+                      controller?.unMute();
+                    } else {
+                      controller?.mute();
+                    }
+                    setState(() {
+                      isMute = !isMute;
+                    });
+                  },
+                  icon: isMute
+                      ? const Icon(Icons.volume_off)
+                      : const Icon(Icons.volume_up),
+                ),
+              ),
             )
           ],
         ),
       );
 
   // load default assets
-  void _onMapViewCreated(VideoPlayerViewController controller) {
-    controller.setAssets(
-      assets: 'assets/splash.mp4',
-      resizeMode: ResizeMode.fill,
-    );
-    // controller.setUrl(
-    //   url:
-    //       'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8',
-    // );
+  void _onMapViewCreated(VideoPlayerViewController ctr) {
+    controller = ctr;
+    ctr.listener()?.listen((event) {
+      if (kDebugMode) {
+        print(event);
+      }
+    });
   }
 }
 
