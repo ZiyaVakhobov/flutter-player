@@ -25,8 +25,9 @@ class VideoPlayerView: NSObject, FlutterPlatformView {
         _methodChannel = FlutterMethodChannel(name: "plugins.udevs/video_player_view_\(viewId)", binaryMessenger: registrar.messenger())
         let url: String? = args?["url"] as? String
         let assets: String? = args?["assets"] as? String
-        
-        let viewController = VideoViewController(registrar: registrar, methodChannel: _methodChannel, assets: assets ?? "", url: url ?? "")
+        let sourceType: String? = args?["resizeMode"] as? String
+        let gravity = videoGravity(s: sourceType ?? "")
+        let viewController = VideoViewController(registrar: registrar, methodChannel: _methodChannel, assets: assets ?? "", url: url ?? "", gravity: gravity)
         self.videoViewController = viewController
         self.videoView.addSubview(videoViewController.view)
         super.init()
@@ -96,17 +97,17 @@ class VideoPlayerView: NSObject, FlutterPlatformView {
     func setUnMute(call: FlutterMethodCall, result: FlutterResult){
         self.videoViewController.unMute()
     }
-    
-    func videoGravity(s:String?) -> AVLayerVideoGravity{
-        switch(s){
-        case "fit":
-            return .resizeAspect
-        case "fill":
-            return .resizeAspectFill
-        case "zoom":
-            return .resize
-        default:
-            return .resizeAspect
-        }
+}
+
+func videoGravity(s:String?) -> AVLayerVideoGravity {
+    switch(s){
+    case "fit":
+        return .resizeAspect
+    case "fill":
+        return .resizeAspectFill
+    case "zoom":
+        return .resize
+    default:
+        return .resizeAspect
     }
 }

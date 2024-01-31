@@ -16,6 +16,7 @@ class VideoViewController: UIViewController {
     //
     var assets: String = ""
     var url: String = ""
+    var gravity: AVLayerVideoGravity
     
     //
     lazy private var player = AVPlayer()
@@ -26,11 +27,12 @@ class VideoViewController: UIViewController {
         return view
     }()
     
-    init(registrar: FlutterPluginRegistrar? = nil, methodChannel: FlutterMethodChannel, assets: String, url:String) {
+    init(registrar: FlutterPluginRegistrar? = nil, methodChannel: FlutterMethodChannel, assets: String, url:String, gravity: AVLayerVideoGravity) {
         self.registrar = registrar
         self.methodChannel = methodChannel
         self.assets = assets
         self.url = url
+        self.gravity = gravity
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -41,7 +43,7 @@ class VideoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(videoView)
-        playVideo(gravity: .resizeAspect)
+        playVideo(gravity: gravity)
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

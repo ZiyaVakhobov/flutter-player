@@ -27,6 +27,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             Align(
               child: VideoPlayerView(
                 url: 'assets/splash.mp4',
+                resizeMode: ResizeMode.fill,
                 onMapViewCreated: _onMapViewCreated,
               ),
             ),

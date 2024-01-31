@@ -4,8 +4,9 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="Udevs Video Player"
-        android:theme="@style/Theme.AppCompat">
+        android:label="Video Player"
+        android:theme="@style/Theme.AppCompat"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

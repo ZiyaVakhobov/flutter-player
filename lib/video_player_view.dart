@@ -11,10 +11,12 @@ class VideoPlayerView extends StatelessWidget {
     super.key,
     required this.onMapViewCreated,
     required this.url,
+    this.resizeMode = ResizeMode.fit,
   });
 
   final FlutterVideoPayerViewCreatedCallback onMapViewCreated;
   final String url;
+  final ResizeMode resizeMode;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,11 @@ class VideoPlayerView extends StatelessWidget {
       case TargetPlatform.android:
         return AndroidView(
           layoutDirection: TextDirection.ltr,
+          creationParams: <String, dynamic>{
+            if (url.contains('http')) 'url': url,
+            if (url.contains('assets')) 'assets': url,
+            'resizeMode': resizeMode.name,
+          },
           viewType: 'plugins.udevs/video_player_view',
           onPlatformViewCreated: _onPlatformViewCreated,
         );
@@ -31,6 +38,7 @@ class VideoPlayerView extends StatelessWidget {
           creationParams: <String, dynamic>{
             if (url.contains('http')) 'url': url,
             if (url.contains('assets')) 'assets': url,
+            'resizeMode': resizeMode.name,
           },
           viewType: 'plugins.udevs/video_player_view',
           onPlatformViewCreated: _onPlatformViewCreated,
