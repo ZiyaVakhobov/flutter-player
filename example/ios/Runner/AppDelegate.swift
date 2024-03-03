@@ -1,14 +1,10 @@
 import UIKit
 import AVFAudio
 import AVFoundation
-import GoogleCast
 import Flutter
-
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
-    
-    let kReceiverAppID = "7B356178"
     
     override func application(
         _ application: UIApplication,
@@ -21,17 +17,6 @@ import Flutter
         } catch  {
             print("Audio session failed")
         }
-
-        // Set your receiver application ID.
-        let options = GCKCastOptions(discoveryCriteria: GCKDiscoveryCriteria(applicationID: kReceiverAppID))
-        options.physicalVolumeButtonsWillControlDeviceVolume = true
-        GCKCastContext.setSharedInstanceWith(options)
-        GCKCastContext.sharedInstance().useDefaultExpandedMediaControls = true
-        
-        /** Following code enables CastConnect */
-        let launchOption = GCKLaunchOptions()
-        launchOption.androidReceiverCompatible = true
-        options.launchOptions = launchOption
         
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)

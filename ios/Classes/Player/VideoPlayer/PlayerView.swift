@@ -6,7 +6,6 @@
 //
 
 import AVKit
-import GoogleCast
 import AVFoundation
 import TinyConstraints
 import NVActivityIndicatorView
@@ -59,9 +58,7 @@ class PlayerView: UIView {
     private(set) var streamPosition: TimeInterval?
     private(set) var streamDuration: TimeInterval?
     ///
-    private(set) var media: GCKMediaInformation?
     private(set) var playerState = LocalPlayerState.stopped
-    var playbackMode = PlaybackMode.none
     // If there is a pending request to seek to a new position.
     private var pendingPlayPosition = TimeInterval()
     // If there is a pending request to start playback.
@@ -251,13 +248,6 @@ class PlayerView: UIView {
         return activityView
     }()
     
-    var castButton: GCKUICastButton = {
-        let button = GCKUICastButton(frame: CGRect(x: CGFloat(0), y: CGFloat(0),
-                                                   width: CGFloat(24), height: CGFloat(24)))
-        button.tintColor = .white
-        return button
-    }()
-    
     private var brightnessSlider: UISlider = {
         let slider = UISlider()
         slider.minimumValue = 0
@@ -295,15 +285,7 @@ class PlayerView: UIView {
         overlayView.isHidden = isPiP
     }
     
-    func loadMedia(_ media: GCKMediaInformation?, autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
-        if self.media?.contentURL != nil && (self.media?.contentURL == media?.contentURL) {
-            return
-        }
-        self.media = media
-        if media == nil {
-            purgeMediaPlayer()
-            return
-        }
+    func loadMedia(autoPlay: Bool, playPosition: TimeInterval, area:UILayoutGuide) {
         translatesAutoresizingMaskIntoConstraints = false
         uiSetup()
         addSubviews()
@@ -423,17 +405,10 @@ class PlayerView: UIView {
     
     
     func playOfflineAsset() {
-        guard let url = media?.contentURL else {
+        guard let url = URL(string: playerConfiguration.url) else {
             return
         }
-        guard let assetPath = UserDefaults.standard.value(forKey: media?.contentURL?.absoluteString ?? "") as? String else {
-            loadMediaPlayer(asset: AVURLAsset(url: url))
-            return
-        }
-        let baseURL = URL(fileURLWithPath: NSHomeDirectory())
-        let assetURL = baseURL.appendingPathComponent(assetPath)
-        let asset = AVURLAsset(url: assetURL)
-        loadMediaPlayer(asset: asset)
+        loadMediaPlayer(asset: AVURLAsset(url: url))
     }
     
     func changeUrl(url:String?, title: String?){
@@ -518,7 +493,6 @@ class PlayerView: UIView {
     }
     
     @objc func skipBackButtonPressed(_ sender: UIButton){
-        if playbackMode == .local {
             self.backwardTouches += 1
             self.seekBackwardTo(10.0 * Double(self.backwardTouches))
             self.backwardGestureTimer?.invalidate()
@@ -526,13 +500,10 @@ class PlayerView: UIView {
                 self.backwardTouches = 0
             }
             resetTimer()
-        } else {
-            delegate?.skipBackButtonPressed()
-        }
     }
     
     @objc func skipForwardButtonPressed(_ sender: UIButton){
-        if playbackMode == .local {
+        
             self.forwardTouches += 1
             self.seekForwardTo(10.0 * Double(self.forwardTouches))
             self.forwardGestureTimer?.invalidate()
@@ -540,13 +511,10 @@ class PlayerView: UIView {
                 self.forwardTouches = 0
             }
             resetTimer()
-        } else {
-            delegate?.skipForwardButtonPressed()
-        }
     }
     
     @objc func playButtonPressed(_ sender: UIButton){
-        if playbackMode == .local {
+        
             if !player.isPlaying {
                 player.play()
                 playButton.setImage(Svg.pause.uiImage, for: .normal)
@@ -559,9 +527,6 @@ class PlayerView: UIView {
                 timer?.invalidate()
                 showControls()
             }
-        } else {
-            delegate?.playButtonPressed()
-        }
     }
     
     @objc func hideControls() {
@@ -725,7 +690,6 @@ class PlayerView: UIView {
         topView.addSubview(settingsButton)
         topView.addSubview(shareButton)
         topView.addSubview(pipButton)
-        topView.addSubview(castButton)
     }
     
     func addConstraints(area:UILayoutGuide) {
@@ -848,15 +812,12 @@ class PlayerView: UIView {
             shareButton.centerY(to: topView)
         }
         
-        castButton.rightToLeft(of: playerConfiguration.isLive ? settingsButton: shareButton)
-        castButton.centerY(to: topView)
-        
         pipButton.leftToRight(of: exitButton)
         pipButton.centerY(to: topView)
         
         titleLabelLandacape.centerY(to: topView)
         titleLabelLandacape.centerX(to: topView)
-        titleLabelLandacape.rightToLeft(of: castButton, offset:  playerConfiguration.isLive ?0:32)
+//        titleLabelLandacape.rightToLeft(of: castButton, offset:  playerConfiguration.isLive ?0:32)
         titleLabelLandacape.leftToRight(of: pipButton)
         titleLabelLandacape.layoutMargins = .horizontal(8)
         titleLabelPortrait.centerX(to: overlayView)
@@ -877,27 +838,22 @@ class PlayerView: UIView {
             if newValue != oldValue {
                 DispatchQueue.main.async {[weak self] in
                     if newValue == 2 {
-                        if self?.playbackMode == .local {
                             self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
                             self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                             self?.activityIndicatorView.stopAnimating()
                             self?.enableGesture = true
-                        }
                     } else if newValue == 0 {
-                        if self?.playbackMode == .local {
                             self?.playButton.setImage(Svg.play.uiImage, for: .normal)
                             self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                             self?.activityIndicatorView.stopAnimating()
                             self?.enableGesture = true
                             self?.timer?.invalidate()
                             self?.showControls()
-                        }
                     } else {
-                        if self?.playbackMode == .local {
                             self?.playButton.alpha = 0.0
                             self?.activityIndicatorView.startAnimating()
                             self?.enableGesture = false
-                        }
+                        
                     }
                 }
             }
@@ -933,7 +889,7 @@ class PlayerView: UIView {
                 }
                 self?.handleSeekFinished()
             }
-            pendingPlayPosition = kGCKInvalidTimeInterval
+//            pendingPlayPosition = kGCKInvalidTimeInterval
             return
         } else {
             activityIndicatorView.stopAnimating()
@@ -1031,11 +987,7 @@ class PlayerView: UIView {
     
     func verticalMoved(_ value: CGFloat) {
         if isVolume {
-            if playbackMode == .local {
-                self.volumeViewSlider.value -= Float(value / 10000)
-            } else {
-                delegate?.volumeChanged(value: Float(value / 10000))
-            }
+            self.volumeViewSlider.value -= Float(value / 10000)
         } else {
             brightnessSlider.isHidden = false
             brightnessSlider.value -= Float(value / 10000)
@@ -1168,11 +1120,7 @@ class PlayerView: UIView {
     }
     
     @objc func sliderValueChanged(_ sender: UISlider) {
-        if playbackMode == .local {
-            player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
-        } else {
-            delegate?.sliderValueChanged(value: sender.value)
-        }
+        player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
     }
     
     /// MARK: - Time logic

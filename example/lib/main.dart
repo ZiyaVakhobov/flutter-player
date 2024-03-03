@@ -166,7 +166,7 @@ class _MainPageState extends State<MainPage> {
               baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
               initialResolution: {
                 '240p':
-                    'https://cdn.uzd.udevs.io/uzdigital/videos/772a7a12977cd08a10b6f6843ae80563/240p/index.m3u8'
+                    'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
               },
               resolutions: {},
               qualityText: 'Качество',
@@ -391,7 +391,6 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 }
-
 
 /// flutter pub run flutter_launcher_icons:main
 /// flutter run -d windows
