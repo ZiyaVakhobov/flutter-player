@@ -122,7 +122,7 @@ class PlayerView: UIView {
     
     private var rotateButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.share.uiImage, for: .normal)
+        button.setImage(Svg.back.uiImage, for: .normal)
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
         return button
     }()
@@ -182,7 +182,7 @@ class PlayerView: UIView {
     
     private var shareButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.share.uiImage, for: .normal)
+        button.setImage(Svg.pip.uiImage, for: .normal)
         button.addTarget(self, action: #selector(share(_ :)), for: .touchUpInside)
         button.isHidden = true
         return button
@@ -223,7 +223,7 @@ class PlayerView: UIView {
     
     private var channelsButton: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.channels.uiImage, for: .normal)
+        button.setImage(Svg.pip.uiImage, for: .normal)
         button.setTitle("", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -636,7 +636,7 @@ class PlayerView: UIView {
         }
         titleLabelLandacape.isHidden = true
         titleLabelPortrait.isHidden = false
-        rotateButton.setImage(Svg.share.uiImage, for: .normal)
+        rotateButton.setImage(Svg.back.uiImage, for: .normal)
     }
     
     private func addVideoLandscapeConstraints() {
