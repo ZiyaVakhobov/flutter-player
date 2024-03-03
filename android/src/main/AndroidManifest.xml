@@ -21,10 +21,6 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"
             tools:targetApi="n" />
 
-        <meta-data
-            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-            android:value="uz.udevs.udevs_video_player.CastOptionsProvider" />
-
         <service
             android:name=".services.MyDownloadService"
             android:exported="false">

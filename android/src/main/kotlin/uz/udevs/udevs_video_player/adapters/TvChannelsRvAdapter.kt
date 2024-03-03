@@ -34,7 +34,7 @@ class TvChannelsRvAdapter(
     override fun onBindViewHolder(holder: Vh, position: Int) {
         Glide.with(context)
             .load(list[position].image)
-            .placeholder(R.drawable.logo_secondary)
+            .placeholder(R.drawable.ic_play)
             .into(holder.image)
         holder.image.setOnClickListener {
             onClickListener.onClick(position)

@@ -13,6 +13,7 @@
     <color name="second_black">#111B33</color>
     <color name="channels_background">#66100E19</color>
 
+    <color name="primary">#FF6F31</color>
     <color name="main">#1c192c</color>
     <color name="main_dark">#100E19</color>
     <color name="red">#F40100</color>

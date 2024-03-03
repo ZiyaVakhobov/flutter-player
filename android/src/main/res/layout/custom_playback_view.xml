@@ -56,14 +56,6 @@
                 android:visibility="invisible"
                 tools:ignore="HardcodedText" />
 
-            <androidx.mediarouter.app.MediaRouteButton
-                android:id="@+id/video_cast"
-                android:layout_width="50dp"
-                android:layout_height="30dp"
-                android:mediaRouteTypes="user"
-                android:src="@drawable/ic_cast"
-                android:visibility="gone" />
-
             <ImageView
                 android:id="@+id/iv_share_movie"
                 android:layout_width="50dp"
@@ -361,8 +353,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="7dp"
-            app:played_color="@color/blue"
-            app:scrubber_color="@color/blue"
+            app:played_color="@color/primary"
+            app:scrubber_color="@color/primary"
             app:unplayed_color="@color/grey10" />
 
         <SeekBar
@@ -375,7 +367,6 @@
             android:progress="100"
             android:progressDrawable="@drawable/custom_progress_bar"
             android:thumb="@drawable/custom_thumb"
-
             android:visibility="gone" />
     </LinearLayout>
 </RelativeLayout>

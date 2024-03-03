@@ -19,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:contentDescription="@string/app_id"
-            android:src="@drawable/logo_secondary" />
+            android:contentDescription="@string/app_name" />
     </androidx.cardview.widget.CardView>
 
 </LinearLayout>

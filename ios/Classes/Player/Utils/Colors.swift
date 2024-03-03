@@ -9,7 +9,7 @@ import Foundation
 
 struct Colors {
     
-    static let primary = UIColor(red: 34/255, green: 119/255, blue: 246/255, alpha: 1)
+    static let primary = UIColor(red: 255/255, green: 111/255, blue: 49/255, alpha: 1)
     static let white50 = UIColor(red:1, green: 1, blue: 1, alpha: 0.5)
     static let backgroud = UIColor(red: 28/255, green: 30/255, blue: 33/255, alpha: 1)
     

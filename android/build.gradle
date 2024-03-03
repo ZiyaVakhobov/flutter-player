@@ -10,7 +10,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10"
     }
 }
 
@@ -72,8 +72,6 @@ android {
         implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
         implementation 'androidx.appcompat:appcompat:1.6.1'
-        implementation 'androidx.mediarouter:mediarouter:1.6.0'
-        implementation 'com.google.android.gms:play-services-cast-framework:21.4.0'
 
         implementation 'org.checkerframework:checker-qual:3.33.0'
         implementation 'com.google.android.gms:play-services-cronet:18.0.1'
