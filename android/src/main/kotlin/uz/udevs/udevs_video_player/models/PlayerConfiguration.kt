@@ -60,8 +60,6 @@ data class PlayerConfiguration(
     val fromCache: Boolean,
     @SerializedName("tvCategories")
     val tvCategories: List<TvCategories>,
-    @SerializedName("ip")
-    val ip: String,
     @SerializedName("selectChannelIndex")
     val selectChannelIndex: Int,
     @SerializedName("selectTvCategoryIndex")

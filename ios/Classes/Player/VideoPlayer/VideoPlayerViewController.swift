@@ -115,7 +115,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             }
         }
         view.backgroundColor = .black
-        
         playerView.delegate = self
         playerView.playerConfiguration = playerConfiguration
         view.addSubview(playerView)
@@ -173,12 +172,9 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     }
     
     func switchToLocalPlayback() {
-        var playPosition: TimeInterval = TimeInterval(playerConfiguration.lastPosition)
-        var paused: Bool = false
-        var ended: Bool = false
-        populateMediaInfo((!paused && !ended), playPosition: playPosition)
+        let playPosition: TimeInterval = TimeInterval(playerConfiguration.lastPosition)
+        populateMediaInfo(true, playPosition: playPosition)
     }
-    
     
     private func addVideosLandscapeConstraints() {
         portraitConstraints.deActivate()
@@ -189,24 +185,6 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         landscapeConstraints.deActivate()
         portraitConstraints.append(contentsOf: playerView.center(in: view))
         portraitConstraints.append(contentsOf: playerView.edgesToSuperview())
-    }
-    
-    func isCheckPlay(){
-    }
-    
-    func skipForwardButtonPressed() {
-    }
-    
-    func skipBackButtonPressed() {
-    }
-    
-    func sliderValueChanged(value: Float) {
-    }
-    
-    func volumeChanged(value: Float){
-    }
-    
-    func playButtonPressed() {
     }
     
     func showPressed() {
@@ -496,28 +474,16 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
                 return
             }
             if self.playerConfiguration.url != videoUrl!{
-//                if playbackMode == .local{
-                    self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
-                    self.url = videoUrl
-//                } else {
-//                    self.title = "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}"
-//                    self.url = videoUrl
-//                    self.loadRemoteMedia(position: TimeInterval(0))
-//                }
+                self.playerView.changeUrl(url: videoUrl, title: "S\(_seasonIndex + 1)" + " " + "E\(_episodeIndex + 1)" + " \u{22}\(title)\u{22}" )
+                self.url = videoUrl
             } else {
                 print("ERROR")
             }
             return
         } else if !self.resolutions!.isEmpty {
-//            if playbackMode == .local {
-                let videoUrl = Array(resolutions!.values)[0]
-                self.playerView.changeUrl(url: videoUrl, title: title)
-                self.url = videoUrl
-//            } else {
-//                let videoUrl = Array(resolutions!.values)[0]
-//                self.url = videoUrl
-//                self.loadRemoteMedia(position: TimeInterval(0))
-//            }
+            let videoUrl = Array(resolutions!.values)[0]
+            self.playerView.changeUrl(url: videoUrl, title: title)
+            self.url = videoUrl
             return
         }
     }
@@ -596,4 +562,3 @@ extension VideoPlayerViewController: QualityDelegate, SpeedDelegate, EpisodeDele
         showSubtitleBottomSheet()
     }
 }
-// 1170

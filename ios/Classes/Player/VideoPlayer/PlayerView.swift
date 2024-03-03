@@ -19,12 +19,6 @@ protocol PlayerViewDelegate: NSObjectProtocol {
     func showPressed()
     func changeOrientation()
     func togglePictureInPictureMode()
-    func skipForwardButtonPressed()
-    func skipBackButtonPressed()
-    func playButtonPressed()
-    func sliderValueChanged(value: Float)
-    func volumeChanged(value: Float)
-    func isCheckPlay()
     func share()
 }
 
@@ -454,6 +448,7 @@ class PlayerView: UIView {
     }
     
     func setTitle(title: String?){
+        self.titleLabelPortrait.isHidden = false
         self.titleLabelPortrait.text = title ?? ""
         self.titleLabelLandacape.text = title ?? ""
     }
@@ -629,15 +624,14 @@ class PlayerView: UIView {
     }
     
     private func addVideoPortaitConstraints() {
-        titleLabelLandacape.isHidden = true
-        titleLabelPortrait.isHidden = false
-        rotateButton.setImage(Svg.rotate.uiImage, for: .normal)
+        titleLabelLandacape.isHidden = false
+        titleLabelPortrait.isHidden = true
     }
     
     private func addVideoLandscapeConstraints() {
         self.playerLayer.videoGravity = .resizeAspect
-        titleLabelLandacape.isHidden = false
-        titleLabelPortrait.isHidden = true
+        titleLabelLandacape.isHidden = true
+        titleLabelPortrait.isHidden = false
     }
     
     func addGestures(){
@@ -874,31 +868,24 @@ class PlayerView: UIView {
                 }
             }
         }
-        
         if !pendingPlayPosition.isNaN, pendingPlayPosition > 0 {
-//            print("seeking to pending position \(pendingPlayPosition)")
             player.seek(to: CMTimeMakeWithSeconds(pendingPlayPosition, preferredTimescale: 1)) { [weak self] _ in
                 if self?.playerState == .starting {
                     self?.pendingPlay = true
                 }
                 self?.handleSeekFinished()
             }
-//            pendingPlayPosition = kGCKInvalidTimeInterval
             return
         } else {
             activityIndicatorView.stopAnimating()
         }
         if pendingPlay {
-            print("pendingPlay")
-            print(pendingPlay)
             pendingPlay = false
             player.play()
             playerState = .playing
         } else {
             playerState = .paused
         }
-        
-        delegate?.isCheckPlay()
     }
     
     func handleSeekFinished() {
@@ -1010,9 +997,7 @@ class PlayerView: UIView {
             if enableGesture {
                 playButton.alpha = alpha
             }
-            
             bottomView.alpha = alpha
-            
             if(alpha == 1.0){
                 resetTimer()
             }

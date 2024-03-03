@@ -711,7 +711,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         retrofitService?.getSingleTvChannel(
             playerConfiguration.authorization,
             playerConfiguration.tvCategories[tvCIndex].channels[cIndex].id,
-            playerConfiguration.ip,
+            "playerConfiguration.ip",
         )?.enqueue(object : Callback<TvChannelResponse> {
             override fun onResponse(
                 call: Call<TvChannelResponse>, response: Response<TvChannelResponse>
@@ -721,7 +721,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     val map: HashMap<String, String> = hashMapOf()
                     map["Auto"] = body.channelStreamAll
                     playerConfiguration.resolutions = map
-
                     url = body.channelStreamAll
                     title?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
                     title1?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
