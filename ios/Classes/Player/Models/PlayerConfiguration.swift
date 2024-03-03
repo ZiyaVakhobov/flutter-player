@@ -35,12 +35,11 @@ struct PlayerConfiguration{
     var autoText: String
     var baseUrl: String
     var movieShareLink: String
-    var ip: String
     var selectChannelIndex: Int
     var selectTvCategoryIndex: Int
     var tvCategories: [TvCategories]
     
-    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String, ip : String, selectChannelIndex: Int, selectTvCategoryIndex: Int, tvCategories: [TvCategories]) {
+    init(initialResolution: [String : String], resolutions: [String : String], qualityText: String, speedText: String, lastPosition: Int, title: String, isSerial: Bool, episodeButtonText: String, nextButtonText: String, seasons: [Season], isLive: Bool, tvProgramsText: String, programsInfoList: [ProgramInfo], showController: Bool, playVideoFromAsset: Bool, assetPath: String? = nil, seasonIndex: Int, episodeIndex: Int, isMegogo: Bool, isPremier: Bool, videoId: String, sessionId: String, megogoAccessToken: String, authorization: String, autoText: String, baseUrl: String,url: String,movieShareLink: String, selectChannelIndex: Int, selectTvCategoryIndex: Int, tvCategories: [TvCategories]) {
         self.initialResolution = initialResolution
         self.resolutions = resolutions
         self.qualityText = qualityText
@@ -69,7 +68,6 @@ struct PlayerConfiguration{
         self.baseUrl = baseUrl
         self.url = url
         self.movieShareLink = movieShareLink
-        self.ip = ip
         self.selectChannelIndex = selectChannelIndex
         self.selectTvCategoryIndex = selectTvCategoryIndex
         self.tvCategories = tvCategories
@@ -127,7 +125,6 @@ struct PlayerConfiguration{
                                    baseUrl: map["baseUrl"] as! String,
                                    url: (map["initialResolution"] as! [String:String]).values.first ?? "",
                                    movieShareLink: map["movieShareLink"] as! String,
-                                   ip: map["ip"] as! String,
                                    selectChannelIndex: map["selectChannelIndex"] as? Int ?? 0, selectTvCategoryIndex: map["selectTvCategoryIndex"] as? Int ?? 0,
                                    tvCategories: tvCategories
                                    

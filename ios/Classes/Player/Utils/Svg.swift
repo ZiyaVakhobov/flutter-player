@@ -15,7 +15,7 @@ struct Svg {
     static let more :SVGKImage = SVGKImage(named: "more", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let screencast :SVGKImage = SVGKImage(named: "screencast", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let down :SVGKImage = SVGKImage(named: "down", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
-    static let pip :SVGKImage = SVGKImage(named: "picture_in_picture.svg", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
+    static let pip :SVGKImage = SVGKImage(named: "picture_in_picture", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let rewind :SVGKImage = SVGKImage(named: "rewind", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let forward :SVGKImage = SVGKImage(named: "forward", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let rotate :SVGKImage = SVGKImage(named: "rotate", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)

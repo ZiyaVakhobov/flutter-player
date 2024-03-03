@@ -40,7 +40,6 @@ class PlayerConfiguration {
     required this.baseUrl,
     required this.fromCache,
     required this.movieShareLink,
-    required this.ip,
     required this.selectChannelIndex,
     this.selectTvCategoryIndex = 0,
     required this.tvCategories,
@@ -75,7 +74,6 @@ class PlayerConfiguration {
   final String movieShareLink;
   final bool fromCache;
   final List<TvCategories> tvCategories;
-  final String ip;
   final int selectChannelIndex;
   final int selectTvCategoryIndex;
 
@@ -109,7 +107,6 @@ class PlayerConfiguration {
     map['baseUrl'] = baseUrl;
     map['fromCache'] = fromCache;
     map['movieShareLink'] = movieShareLink;
-    map['ip'] = ip;
     map['selectChannelIndex'] = selectChannelIndex;
     map['selectTvCategoryIndex'] = selectTvCategoryIndex;
     map['tvCategories'] = tvCategories.map((v) => v.toJson()).toList();
@@ -147,7 +144,6 @@ class PlayerConfiguration {
       'fromCache: $fromCache, '
       'movieShareLink: $movieShareLink, '
       'channels: $tvCategories, '
-      'ip: $ip'
       'selectChannelIndex: $selectChannelIndex'
       '}';
 }

@@ -194,7 +194,6 @@ class _MainPageState extends State<MainPage> {
               autoText: 'Автонастройка',
               fromCache: true,
               selectChannelIndex: 0,
-              ip: '',
               tvCategories: [],
             ),
           ) ??
@@ -250,7 +249,6 @@ class _MainPageState extends State<MainPage> {
               autoText: 'Автонастройка',
               fromCache: true,
               selectChannelIndex: 0,
-              ip: '',
               tvCategories: [
                 TvCategories(
                   id: '',

@@ -454,7 +454,7 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
     func getChannel(id : String) -> ChannelResponse? {
         let _url : String = playerConfiguration.baseUrl+"tv/channel/\(id)"
         var channelResponse: ChannelResponse?
-        let result = Networking.sharedInstance.getChannel(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId,parameters: ["client_ip" : playerConfiguration.ip])
+        let result = Networking.sharedInstance.getChannel(_url, token: playerConfiguration.authorization, sessionId: playerConfiguration.sessionId,parameters: ["client_ip" : ""])
         switch result {
         case .failure(let error):
             print(error)
