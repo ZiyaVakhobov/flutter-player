@@ -173,7 +173,7 @@ class _MainPageState extends State<MainPage> {
               speedText: 'Скорость',
               lastPosition: 0,
               title: 'S1 E1  "Женщина-Халк: Адвокат" ',
-              isSerial: true,
+              isSerial: false,
               episodeButtonText: 'Эпизоды',
               nextButtonText: 'След.эпизод',
               seasons: [],
@@ -228,7 +228,7 @@ class _MainPageState extends State<MainPage> {
               speedText: 'Скорость',
               lastPosition: 0,
               title: 'S1 E1  "Женщина-Халк: Адвокат" ',
-              isSerial: true,
+              isSerial: false,
               episodeButtonText: 'Эпизоды',
               nextButtonText: 'След.эпизод',
               seasons: [],
@@ -249,28 +249,7 @@ class _MainPageState extends State<MainPage> {
               autoText: 'Автонастройка',
               fromCache: true,
               selectChannelIndex: 0,
-              tvCategories: [
-                TvCategories(
-                  id: '',
-                  title: 'Все',
-                  tvChannels: [
-                    TvChannel(
-                      name: 'Setanta Sports 1',
-                      id: 'c782939d-2ace-4075-96d1-c3eae0162370',
-                      image:
-                          'https://cdn.uzd.udevs.io/uzdigital/images/1738fe23-f629-4a69-ae16-617cf61fcf9d.png',
-                      resolutions: {},
-                    ),
-                    TvChannel(
-                      name: 'Setanta Sports 2',
-                      id: '8fd99b87-936c-47f6-8874-dda03521d69a',
-                      image:
-                          'https://cdn.uzd.udevs.io/uzdigital/images/1738fe23-f629-4a69-ae16-617cf61fcf9d.png',
-                      resolutions: {},
-                    ),
-                  ],
-                ),
-              ],
+              tvCategories: [],
             ),
           ) ??
           'nothing';

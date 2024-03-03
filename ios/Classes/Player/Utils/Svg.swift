@@ -18,7 +18,7 @@ struct Svg {
     static let pip :SVGKImage = SVGKImage(named: "picture_in_picture", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let rewind :SVGKImage = SVGKImage(named: "rewind", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let forward :SVGKImage = SVGKImage(named: "forward", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
-//    static let rotate :SVGKImage = SVGKImage(named: "rotate", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
+    static let rotate :SVGKImage = SVGKImage(named: "rotate", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let back :SVGKImage = SVGKImage(named: "back", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let right :SVGKImage = SVGKImage(named: "right", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let done :SVGKImage = SVGKImage(named: "done", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
@@ -27,7 +27,7 @@ struct Svg {
     static let programmes :SVGKImage = SVGKImage(named: "programmes", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let serial :SVGKImage = SVGKImage(named: "serial", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     static let serialPlay :SVGKImage = SVGKImage(named: "serial_play", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
-//     static let share :SVGKImage = SVGKImage(named: "share", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
-//     static let channels :SVGKImage = SVGKImage(named: "channels", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
+     static let share :SVGKImage = SVGKImage(named: "share", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
+     static let channels :SVGKImage = SVGKImage(named: "channels", in: Bundle(for: SwiftUdevsVideoPlayerPlugin.self), withCacheKey: nil)
     
 }
