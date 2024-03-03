@@ -122,7 +122,7 @@ class PlayerView: UIView {
     
     private var rotateButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.rotate.uiImage, for: .normal)
+        button.setImage(Svg.share.uiImage, for: .normal)
         button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
         return button
     }()
@@ -636,7 +636,7 @@ class PlayerView: UIView {
         }
         titleLabelLandacape.isHidden = true
         titleLabelPortrait.isHidden = false
-        rotateButton.setImage(Svg.rotate.uiImage, for: .normal)
+        rotateButton.setImage(Svg.share.uiImage, for: .normal)
     }
     
     private func addVideoLandscapeConstraints() {
