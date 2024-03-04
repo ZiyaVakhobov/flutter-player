@@ -43,9 +43,11 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var activity: Activity? = null
     private var resultMethod: Result? = null
     private var downloadTracker: DownloadTracker? = null
+    @SuppressLint("UnsafeOptInUsageError")
     private lateinit var renderersFactory: RenderersFactory
     private val gson = Gson()
 
+    @SuppressLint("UnsafeOptInUsageError")
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         binding.platformViewRegistry.registerViewFactory(
             "plugins.udevs/video_player_view", VideoPlayerViewFactory(binding.binaryMessenger)

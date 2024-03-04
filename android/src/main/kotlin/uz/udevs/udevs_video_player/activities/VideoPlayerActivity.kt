@@ -1,4 +1,4 @@
-package uz.udevs.udevs_video_player.activities
+ package uz.udevs.udevs_video_player.activities
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
@@ -61,8 +61,8 @@ import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import kotlin.math.abs
 
-@UnstableApi
-class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
+ @UnstableApi
+ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
 
     private lateinit var playerView: PlayerView

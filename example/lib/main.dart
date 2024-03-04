@@ -161,47 +161,50 @@ class _MainPageState extends State<MainPage> {
   Future<void> playVideo() async {
     try {
       final s = await _udevsVideoPlayerPlugin.playVideo(
-            playerConfig: const PlayerConfiguration(
-              movieShareLink: 'https://uzd.udevs.io/movie/7963?type=premier',
-              baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
-              initialResolution: {
-                '240p':
-                    'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
-              },
-              resolutions: {},
-              qualityText: 'Качество',
-              speedText: 'Скорость',
-              lastPosition: 0,
-              title: 'S1 E1  "Женщина-Халк: Адвокат" ',
-              isSerial: false,
-              episodeButtonText: 'Эпизоды',
-              nextButtonText: 'След.эпизод',
-              seasons: [],
-              isLive: false,
-              tvProgramsText: 'Телеканалы',
-              programsInfoList: [],
-              showController: true,
-              playVideoFromAsset: false,
-              assetPath: '',
-              seasonIndex: 0,
-              episodeIndex: 0,
-              isMegogo: false,
-              isPremier: false,
-              videoId: '',
-              sessionId: '',
-              megogoAccessToken: '',
-              authorization: '',
-              autoText: 'Автонастройка',
-              fromCache: true,
-              selectChannelIndex: 0,
-              tvCategories: [],
-            ),
-          ) ??
-          'nothing';
+        playerConfig: const PlayerConfiguration(
+          movieShareLink: 'https://uzd.udevs.io/movie/7963?type=premier',
+          baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
+          initialResolution: {
+            '240p':
+                'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
+          },
+          resolutions: {
+            '240p':
+                'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
+          },
+          qualityText: 'Качество',
+          speedText: 'Скорость',
+          lastPosition: 0,
+          title: 'S1 E1  "Женщина-Халк: Адвокат" ',
+          isSerial: false,
+          episodeButtonText: 'Эпизоды',
+          nextButtonText: 'След.эпизод',
+          seasons: [],
+          isLive: false,
+          tvProgramsText: 'Телеканалы',
+          programsInfoList: [],
+          showController: true,
+          playVideoFromAsset: false,
+          assetPath: '',
+          seasonIndex: 0,
+          episodeIndex: 0,
+          isMegogo: false,
+          isPremier: false,
+          videoId: '',
+          sessionId: '',
+          megogoAccessToken: '',
+          authorization: '',
+          autoText: 'Автонастройка',
+          fromCache: true,
+          selectChannelIndex: 0,
+          tvCategories: [],
+        ),
+      );
       if (kDebugMode) {
         print('result: $s');
       }
-    } on PlatformException {
+    } on Exception catch (e, s) {
+      print('$e, $s');
       debugPrint('Failed to get platform version.');
     }
   }

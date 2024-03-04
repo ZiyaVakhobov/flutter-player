@@ -58,12 +58,12 @@ data class PlayerConfiguration(
     val baseUrl: String,
     @SerializedName("fromCache")
     val fromCache: Boolean,
-    @SerializedName("tvCategories")
-    val tvCategories: List<TvCategories>,
+    @SerializedName("movieShareLink")
+    val movieShareLink: String,
     @SerializedName("selectChannelIndex")
     val selectChannelIndex: Int,
     @SerializedName("selectTvCategoryIndex")
     val selectTvCategoryIndex: Int,
-    @SerializedName("movieShareLink")
-    val movieShareLink: String,
+    @SerializedName("tvCategories")
+    val tvCategories: List<TvCategories>,
 ) : Serializable
