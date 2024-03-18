@@ -17,7 +17,7 @@ class BottomSheetCell : UITableViewCell{
     
     lazy var checkIcon: UIImageView = {
         let imageView = UIImageView()
-        let image = Svg.done.uiImage
+        let image = Svg.done!
         imageView.image = image
         imageView.size(CGSize(width: 32, height: 32))
         imageView.contentMode = .scaleAspectFit

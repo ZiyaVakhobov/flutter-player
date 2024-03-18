@@ -269,8 +269,8 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         vc.speedDelegate = self
         vc.subtitleDelegate = self
         vc.settingModel = [
-            SettingModel(leftIcon: Svg.settings.uiImage, title: qualityLabelText, configureLabel: selectedQualityText),
-            SettingModel(leftIcon: Svg.playSpeed.uiImage, title: speedLabelText, configureLabel:  selectedSpeedText),
+            SettingModel(leftIcon: Svg.settings!, title: qualityLabelText, configureLabel: selectedQualityText),
+            SettingModel(leftIcon: Svg.playSpeed!, title: speedLabelText, configureLabel:  selectedSpeedText),
 //            SettingModel(leftIcon: Svg.subtitle.uiImage, title: subtitleLabelText, configureLabel: selectedSubtitle)
         ]
         self.present(vc, animated: true, completion: nil)

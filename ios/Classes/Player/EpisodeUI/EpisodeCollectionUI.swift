@@ -92,7 +92,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
         button.imageView?.contentMode = .scaleAspectFit
         button.tintColor = .white
         button.setTitle("\(seasonIndex + 1) \(seasonText)", for: .normal)
-        button.setImage(Svg.down.uiImage, for: .normal)
+        button.setImage(Svg.down!, for: .normal)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         button.semanticContentAttribute = .forceRightToLeft
@@ -107,7 +107,7 @@ class EpisodeCollectionUI: UIViewController, BottomSheetCellDelegateSeason, UICo
     
     lazy var cancelBtn: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(Svg.exit.uiImage, for: .normal)
+        button.setImage(Svg.exit!, for: .normal)
         button.imageView?.contentMode = .scaleAspectFill
         button.tintColor = .white
         button.addTarget(self, action: #selector(tap), for: .touchUpInside)

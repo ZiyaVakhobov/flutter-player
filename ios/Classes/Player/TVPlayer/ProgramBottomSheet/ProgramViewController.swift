@@ -63,7 +63,7 @@ class ProgramViewController: UIViewController {
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
         cancelBtn.backgroundColor = .clear
-        cancelBtn.setImage(Svg.exit.uiImage, for: .normal)
+        cancelBtn.setImage(Svg.exit!, for: .normal)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
@@ -288,7 +288,7 @@ extension ProgramViewController: UITableViewDataSource, UITableViewDelegate {
                 label.textColor = .white
 
                 let button = UIButton(type: .custom)
-                button.setImage(Svg.exit.uiImage, for: .normal)
+                button.setImage(Svg.exit!, for: .normal)
                 button.imageView?.contentMode = .scaleAspectFill
                 button.tintColor = .white
 

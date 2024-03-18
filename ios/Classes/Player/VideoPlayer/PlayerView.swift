@@ -114,13 +114,6 @@ class PlayerView: UIView {
         return liveView
     }()
     
-    private var rotateButton: IconButton = {
-        let button = IconButton()
-        button.setImage(Svg.rotate.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
-        return button
-    }()
-    
     var currentTimeLabel: UILabel = {
         let label = UILabel()
         label.text = "00:00"
@@ -153,30 +146,57 @@ class PlayerView: UIView {
         return slider
     }()
     
+    private var rotateButton: IconButton = {
+        let button = IconButton()
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.rotate {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
+        button.addTarget(self, action: #selector(changeOrientation(_:)), for: .touchUpInside)
+        return button
+    }()
+    
     private var exitButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.exit.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.exit {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var pipButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.pip.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.pip {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(togglePictureInPictureMode(_ :)), for: .touchUpInside)
         return button
     }()
     
     private var settingsButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.more.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.more {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
         return button
     }()
     
     private var shareButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.share.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.share {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(share(_ :)), for: .touchUpInside)
         button.isHidden = true
         return button
@@ -184,28 +204,43 @@ class PlayerView: UIView {
     
     private var playButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.play.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        if let icon = Svg.play {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
         button.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var skipForwardButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.forward.uiImage, for: .normal)
-        button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        if let icon = Svg.forward {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
         return button
     }()
     
     private var skipBackwardButton: IconButton = {
         let button = IconButton()
-        button.setImage(Svg.rewind.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        if let icon = Svg.rewind {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 8)
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var episodesButton: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.serial.uiImage, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 224)
+        if let icon = Svg.serial {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
         button.setTitle("", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -217,7 +252,7 @@ class PlayerView: UIView {
     
     private var channelsButton: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.channels.uiImage, for: .normal)
+        button.setImage(Svg.channels!, for: .normal)
         button.setTitle("", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
         button.setTitleColor(.white, for: .normal)
@@ -228,7 +263,7 @@ class PlayerView: UIView {
     
     private var showsBtn: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.programmes.uiImage, for: .normal)
+        button.setImage(Svg.programmes!, for: .normal)
         button.setTitle("", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -433,7 +468,6 @@ class PlayerView: UIView {
     func setSubtitleCurrentItem() -> [String]{
         var subtitles = player.currentItem?.tracks(type: .subtitle) ?? ["None"]
         subtitles.insert("None", at: 0)
-        
         return subtitles
     }
     
@@ -498,7 +532,6 @@ class PlayerView: UIView {
     }
     
     @objc func skipForwardButtonPressed(_ sender: UIButton){
-        
             self.forwardTouches += 1
             self.seekForwardTo(10.0 * Double(self.forwardTouches))
             self.forwardGestureTimer?.invalidate()
@@ -509,15 +542,14 @@ class PlayerView: UIView {
     }
     
     @objc func playButtonPressed(_ sender: UIButton){
-        
             if !player.isPlaying {
                 player.play()
-                playButton.setImage(Svg.pause.uiImage, for: .normal)
+                playButton.setImage(Svg.pause!, for: .normal)
                 self.player.preroll(atRate: Float(self.playerRate), completionHandler: nil)
                 self.player.rate = Float(self.playerRate)
                 resetTimer()
             } else {
-                playButton.setImage(Svg.play.uiImage, for: .normal)
+                playButton.setImage(Svg.play!, for: .normal)
                 player.pause()
                 timer?.invalidate()
                 showControls()
@@ -826,12 +858,12 @@ class PlayerView: UIView {
             if newValue != oldValue {
                 DispatchQueue.main.async {[weak self] in
                     if newValue == 2 {
-                            self?.playButton.setImage(Svg.pause.uiImage, for: .normal)
+                            self?.playButton.setImage(Svg.pause!, for: .normal)
                             self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                             self?.activityIndicatorView.stopAnimating()
                             self?.enableGesture = true
                     } else if newValue == 0 {
-                            self?.playButton.setImage(Svg.play.uiImage, for: .normal)
+                            self?.playButton.setImage(Svg.play!, for: .normal)
                             self?.playButton.alpha = self?.skipBackwardButton.alpha ?? 0.0
                             self?.activityIndicatorView.stopAnimating()
                             self?.enableGesture = true
@@ -902,9 +934,9 @@ class PlayerView: UIView {
     
     func setPlayButton(isPlay: Bool){
         if isPlay {
-            playButton.setImage(Svg.pause.uiImage, for: .normal)
+            playButton.setImage(Svg.pause!, for: .normal)
         } else {
-            playButton.setImage(Svg.play.uiImage, for: .normal)
+            playButton.setImage(Svg.play!, for: .normal)
         }
     }
     
@@ -916,15 +948,13 @@ class PlayerView: UIView {
     @objc func playerEndedPlaying(_ notification: Notification) {
         DispatchQueue.main.async {[weak self] in
             self?.player.seek(to: CMTime.zero)
-            self?.playButton.setImage(Svg.play.uiImage, for: .normal)
+            self?.playButton.setImage(Svg.play!, for: .normal)
         }
     }
     
     @objc func swipePan() {
         let locationPoint = swipeGesture.location(in: overlayView)
-        
         let velocityPoint = swipeGesture.velocity(in: overlayView)
-        
         switch swipeGesture.state {
         case .began:
             let x = abs(velocityPoint.x)

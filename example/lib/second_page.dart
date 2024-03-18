@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:udevs_video_player/udevs_video_player.dart';
-import 'extensions.dart';
+import 'package:udevs_video_player_example/extensions.dart';
 
 class SecondPage extends StatefulWidget {
   const SecondPage({super.key});

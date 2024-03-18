@@ -72,7 +72,7 @@ class SettingCell: UITableViewCell {
         let image = UIImageView()
         image.backgroundColor = .clear
         image.sizeToFit()
-        image.image = Svg.right.uiImage
+        image.image = Svg.right!
         return image
     }()
     

@@ -19,7 +19,7 @@ class SettingsBottomSheetCell : UITableViewCell{
     
     lazy var forwardIcon: UIImageView = {
         let imageView = UIImageView()
-        let image = Svg.right.uiImage
+        let image = Svg.right!
         imageView.image = image
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .white.withAlphaComponent(0.5)
