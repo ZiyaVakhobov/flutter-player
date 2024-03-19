@@ -354,8 +354,8 @@
             android:layout_height="wrap_content"
             android:paddingHorizontal="7dp"
             app:played_color="@color/primary"
-            app:scrubber_color="@color/primary"
-            app:unplayed_color="@color/grey10" />
+            app:scrubber_drawable="@drawable/custom_thumb"
+            app:unplayed_color="@color/white50" />
 
         <SeekBar
             android:id="@+id/progress_bar"
