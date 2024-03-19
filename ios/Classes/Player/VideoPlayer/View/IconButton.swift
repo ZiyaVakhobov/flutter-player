@@ -30,6 +30,7 @@ class IconButton: UIButton {
         self.imageView?.contentMode = .scaleAspectFit
         self.layer.cornerRadius = 8
         self.size(CGSize(width: 48, height: 48))
+        self.imageEdgeInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
     }
     
 }

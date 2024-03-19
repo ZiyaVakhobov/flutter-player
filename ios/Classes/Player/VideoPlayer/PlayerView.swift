@@ -148,7 +148,6 @@ class PlayerView: UIView {
     
     private var rotateButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.rotate {
             button.setImage(icon, for: .normal)
         }
@@ -159,52 +158,42 @@ class PlayerView: UIView {
     
     private var exitButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.exit {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(exitButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var pipButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.pip {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(togglePictureInPictureMode(_ :)), for: .touchUpInside)
         return button
     }()
     
     private var settingsButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.more {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(settingPressed(_ :)), for: .touchUpInside)
         return button
     }()
     
     private var shareButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.share {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 8,left: 8,bottom: 8,right: 8)
         button.addTarget(self, action: #selector(share(_ :)), for: .touchUpInside)
-        button.isHidden = true
         return button
     }()
     
     private var playButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         if let icon = Svg.play {
             button.setImage(icon, for: .normal)
         }
@@ -215,32 +204,31 @@ class PlayerView: UIView {
     
     private var skipForwardButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         if let icon = Svg.forward {
             button.setImage(icon, for: .normal)
         }
         button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
+        button.addTarget(self, action: #selector(skipForwardButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var skipBackwardButton: IconButton = {
         let button = IconButton()
-        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         if let icon = Svg.rewind {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 8)
+        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
         button.addTarget(self, action: #selector(skipBackButtonPressed(_:)), for: .touchUpInside)
         return button
     }()
     
     private var episodesButton: UIButton = {
         let button = UIButton()
-        button.frame = CGRect(x: 0, y: 0, width: 24, height: 224)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
         if let icon = Svg.serial {
             button.setImage(icon, for: .normal)
         }
-        button.imageEdgeInsets = UIEdgeInsets(top: 4,left: 4,bottom: 4,right: 4)
+        button.imageEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         button.setTitle("", for: .normal)
         button.layer.zPosition = 3
         button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
@@ -252,9 +240,13 @@ class PlayerView: UIView {
     
     private var channelsButton: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.channels!, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.channels {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         button.setTitle("", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         button.setTitleColor(.white, for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(channelsButtonPressed(_:)), for: .touchUpInside)
@@ -263,10 +255,14 @@ class PlayerView: UIView {
     
     private var showsBtn: UIButton = {
         let button = UIButton()
-        button.setImage(Svg.programmes!, for: .normal)
+        button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        if let icon = Svg.programmes {
+            button.setImage(icon, for: .normal)
+        }
+        button.imageEdgeInsets = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)
         button.setTitle("", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13,weight: .semibold)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         button.imageView?.contentMode = .scaleAspectFit
         button.addTarget(self, action: #selector(showPressed), for: .touchUpInside)
         return button
