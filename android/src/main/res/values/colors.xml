@@ -12,13 +12,12 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="second_black">#111B33</color>
     <color name="channels_background">#66100E19</color>
-
-    <color name="primary">#FF6F31</color>
+    <color name="primary">#FF51A3FE</color>
     <color name="main">#1c192c</color>
     <color name="main_dark">#100E19</color>
     <color name="red">#F40100</color>
     <color name="red300">#74F40100</color>
-    <color name="blue">#5086EC</color>
+    <color name="blue">#51A3FE</color>
     <color name="grey10">#A8A8A8</color>
     <color name="white50">#50FFFFFF</color>
     <color name="second_black40">#66100E19</color>

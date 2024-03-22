@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black"
-        app:animation_enabled="false"
+        app:animation_enabled="true"
         app:auto_show="true"
         app:controller_layout_id="@layout/custom_playback_view"
         app:hide_on_touch="true"

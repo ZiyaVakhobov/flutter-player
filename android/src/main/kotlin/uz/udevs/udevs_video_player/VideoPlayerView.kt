@@ -31,7 +31,6 @@ class VideoPlayerView internal constructor(
     override fun getView(): View {
         return playerView
     }
-
     init {
         // Init WebView
         player = ExoPlayer.Builder(context).build()

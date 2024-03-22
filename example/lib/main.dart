@@ -204,7 +204,7 @@ class _MainPageState extends State<MainPage> {
         print('result: $s');
       }
     } on Exception catch (e, s) {
-      print('$e, $s');
+      debugPrint('$e, $s');
       debugPrint('Failed to get platform version.');
     }
   }

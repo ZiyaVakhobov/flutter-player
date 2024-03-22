@@ -70,39 +70,38 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
     private lateinit var intentFilter: IntentFilter
     private lateinit var playerConfiguration: PlayerConfiguration
-    private var close: ImageView? = null
-    private var pip: ImageView? = null
-    private var shareMovieLinkIv: ImageView? = null
-    private var more: ImageView? = null
-    private var title: TextView? = null
-    private var title1: TextView? = null
-    private var rewind: ImageView? = null
-    private var forward: ImageView? = null
-    private var playPause: ImageView? = null
-    private var progressbar: ProgressBar? = null
-    private var timer: LinearLayout? = null
-    private var exoPosition: TextView? = null
-    private var videoPosition: TextView? = null
-    private var live: LinearLayout? = null
-    private var episodesButton: LinearLayout? = null
-    private var episodesText: TextView? = null
-    private var nextButton: LinearLayout? = null
-    private var nextText: TextView? = null
-    private var tvProgramsButton: ImageView? = null
-    private var tvChannels: ImageView? = null
-    private var tvChannelsButton: LinearLayout? = null
-    private var zoom: ImageView? = null
-    private var orientation: ImageView? = null
-    private var exoProgress: DefaultTimeBar? = null
-    private var customSeekBar: SeekBar? = null
-    private var customPlayback: RelativeLayout? = null
-    private var layoutBrightness: LinearLayout? = null
-    private var brightnessSeekbar: SeekBar? = null
-    private var volumeSeekBar: SeekBar? = null
-    private var layoutVolume: LinearLayout? = null
-    private var audioManager: AudioManager? = null
-    private var gestureDetector: GestureDetector? = null
-    private var scaleGestureDetector: ScaleGestureDetector? = null
+    private lateinit var close: ImageView
+    private lateinit var pip: ImageView
+    private lateinit var shareMovieLinkIv: ImageView
+    private lateinit var more: ImageView
+    private lateinit var title: TextView
+    private lateinit var title1: TextView
+    private lateinit var rewind: ImageView
+    private lateinit var forward: ImageView
+    private lateinit var playPause: ImageView
+    private lateinit var progressbar: ProgressBar
+    private lateinit var timer: LinearLayout
+    private lateinit var exoPosition: TextView
+    private lateinit var videoPosition: TextView
+    private lateinit var live: LinearLayout
+    private lateinit var episodesButton: LinearLayout
+    private lateinit var episodesText: TextView
+    private lateinit var nextButton: LinearLayout
+    private lateinit var nextText: TextView
+    private lateinit var tvProgramsButton: ImageView
+    private lateinit var tvChannels: ImageView
+    private lateinit var tvChannelsButton: LinearLayout
+    private lateinit var zoom: ImageView
+    private lateinit var orientation: ImageView
+    private lateinit var exoProgress: DefaultTimeBar
+    private lateinit var customPlayback: RelativeLayout
+    private lateinit var layoutBrightness: LinearLayout
+    private lateinit var brightnessSeekbar: SeekBar
+    private lateinit var volumeSeekBar: SeekBar
+    private lateinit var layoutVolume: LinearLayout
+    private lateinit var audioManager: AudioManager
+    private lateinit var gestureDetector: GestureDetector
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
     private var isSettingsBottomSheetOpened: Boolean = false
     private var isQualitySpeedBottomSheetOpened: Boolean = false
     private val listOfAllOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
@@ -174,15 +173,15 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         sWidth = Resources.getSystem().displayMetrics.widthPixels
         gestureDetector = GestureDetector(this, this)
         scaleGestureDetector = ScaleGestureDetector(this, this)
-        brightnessSeekbar?.max = 30
-        brightnessSeekbar?.progress = 15
+        brightnessSeekbar.max = 30
+        brightnessSeekbar.progress = 15
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         setAudioFocus()
-        maxVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
-        volume = audioManager!!.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
-        volumeSeekBar?.max = maxVolume.toInt()
+        maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).toDouble()
+        volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toDouble()
+        volumeSeekBar.max = maxVolume.toInt()
         maxVolume += 1.0
-        volumeSeekBar?.progress = volume.toInt()
+        volumeSeekBar.progress = volume.toInt()
         playVideo()
     }
 
@@ -293,10 +292,10 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
                     mPlaybackState = PlaybackState.PLAYING
-                    playPause?.setImageResource(R.drawable.ic_pause)
+                    playPause.setImageResource(R.drawable.ic_pause)
                 } else {
                     mPlaybackState = PlaybackState.PAUSED
-                    playPause?.setImageResource(R.drawable.ic_play)
+                    playPause.setImageResource(R.drawable.ic_play)
                 }
             }
 
@@ -304,23 +303,23 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 when (playbackState) {
                     Player.STATE_BUFFERING -> {
                         mPlaybackState = PlaybackState.BUFFERING
-                        playPause?.visibility = View.GONE
-                        progressbar?.visibility = View.VISIBLE
+                        playPause.visibility = View.GONE
+                        progressbar.visibility = View.VISIBLE
                         if (!playerView.isControllerFullyVisible) {
                             playerView.setShowBuffering(SHOW_BUFFERING_ALWAYS)
                         }
                     }
 
                     Player.STATE_READY -> {
-                        playPause?.visibility = View.VISIBLE
-                        progressbar?.visibility = View.GONE
+                        playPause.visibility = View.VISIBLE
+                        progressbar.visibility = View.GONE
                         if (!playerView.isControllerFullyVisible) {
                             playerView.setShowBuffering(SHOW_BUFFERING_NEVER)
                         }
                     }
 
                     Player.STATE_ENDED -> {
-                        playPause?.setImageResource(R.drawable.ic_play)
+                        playPause.setImageResource(R.drawable.ic_play)
                     }
 
                     Player.STATE_IDLE -> {
@@ -346,21 +345,21 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         customPlayback = findViewById(R.id.custom_playback)
         layoutBrightness = findViewById(R.id.layout_brightness)
         brightnessSeekbar = findViewById(R.id.brightness_seek)
-        brightnessSeekbar?.isEnabled = false
+        brightnessSeekbar.isEnabled = false
         layoutVolume = findViewById(R.id.layout_volume)
         volumeSeekBar = findViewById(R.id.volume_seek)
-        volumeSeekBar?.isEnabled = false
+        volumeSeekBar.isEnabled = false
         close = findViewById(R.id.video_close)
         pip = findViewById(R.id.video_pip)
         tvChannels = findViewById(R.id.tv_channels)
         if (playerConfiguration.isLive) {
-            tvChannelsButton?.visibility = View.VISIBLE
+            tvChannelsButton.visibility = View.VISIBLE
         }
         more = findViewById(R.id.video_more)
         title = findViewById(R.id.video_title)
         title1 = findViewById(R.id.video_title1)
-        title?.text = titleText
-        title1?.text = titleText
+        title.text = titleText
+        title1.text = titleText
 
         rewind = findViewById(R.id.video_rewind)
         forward = findViewById(R.id.video_forward)
@@ -368,61 +367,57 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         progressbar = findViewById(R.id.video_progress_bar)
         timer = findViewById(R.id.timer)
         if (playerConfiguration.isLive) {
-            timer?.visibility = View.GONE
+            timer.visibility = View.GONE
         }
         videoPosition = findViewById(R.id.video_position)
         exoPosition = findViewById(R.id.exo_position)
         live = findViewById(R.id.live)
         if (playerConfiguration.isLive) {
-            shareMovieLinkIv?.visibility = View.GONE
-            live?.visibility = View.VISIBLE
+            shareMovieLinkIv.visibility = View.GONE
+            live.visibility = View.VISIBLE
         }
         episodesButton = findViewById(R.id.button_episodes)
         episodesText = findViewById(R.id.text_episodes)
         if (playerConfiguration.seasons.isNotEmpty()) {
-            episodesButton?.visibility = View.VISIBLE
-            episodesText?.text = playerConfiguration.episodeButtonText
+            episodesButton.visibility = View.VISIBLE
+            episodesText.text = playerConfiguration.episodeButtonText
         }
         nextButton = findViewById(R.id.button_next)
         nextText = findViewById(R.id.text_next)
 
         if (playerConfiguration.seasons.isNotEmpty()) if (playerConfiguration.isSerial && !(seasonIndex == playerConfiguration.seasons.size - 1 && episodeIndex == playerConfiguration.seasons[seasonIndex].movies.size - 1)) {
-            nextText?.text = playerConfiguration.nextButtonText
+            nextText.text = playerConfiguration.nextButtonText
         }
         tvProgramsButton = findViewById(R.id.button_tv_programs)
         if (playerConfiguration.isLive) {
-            tvProgramsButton?.visibility = View.VISIBLE
-            tvChannels?.visibility = View.VISIBLE
+            tvProgramsButton.visibility = View.VISIBLE
+            tvChannels.visibility = View.VISIBLE
         }
         zoom = findViewById(R.id.zoom)
         orientation = findViewById(R.id.orientation)
         exoProgress = findViewById(R.id.exo_progress)
-        customSeekBar = findViewById(R.id.progress_bar)
-        customSeekBar?.isEnabled = false
         if (playerConfiguration.isLive) {
-            exoProgress?.visibility = View.GONE
-            rewind?.visibility = View.GONE
-            forward?.visibility = View.GONE
-            customSeekBar?.visibility = View.VISIBLE
+            exoProgress.visibility = View.GONE
+            rewind.visibility = View.GONE
+            forward.visibility = View.GONE
         }
         findViewById<PlayerView>(R.id.exo_player_view).setOnTouchListener { _, motionEvent ->
             if (motionEvent.pointerCount == 2) {
-                scaleGestureDetector?.onTouchEvent(motionEvent)
+                scaleGestureDetector.onTouchEvent(motionEvent)
             } else if (!playerView.isControllerFullyVisible && motionEvent.pointerCount == 1) {
-                gestureDetector?.onTouchEvent(motionEvent)
+                gestureDetector.onTouchEvent(motionEvent)
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
-                    layoutBrightness?.visibility = View.GONE
-                    layoutVolume?.visibility = View.GONE
+                    layoutBrightness.visibility = View.GONE
+                    layoutVolume.visibility = View.GONE
                 }
             }
             return@setOnTouchListener true
         }
     }
 
-
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
     private fun initializeClickListeners() {
-        customPlayback?.setOnTouchListener { _, motionEvent ->
+        customPlayback.setOnTouchListener { _, motionEvent ->
             if (motionEvent.pointerCount == 1 && motionEvent.action == MotionEvent.ACTION_UP) {
                 lastClicked1 = if (lastClicked1 == -1L) {
                     System.currentTimeMillis()
@@ -448,11 +443,11 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             return@setOnTouchListener true
         }
 
-        shareMovieLinkIv?.setOnClickListener {
+        shareMovieLinkIv.setOnClickListener {
             shareMovieLink()
         }
 
-        close?.setOnClickListener {
+        close.setOnClickListener {
             if (player.isPlaying) {
                 player.stop()
             }
@@ -462,7 +457,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             setResult(PLAYER_ACTIVITY_FINISH, intent)
             finish()
         }
-        pip?.setOnClickListener {
+        pip.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val params = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9))
@@ -475,49 +470,31 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 Toast.makeText(this, "This is my Toast message!", Toast.LENGTH_SHORT).show()
             }
         }
-        more?.setOnClickListener {
+        more.setOnClickListener {
             showSettingsBottomSheet()
         }
-        rewind?.setOnClickListener {
+        rewind.setOnClickListener {
             player.seekTo(player.currentPosition - 10000)
         }
-        forward?.setOnClickListener {
-//            if (mLocation == PlaybackLocation.LOCAL) {
+        forward.setOnClickListener {
             player.seekTo(player.currentPosition + 10000)
-//            } else {
-//                val remoteMediaClient = mCastSession!!.remoteMediaClient
-//                val seekOptions: MediaSeekOptions = MediaSeekOptions
-//                    .Builder()
-//                    .setPosition((customSeekBar!!.progress * 1000 + 10000).toLong())
-//                    .build()
-//                remoteMediaClient?.seek(seekOptions)
-//            }
+
         }
-        playPause?.setOnClickListener {
-//            if (mLocation == PlaybackLocation.LOCAL) {
+        playPause.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
             } else {
                 player.play()
             }
-//            } else {
-//                val remoteMediaClient = mCastSession!!.remoteMediaClient
-//                if (remoteMediaClient?.isPlaying == true) {
-//                    remoteMediaClient.pause()
-//
-//                } else {
-//                    remoteMediaClient?.play()
-//                }
-//            }
         }
         ///TODO:
-        tvChannels?.setOnClickListener {
+        tvChannels.setOnClickListener {
             showChannelsBottomSheet()
         }
-        episodesButton?.setOnClickListener {
+        episodesButton.setOnClickListener {
             if (playerConfiguration.seasons.isNotEmpty()) showEpisodesBottomSheet()
         }
-        nextButton?.setOnClickListener {
+        nextButton.setOnClickListener {
             if (playerConfiguration.seasons.isEmpty()) {
                 return@setOnClickListener
             }
@@ -529,11 +506,11 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 }
             }
             if (isLastEpisode()) {
-                nextButton?.visibility = View.GONE
+                nextButton.visibility = View.GONE
             } else {
-                nextButton?.visibility = View.VISIBLE
+                nextButton.visibility = View.VISIBLE
             }
-            title?.text =
+            title.text =
                 "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
             if (playerConfiguration.isMegogo && playerConfiguration.isSerial) {
                 getMegogoStream()
@@ -547,33 +524,26 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
                 player.setMediaSource(hlsMediaSource)
                 player.prepare()
-//                if (mLocation == PlaybackLocation.LOCAL) {
                 player.playWhenReady
-//                } else {
-//                    loadRemoteMedia(0)
-//                }
             }
         }
-        tvProgramsButton?.setOnClickListener {
+        tvProgramsButton.setOnClickListener {
             if (playerConfiguration.programsInfoList.isNotEmpty()) showTvProgramsBottomSheet()
         }
-        zoom?.setOnClickListener {
-//            if (mLocation == PlaybackLocation.REMOTE) {
-//                return@setOnClickListener
-//            }
+        zoom.setOnClickListener {
             when (playerView.resizeMode) {
                 AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> {
-                    zoom?.setImageResource(R.drawable.ic_fit)
+                    zoom.setImageResource(R.drawable.ic_fit)
                     playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
 
                 AspectRatioFrameLayout.RESIZE_MODE_FILL -> {
-                    zoom?.setImageResource(R.drawable.ic_crop_fit)
+                    zoom.setImageResource(R.drawable.ic_crop_fit)
                     playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 }
 
                 AspectRatioFrameLayout.RESIZE_MODE_FIT -> {
-                    zoom?.setImageResource(R.drawable.ic_stretch)
+                    zoom.setImageResource(R.drawable.ic_stretch)
                     playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                 }
 
@@ -581,7 +551,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH -> {}
             }
         }
-        orientation?.setOnClickListener {
+        orientation.setOnClickListener {
             requestedOrientation =
                 if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -600,9 +570,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onUserLeaveHint() {
-//        if (mLocation == PlaybackLocation.REMOTE) {
-//            return
-//        }
         val params = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PictureInPictureParams.Builder().setAspectRatio(Rational(100, 50))
                 .setAutoEnterEnabled(false).build()
@@ -722,8 +689,8 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     map["Auto"] = body.channelStreamAll
                     playerConfiguration.resolutions = map
                     url = body.channelStreamAll
-                    title?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
-                    title1?.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
+                    title.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
+                    title1.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
                     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                     val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
@@ -747,16 +714,16 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             if (playerConfiguration.isLive) {
                 playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
-            title?.text = title1?.text
-            title?.visibility = View.VISIBLE
-            title1?.text = ""
-            title1?.visibility = View.GONE
-            if (playerConfiguration.isSerial) if (isLastEpisode()) nextButton?.visibility =
+            title.text = title1.text
+            title.visibility = View.VISIBLE
+            title1.text = ""
+            title1.visibility = View.GONE
+            if (playerConfiguration.isSerial) if (isLastEpisode()) nextButton.visibility =
                 View.VISIBLE
-            else nextButton?.visibility = View.GONE
-            else nextButton?.visibility = View.GONE
-            zoom?.visibility = View.VISIBLE
-            orientation?.setImageResource(R.drawable.ic_portrait)
+            else nextButton.visibility = View.GONE
+            else nextButton.visibility = View.GONE
+            zoom.visibility = View.VISIBLE
+            orientation.setImageResource(R.drawable.ic_portrait)
             when (currentBottomSheet) {
                 BottomSheet.EPISODES -> {
                     backButtonEpisodeBottomSheet?.visibility = View.VISIBLE
@@ -775,13 +742,13 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             }
         } else {
             cutFullScreen()
-            title1?.text = title?.text
-            title1?.visibility = View.VISIBLE
-            title?.text = ""
-            title?.visibility = View.INVISIBLE
-            nextButton?.visibility = View.GONE
-            zoom?.visibility = View.GONE
-            orientation?.setImageResource(R.drawable.ic_landscape)
+            title1.text = title.text
+            title1.visibility = View.VISIBLE
+            title.text = ""
+            title.visibility = View.INVISIBLE
+            nextButton.visibility = View.GONE
+            zoom.visibility = View.GONE
+            orientation.setImageResource(R.drawable.ic_landscape)
             playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             when (currentBottomSheet) {
                 BottomSheet.EPISODES -> {
@@ -838,7 +805,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             bottomSheetDialog.dismiss()
         }
         val titleBottomSheet = bottomSheetDialog.findViewById<TextView>(R.id.tv_program_sheet_title)
-        titleBottomSheet?.text = title?.text
+        titleBottomSheet?.text = title.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.tv_programs_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.tv_programs_view_pager)
         viewPager?.adapter = TvProgramsPagerAdapter(this, playerConfiguration.programsInfoList)
@@ -869,7 +836,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             bottomSheetDialog.dismiss()
         }
         val titleBottomSheet = bottomSheetDialog.findViewById<TextView>(R.id.episodes_sheet_title)
-        titleBottomSheet?.text = title?.text
+        titleBottomSheet?.text = title.text
         val tabLayout = bottomSheetDialog.findViewById<TabLayout>(R.id.episode_tabs)
         val viewPager = bottomSheetDialog.findViewById<ViewPager2>(R.id.episode_view_pager)
         viewPager?.adapter = EpisodePagerAdapter(viewPager!!,
@@ -885,18 +852,18 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                     if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
                         titleText =
                             "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
-                        title?.text = titleText
-                        title1?.text = title?.text
-                        title1?.visibility = View.VISIBLE
-                        title?.text = ""
-                        title?.visibility = View.INVISIBLE
+                        title.text = titleText
+                        title1.text = title.text
+                        title1.visibility = View.VISIBLE
+                        title.text = ""
+                        title.visibility = View.INVISIBLE
                     } else {
                         titleText =
                             "S${seasonIndex + 1} E${episodeIndex + 1} " + playerConfiguration.seasons[seasonIndex].movies[episodeIndex].title
-                        title?.text = titleText
-                        title?.visibility = View.VISIBLE
-                        title1?.text = ""
-                        title1?.visibility = View.GONE
+                        title.text = titleText
+                        title.visibility = View.VISIBLE
+                        title1.text = ""
+                        title1.visibility = View.GONE
                     }
                     if (playerConfiguration.isMegogo && playerConfiguration.isSerial) {
                         getMegogoStream()
@@ -911,11 +878,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                                 .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
                         player.setMediaSource(hlsMediaSource)
                         player.prepare()
-//                        if (mLocation == PlaybackLocation.LOCAL) {
                         player.playWhenReady
-//                        } else {
-//                            loadRemoteMedia(0)
-//                        }
                     }
                     bottomSheetDialog.dismiss()
                 }
@@ -1022,7 +985,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             }
         }
         speed?.setOnClickListener {
-//            if (mLocation == PlaybackLocation.LOCAL)
             showQualitySpeedSheet(currentSpeed, speeds as ArrayList, false)
         }
         bottomSheetDialog.show()
@@ -1176,21 +1138,21 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     ): Boolean {
         if (abs(distanceX) < abs(distanceY)) {
             if (event.x < sWidth / 2) {
-                layoutBrightness?.visibility = View.VISIBLE
-                layoutVolume?.visibility = View.GONE
+                layoutBrightness.visibility = View.VISIBLE
+                layoutVolume.visibility = View.GONE
                 val increase = distanceY > 0
                 val newValue: Double = if (increase) brightness + 0.2 else brightness - 0.2
                 if (newValue in 0.0..maxBrightness) brightness = newValue
-                brightnessSeekbar?.progress = brightness.toInt()
+                brightnessSeekbar.progress = brightness.toInt()
                 setScreenBrightness(brightness.toInt())
             } else {
-                layoutBrightness?.visibility = View.GONE
-                layoutVolume?.visibility = View.VISIBLE
+                layoutBrightness.visibility = View.GONE
+                layoutVolume.visibility = View.VISIBLE
                 val increase = distanceY > 0
                 val newValue = if (increase) volume + 0.2 else volume - 0.2
                 if (newValue in 0.0..maxVolume) volume = newValue
-                volumeSeekBar?.progress = volume.toInt()
-                audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, volume.toInt(), 0)
+                volumeSeekBar.progress = volume.toInt()
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume.toInt(), 0)
             }
         }
         return true
@@ -1232,14 +1194,14 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     private fun setAudioFocus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioManager!!.requestAudioFocus(
+            audioManager.requestAudioFocus(
                 AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).setAudioAttributes(
                     AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_GAME)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build()
                 ).setAcceptsDelayedFocusGain(true).setOnAudioFocusChangeListener(this).build()
             )
         } else {
-            @Suppress("DEPRECATION") audioManager!!.requestAudioFocus(
+            @Suppress("DEPRECATION") audioManager.requestAudioFocus(
                 this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN
             )
         }

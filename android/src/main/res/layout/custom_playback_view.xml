@@ -26,7 +26,8 @@
                 android:id="@+id/video_close"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginStart="10dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
                 android:padding="12dp"
                 android:src="@drawable/ic_close"
                 android:visibility="visible"
@@ -36,6 +37,7 @@
                 android:id="@+id/video_pip"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_gravity="center"
                 android:padding="12dp"
                 android:src="@drawable/ic_pip"
                 android:visibility="visible"
@@ -45,6 +47,7 @@
                 android:id="@+id/video_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:fontFamily="@font/semibold"
@@ -59,20 +62,19 @@
             <ImageView
                 android:id="@+id/iv_share_movie"
                 android:layout_width="50dp"
-                android:layout_height="25dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="10dp"
-                android:padding="2dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:padding="13dp"
                 android:src="@drawable/ic_share"
                 tools:ignore="ContentDescription" />
 
             <ImageView
                 android:id="@+id/video_more"
                 android:layout_width="50dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="10dp"
-                android:padding="2dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
+                android:padding="12dp"
                 android:src="@drawable/ic_more"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
@@ -81,6 +83,7 @@
             android:id="@+id/video_title1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:ellipsize="end"
             android:fontFamily="@font/semibold"
             android:gravity="center_horizontal"
@@ -171,6 +174,7 @@
             android:id="@+id/bottom_top"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:gravity="center_vertical"
             android:paddingHorizontal="15dp">
 
@@ -356,17 +360,5 @@
             app:played_color="@color/primary"
             app:scrubber_drawable="@drawable/custom_thumb"
             app:unplayed_color="@color/white50" />
-
-        <SeekBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="5dp"
-            android:paddingHorizontal="15dp"
-            android:progress="100"
-            android:progressDrawable="@drawable/custom_progress_bar"
-            android:thumb="@drawable/custom_thumb"
-            android:visibility="gone" />
     </LinearLayout>
 </RelativeLayout>
