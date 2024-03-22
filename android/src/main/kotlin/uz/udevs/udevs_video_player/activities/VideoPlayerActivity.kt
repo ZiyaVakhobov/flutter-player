@@ -222,9 +222,9 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 if (player.isPlaying) {
                     player.stop()
                 }
-                val seconds = player.currentPosition / 1000
                 val intent = Intent()
-                intent.putExtra("position", seconds)
+                intent.putExtra("position", player.currentPosition / 1000)
+                intent.putExtra("duration", player.duration / 1000)
                 setResult(PLAYER_ACTIVITY_FINISH, intent)
                 finish()
             }
@@ -451,9 +451,9 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             if (player.isPlaying) {
                 player.stop()
             }
-            val seconds = player.currentPosition / 1000
             val intent = Intent()
-            intent.putExtra("position", seconds)
+            intent.putExtra("position", player.currentPosition / 1000)
+            intent.putExtra("duration", player.duration / 1000)
             setResult(PLAYER_ACTIVITY_FINISH, intent)
             finish()
         }

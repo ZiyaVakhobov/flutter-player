@@ -201,7 +201,7 @@ class _MainPageState extends State<MainPage> {
         ),
       );
       if (kDebugMode) {
-        print('result: $s');
+        print('Result Time: $s');
       }
     } on Exception catch (e, s) {
       debugPrint('$e, $s');

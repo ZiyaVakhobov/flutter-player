@@ -12,7 +12,7 @@ import NVActivityIndicatorView
 import MediaPlayer
 
 protocol PlayerViewDelegate: NSObjectProtocol {
-    func close(duration: Double)
+    func close(duration: [Int])
     func settingsPressed()
     func episodesButtonPressed()
     func channelsButtonPressed()
@@ -486,7 +486,9 @@ class PlayerView: UIView {
     @objc func exitButtonPressed(_ sender: UIButton){
         purgeMediaPlayer();
         removeMediaPlayerObservers();
-        delegate?.close(duration: player.currentTime().seconds)
+        delegate?.close(duration: [Int(player.currentTime().seconds),
+            Int(player.currentItem!.duration.seconds)]
+        )
     }
     
     @objc func togglePictureInPictureMode(_ sender: UIButton){

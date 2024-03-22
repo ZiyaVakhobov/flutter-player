@@ -16,10 +16,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
       StreamController<MediaItemDownload>.broadcast();
 
   @override
-  Future<int?> playVideo({
-    required String playerConfigJsonString,
-  }) async {
-    final res = await methodChannel.invokeMethod<int?>(
+  Future<dynamic> playVideo({required String playerConfigJsonString}) async {
+    final res = await methodChannel.invokeMethod<dynamic>(
       'playVideo',
       <String, dynamic>{'playerConfigJsonString': playerConfigJsonString},
     );
@@ -144,4 +142,8 @@ class MethodChannelUdevsVideoPlayer extends UdevsVideoPlayerPlatform {
   void dispose() {
     _streamController.onCancel!();
   }
+
+  @override
+  Future<int?> getPercentDownload({required String downloadConfigJsonString}) =>
+      Future.value(0);
 }

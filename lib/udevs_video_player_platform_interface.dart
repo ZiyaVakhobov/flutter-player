@@ -24,59 +24,33 @@ abstract class UdevsVideoPlayerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<int?> playVideo({required String playerConfigJsonString}) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  Future<dynamic> playVideo({required String playerConfigJsonString});
 
-  Future downloadVideo({required String downloadConfigJsonString}) {
-    throw UnimplementedError('downloadVideo() has not been implemented.');
-  }
+  Future downloadVideo({required String downloadConfigJsonString});
 
-  Future pauseDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('pauseDownload() has not been implemented.');
-  }
+  Future pauseDownload({required String downloadConfigJsonString});
 
-  Future resumeDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('resumeDownload() has not been implemented.');
-  }
+  Future resumeDownload({required String downloadConfigJsonString});
 
-  Future<bool> isDownloadVideo({required String downloadConfigJsonString}) {
-    throw UnimplementedError('isDownloadVideo() has not been implemented.');
-  }
+  Future<bool> isDownloadVideo({required String downloadConfigJsonString});
 
-  Future<int?> getCurrentProgressDownload(
-      {required String downloadConfigJsonString}) {
-    throw UnimplementedError(
-        'getCurrentProgressDownload() has not been implemented.');
-  }
+  Future<int?> getCurrentProgressDownload({
+    required String downloadConfigJsonString,
+  });
 
-  Stream<MediaItemDownload> currentProgressDownloadAsStream() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  Stream<MediaItemDownload> currentProgressDownloadAsStream();
 
-  Future<int?> getStateDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('getStateDownload() has not been implemented.');
-  }
+  Future<int?> getStateDownload({required String downloadConfigJsonString});
 
-  Future<int?> getPercentDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('getPercentDownload() has not been implemented.');
-  }
+  Future<int?> getPercentDownload({required String downloadConfigJsonString});
 
-  Future<int?> getBytesDownloaded({required String downloadConfigJsonString}) {
-    throw UnimplementedError('getBytesDownloaded() has not been implemented.');
-  }
+  Future<int?> getBytesDownloaded({required String downloadConfigJsonString});
 
-  Future<int?> getContentBytesDownload(
-      {required String downloadConfigJsonString}) {
-    throw UnimplementedError(
-        'getContentBytesDownload() has not been implemented.');
-  }
+  Future<int?> getContentBytesDownload({
+    required String downloadConfigJsonString,
+  });
 
-  Future removeDownload({required String downloadConfigJsonString}) {
-    throw UnimplementedError('removeDownload() has not been implemented.');
-  }
+  Future removeDownload({required String downloadConfigJsonString});
 
-  void dispose() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  void dispose();
 }

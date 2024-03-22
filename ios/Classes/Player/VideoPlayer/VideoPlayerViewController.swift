@@ -197,12 +197,12 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
         }
     }
     
-    func close(duration : Double){
+    func close(duration : [Int]){
         if UIApplication.shared.statusBarOrientation == .landscapeLeft || UIApplication.shared.statusBarOrientation == .landscapeRight {
             changeOrientation()
         }
         self.dismiss(animated: true, completion: nil)
-        delegate?.getDuration(duration: duration)
+        delegate?.getDuration(duration : duration)
     }
     
     func share() {

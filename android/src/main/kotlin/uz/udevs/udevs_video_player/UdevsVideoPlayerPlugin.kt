@@ -43,6 +43,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var activity: Activity? = null
     private var resultMethod: Result? = null
     private var downloadTracker: DownloadTracker? = null
+
     @SuppressLint("UnsafeOptInUsageError")
     private lateinit var renderersFactory: RenderersFactory
     private val gson = Gson()
@@ -187,7 +188,14 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == PLAYER_ACTIVITY && resultCode == PLAYER_ACTIVITY_FINISH) {
-            resultMethod?.success(data?.getLongExtra("position", 0))
+            val position: Long = data?.getLongExtra("position", 0) ?: 0
+            val duration: Long = data?.getLongExtra("duration", 0) ?: 0
+            resultMethod?.success(
+                listOf(
+                    position.toInt(),
+                    duration.toInt()
+                )
+            )
         }
         return true
     }

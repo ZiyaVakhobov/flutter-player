@@ -19,7 +19,6 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
     override private init(){
         super.init()
         let configuration = URLSessionConfiguration.background(withIdentifier: downloadIdentifier)
-        // Create a new AVAssetDownloadURLSession with background configuration, delegate, and queue
         assetDownloadURLSession = AVAssetDownloadURLSession(configuration: configuration,
                                                             assetDownloadDelegate: self,
                                                             delegateQueue: OperationQueue.main)
@@ -152,8 +151,8 @@ public class SwiftUdevsVideoPlayerPlugin: NSObject, FlutterPlugin, VideoPlayerDe
         }
     }
     
-    func getDuration(duration: Double) {
-        flutterResult!(Int(duration))
+    func getDuration(duration: [Int]) {
+        flutterResult!(duration)
     }
     
     private func getPercentComplete(download: MediaItemDownload){
