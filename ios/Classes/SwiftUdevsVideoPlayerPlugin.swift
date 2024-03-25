@@ -280,14 +280,6 @@ extension SwiftUdevsVideoPlayerPlugin: AVAssetDownloadDelegate {
     /// Method called when a child AVAssetDownloadTask completes.
     public func urlSession(_ session: URLSession, aggregateAssetDownloadTask: AVAggregateAssetDownloadTask,
                            didCompleteFor mediaSelection: AVMediaSelection) {
-        /*
-         This delegate callback provides an AVMediaSelection object which is now fully available for
-         offline use. You can perform any additional processing with the object here.
-         */
-        print("TEst test")
-        print(aggregateAssetDownloadTask.urlAsset.assetCache.hashValue)
-        print(aggregateAssetDownloadTask.progress.fileTotalCount)
-        print(aggregateAssetDownloadTask.progress.totalUnitCount.byteSwapped)
         guard let asset = activeDownloadsMap[aggregateAssetDownloadTask] else { return }
         
     }

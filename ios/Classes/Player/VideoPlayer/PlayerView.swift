@@ -449,16 +449,12 @@ class PlayerView: UIView {
     }
     
     func changeQuality(url:String?){
-        guard let videoURL = URL(string: url ?? "") else {
+        if(url == nil){ return}
+        guard let bitrate = Double(url!) else {
+            self.player.currentItem?.preferredPeakBitRate = 5687102
             return
         }
-        let currentTime = self.player.currentTime()
-        let asset = AVURLAsset(url: videoURL)
-        let playerItem = AVPlayerItem(asset: asset)
-        self.player.replaceCurrentItem(with: playerItem)
-        self.player.seek(to: currentTime)
-        self.player.currentItem?.preferredForwardBufferDuration = TimeInterval(1)
-        self.player.automaticallyWaitsToMinimizeStalling = true
+        self.player.currentItem?.preferredPeakBitRate = bitrate
     }
     
     func setSubtitleCurrentItem() -> [String]{

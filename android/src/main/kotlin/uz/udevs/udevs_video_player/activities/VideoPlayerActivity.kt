@@ -49,7 +49,6 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
@@ -123,7 +122,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private lateinit var audioManager: AudioManager
     private lateinit var gestureDetector: GestureDetector
     private lateinit var scaleGestureDetector: ScaleGestureDetector
-    private lateinit var trackSelector: DefaultTrackSelector
     private var isSettingsBottomSheetOpened: Boolean = false
     private var isQualitySpeedBottomSheetOpened: Boolean = false
     private val listOfAllOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
@@ -293,13 +291,12 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     }
 
     private fun playVideo() {
-        trackSelector = DefaultTrackSelector(this)
         val dataSourceFactory: DataSource.Factory =
             if (!playerConfiguration.fromCache) DefaultHttpDataSource.Factory()
             else DownloadUtil.getDataSourceFactory(this)
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-        player = ExoPlayer.Builder(this).setTrackSelector(trackSelector).build()
+        player = ExoPlayer.Builder(this).build()
         playerView.player = player
         playerView.keepScreenOn = true
         playerView.useController = playerConfiguration.showController
@@ -712,20 +709,20 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 call: Call<TvChannelResponse>, response: Response<TvChannelResponse>
             ) {
                 val body = response.body()
-                if (body != null) {
-                    val map: HashMap<String, String> = hashMapOf()
-                    map["Auto"] = body.channelStreamAll
-                    playerConfiguration.resolutions = map
-                    url = body.channelStreamAll
-                    title.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
-                    title1.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
-                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                    val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                    player.setMediaSource(hlsMediaSource)
-                    player.prepare()
-                    player.playWhenReady
-                }
+//                if (body != null) {
+//                    val map: HashMap<String, Int> = hashMapOf()
+//                    map["Auto"] = body.channelStreamAll
+//                    playerConfiguration.resolutions = map
+//                    url = body.channelStreamAll
+//                    title.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
+//                    title1.text = playerConfiguration.tvCategories[tvCIndex].channels[cIndex].name
+//                    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+//                    val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
+//                        .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
+//                    player.setMediaSource(hlsMediaSource)
+//                    player.prepare()
+//                    player.playWhenReady
+//                }
             }
 
             override fun onFailure(call: Call<TvChannelResponse>, t: Throwable) {
@@ -1098,16 +1095,24 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                         if (player.isPlaying) {
                             player.pause()
                         }
-                        val currentPosition = player.currentPosition
-                        val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                        url =
+                        val url =
                             if (playerConfiguration.isSerial) playerConfiguration.seasons[seasonIndex].movies[episodeIndex].resolutions[currentQuality] else playerConfiguration.resolutions[currentQuality]
-                        val hlsMediaSource: HlsMediaSource =
-                            HlsMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-                        player.setMediaSource(hlsMediaSource)
-                        player.seekTo(currentPosition)
-                        player.play()
+                        Log.d(tag, "onClick: $url")
+                        val bitrate: Int? = url?.toIntOrNull()
+                        if (bitrate != null) {
+                            player.trackSelectionParameters =
+                                player.trackSelectionParameters.buildUpon()
+                                    .setMaxVideoBitrate(bitrate)
+                                    .build()
+                            player.playWhenReady = true
+                        } else {
+                            player.trackSelectionParameters =
+                                player.trackSelectionParameters.buildUpon()
+                                    .setMaxVideoBitrate(Integer.MAX_VALUE)
+
+                                    .build()
+                            player.playWhenReady = true
+                        }
                     } else {
                         currentSpeed = l[position]
                         speedText?.text = currentSpeed

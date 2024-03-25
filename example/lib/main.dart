@@ -165,11 +165,11 @@ class _MainPageState extends State<MainPage> {
           movieShareLink: 'https://uzd.udevs.io/movie/7963?type=premier',
           baseUrl: 'https://api.spec.uzd.udevs.io/v1/',
           initialResolution: {
-            '240p':
+            'Auto':
                 'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
           },
           resolutions: {
-            '240p':
+            'Auto':
                 'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
           },
           qualityText: 'Качество',
