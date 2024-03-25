@@ -21,8 +21,19 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.util.Rational
-import android.view.*
-import android.widget.*
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
+import android.view.View
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ListView
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.SeekBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +41,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -37,6 +49,7 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerView
@@ -53,13 +66,21 @@ import retrofit2.Response
 import uz.udevs.udevs_video_player.EXTRA_ARGUMENT
 import uz.udevs.udevs_video_player.PLAYER_ACTIVITY_FINISH
 import uz.udevs.udevs_video_player.R
-import uz.udevs.udevs_video_player.adapters.*
-import uz.udevs.udevs_video_player.models.*
+import uz.udevs.udevs_video_player.adapters.EpisodePagerAdapter
+import uz.udevs.udevs_video_player.adapters.QualitySpeedAdapter
+import uz.udevs.udevs_video_player.adapters.TvCategoryPagerAdapter
+import uz.udevs.udevs_video_player.adapters.TvProgramsPagerAdapter
+import uz.udevs.udevs_video_player.models.BottomSheet
+import uz.udevs.udevs_video_player.models.MegogoStreamResponse
+import uz.udevs.udevs_video_player.models.PlayerConfiguration
+import uz.udevs.udevs_video_player.models.PremierStreamResponse
+import uz.udevs.udevs_video_player.models.TvChannelResponse
 import uz.udevs.udevs_video_player.retrofit.Common
 import uz.udevs.udevs_video_player.retrofit.RetrofitService
 import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import kotlin.math.abs
+
 
 @UnstableApi
 class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
@@ -102,6 +123,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private lateinit var audioManager: AudioManager
     private lateinit var gestureDetector: GestureDetector
     private lateinit var scaleGestureDetector: ScaleGestureDetector
+    private lateinit var trackSelector: DefaultTrackSelector
     private var isSettingsBottomSheetOpened: Boolean = false
     private var isQualitySpeedBottomSheetOpened: Boolean = false
     private val listOfAllOpenedBottomSheets = mutableListOf<BottomSheetDialog>()
@@ -271,12 +293,13 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     }
 
     private fun playVideo() {
+        trackSelector = DefaultTrackSelector(this)
         val dataSourceFactory: DataSource.Factory =
             if (!playerConfiguration.fromCache) DefaultHttpDataSource.Factory()
             else DownloadUtil.getDataSourceFactory(this)
         val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(dataSourceFactory)
             .createMediaSource(MediaItem.fromUri(Uri.parse(url)))
-        player = ExoPlayer.Builder(this).build()
+        player = ExoPlayer.Builder(this).setTrackSelector(trackSelector).build()
         playerView.player = player
         playerView.keepScreenOn = true
         playerView.useController = playerConfiguration.showController
@@ -287,6 +310,11 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             override fun onPlayerError(error: PlaybackException) {
                 Log.d(tag, "onPlayerError: ${error.errorCode}")
                 player.pause()
+            }
+
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                Log.d(tag, "onMediaMetadataChanged: ${mediaMetadata.title}")
+                super.onMediaMetadataChanged(mediaMetadata)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {

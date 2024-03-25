@@ -58,8 +58,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         downloadTracker = DownloadUtil.getDownloadTracker(binding.applicationContext)
         startDownloadService(binding.applicationContext)
         downloadTracker!!.addListener(this)
-        renderersFactory =
-            DownloadUtil.buildRenderersFactory(binding.applicationContext, false)
+        renderersFactory = DownloadUtil.buildRenderersFactory(binding.applicationContext, false)
         val download = downloadTracker?.getDownload()
         if (download != null) {
             runnable = object : Runnable {
@@ -84,17 +83,12 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val gson = Gson()
                 val playerConfiguration =
                     gson.fromJson(playerConfigJsonString, PlayerConfiguration::class.java)
-                val intent =
-                    Intent(activity?.applicationContext, VideoPlayerActivity::class.java)
+                val intent = Intent(activity?.applicationContext, VideoPlayerActivity::class.java)
                 intent.putExtra(EXTRA_ARGUMENT, playerConfiguration)
                 activity?.startActivityForResult(intent, PLAYER_ACTIVITY)
                 resultMethod = result
             }
-        } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" ||
-            call.method == "getCurrentProgressDownload" || call.method == "pauseDownload" ||
-            call.method == "resumeDownload" || call.method == "getStateDownload" || call.method == "getBytesDownloaded" ||
-            call.method == "getContentBytesDownload" || call.method == "removeDownload"
-        ) {
+        } else if (call.method == "downloadVideo" || call.method == "checkIsDownloadedVideo" || call.method == "getCurrentProgressDownload" || call.method == "pauseDownload" || call.method == "resumeDownload" || call.method == "getStateDownload" || call.method == "getBytesDownloaded" || call.method == "getContentBytesDownload" || call.method == "removeDownload") {
             if (call.hasArgument("downloadConfigJsonString")) {
                 val downloadConfigJsonString = call.argument("downloadConfigJsonString") as String?
                 val downloadConfiguration =
@@ -102,20 +96,16 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val uri = Uri.parse(downloadConfiguration.url)
                 val adaptiveMimeType: String? =
                     Util.getAdaptiveMimeTypeForContentType(Util.inferContentType(uri))
-                val mediaItem = MediaItem.Builder()
-                    .setUri(uri)
-                    .setMediaMetadata(
+                val mediaItem = MediaItem.Builder().setUri(uri).setMediaMetadata(
                         MediaMetadata.Builder().setTitle(downloadConfiguration.title).build()
-                    )
-                    .setMimeType(adaptiveMimeType).build()
+                    ).setMimeType(adaptiveMimeType).build()
                 when (call.method) {
                     "downloadVideo" -> {
                         downloadTracker?.toggleDownload(mediaItem, renderersFactory)
                     }
 
                     "checkIsDownloadedVideo" -> {
-                        val isDownloaded =
-                            downloadTracker!!.isDownloaded(mediaItem)
+                        val isDownloaded = downloadTracker!!.isDownloaded(mediaItem)
                         result.success(isDownloaded)
                     }
 
@@ -190,12 +180,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         if (requestCode == PLAYER_ACTIVITY && resultCode == PLAYER_ACTIVITY_FINISH) {
             val position: Long = data?.getLongExtra("position", 0) ?: 0
             val duration: Long = data?.getLongExtra("duration", 0) ?: 0
-            resultMethod?.success(
-                listOf(
-                    position.toInt(),
-                    duration.toInt()
-                )
-            )
+            resultMethod?.success(listOf(position.toInt(), duration.toInt()))
         }
         return true
     }
@@ -211,8 +196,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             DownloadService.start(context, MyDownloadService::class.java)
         } catch (e: IllegalStateException) {
             DownloadService.startForeground(
-                context,
-                MyDownloadService::class.java
+                context, MyDownloadService::class.java
             )
         }
     }
@@ -250,10 +234,7 @@ class UdevsVideoPlayerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         return gson.toJson(
             MediaItemDownload(
-                download.request.id,
-                percent,
-                download.state,
-                download.bytesDownloaded
+                download.request.id, percent, download.state, download.bytesDownloaded
             )
         )
     }
