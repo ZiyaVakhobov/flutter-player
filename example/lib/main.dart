@@ -170,7 +170,10 @@ class _MainPageState extends State<MainPage> {
           },
           resolutions: {
             'Auto':
-                'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8'
+                'https://df5ralxb7y7wh.cloudfront.net/elementary_unit_1_the_karate_kid/TRKyawvyNXdOIoLVloLmytyIRSOmgbuUUTqXGMX1.m3u8',
+            '480p': '1014624',
+            '720p': '1321824',
+            '360p': '1937246',
           },
           qualityText: 'Качество',
           speedText: 'Скорость',

@@ -95,6 +95,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         modalPresentationStyle = .custom
         transitioningDelegate = self
     }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -119,7 +120,7 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
         backView.addSubview(mainStack)
         contentView.addSubview(tableView)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        menuView.backgroundColor = Colors.moreColor
+        menuView.backgroundColor = Colors.backgroundBottomSheet
         tableView.backgroundColor = .clear
         menuView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -129,8 +130,6 @@ class SettingVC: UIViewController, UIGestureRecognizerDelegate {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        
         backView.snp.makeConstraints { make in
             make.edges.equalTo(menuView)
         }

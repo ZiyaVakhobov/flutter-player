@@ -324,18 +324,11 @@ class VideoPlayerViewController: UIViewController, AVPictureInPictureControllerD
             let url = resList[sortedResolutions[index]]
             self.playerView.changeQuality(url: url)
             self.url = url
-//            if playbackMode == .remote {
-//                self.loadRemoteMedia(position: sessionManager.currentSession?.remoteMediaClient?.approximateStreamPosition() ?? 0)
-//            }
             break
         case .speed:
             self.playerRate = Float(speedList[index])!
             self.selectedSpeedText = isRegular  ? "\(self.playerRate)x(Обычный)" : "\(self.playerRate)x"
-//            if playbackMode == .local {
-                self.playerView.changeSpeed(rate: self.playerRate)
-//            } else {
-//                self.playbackRateRemote(playbackRate: self.playerRate)
-//            }
+            self.playerView.changeSpeed(rate: self.playerRate)
             break
         case .subtitle:
             var subtitles = playerView.setSubtitleCurrentItem()

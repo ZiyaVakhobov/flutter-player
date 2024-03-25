@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
+
     <style name="TrackSelectionDialogThemeOverlay" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="windowNoTitle">false</item>
     </style>
@@ -17,12 +18,4 @@
         <item name="background">@color/main_dark</item>
     </style>
 
-    <style name="ChannelsBottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:colorBackground">@color/transparent</item>
-        <item name="android:statusBarColor">@color/transparent</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-        <item name="backgroundTint">@color/channels_background</item>
-        <item name="background">@color/channels_background</item>
-    </style>
 </resources>

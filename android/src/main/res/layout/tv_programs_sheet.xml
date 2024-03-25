@@ -5,7 +5,7 @@
     android:id="@+id/tv_program_bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/main_dark"
+    android:background="@drawable/background_bottom_sheet"
     android:orientation="vertical"
     android:paddingHorizontal="20dp">
 
@@ -39,7 +39,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/tv_programs_background"
+        android:background="@drawable/background_bottom_sheet"
         android:orientation="vertical">
 
         <com.google.android.material.tabs.TabLayout

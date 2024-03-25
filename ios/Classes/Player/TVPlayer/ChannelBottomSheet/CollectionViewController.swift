@@ -68,7 +68,7 @@ class CollectionViewController: UIViewController {
     
     lazy var backView : UIView =  {
         let view = UIView()
-        view.backgroundColor = Colors.channelsBackground
+        view.backgroundColor = Colors.backgroundBottomSheet
         return view
     }()
     

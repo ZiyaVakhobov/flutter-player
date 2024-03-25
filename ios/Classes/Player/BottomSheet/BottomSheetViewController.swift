@@ -57,7 +57,8 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     lazy var cancelBtn: UIButton = {
         let cancelBtn = UIButton()
         cancelBtn.setImage(Svg.exit!, for: .normal)
-        cancelBtn.size(CGSize(width: 32, height: 32))
+        cancelBtn.size(CGSize(width: 48, height: 48))
+        cancelBtn.imageEdgeInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         cancelBtn.imageView?.contentMode = .scaleAspectFit
         cancelBtn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return cancelBtn
@@ -68,6 +69,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         let stackView = UIStackView(arrangedSubviews: [])
         stackView.axis = .vertical
         stackView.distribution = .fillEqually
+        stackView.backgroundColor = Colors.backgroundBottomSheet
         return stackView
     }()
     
@@ -81,7 +83,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = Colors.black
         view.layer.cornerRadius = 16
         view.clipsToBounds = true
         view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
@@ -109,7 +110,7 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     
     lazy var dimmedView: UIView = {
         let view = UIView()
-        view.backgroundColor = .black
+        view.backgroundColor = .clear
         view.alpha = maxDimmedAlpha
         return view
     }()
@@ -136,9 +137,9 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
         contentTableView.delegate = self
         contentTableView.dataSource = self
         contentTableView.separatorStyle = UITableViewCell.SeparatorStyle.none
-        containerView.backgroundColor = Colors.moreColor
+        containerView.backgroundColor = Colors.backgroundBottomSheet
         contentTableView.register(BottomSheetCell.self, forCellReuseIdentifier: "BottomSheetCell")
-        setupView()
+        view.backgroundColor = .clear
         setupConstraints()
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleCloseAction))
         dimmedView.addGestureRecognizer(tapGesture)
@@ -179,10 +180,6 @@ class BottomSheetViewController: UIViewController, UITableViewDelegate, UITableV
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         animateDismissView()
         cellDelegate?.onBottomSheetCellTapped(index: indexPath.row, type : bottomSheetType)
-    }
-    
-    func setupView() {
-        view.backgroundColor = .clear
     }
     
     func setupConstraints() {

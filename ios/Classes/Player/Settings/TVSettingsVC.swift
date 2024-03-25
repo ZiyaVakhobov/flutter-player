@@ -128,7 +128,7 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
         backView.addSubview(mainStack)
         contentView.addSubview(tableView)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        menuView.backgroundColor = Colors.moreColor
+        menuView.backgroundColor = Colors.backgroundBottomSheet
         tableView.backgroundColor = .clear
         tableView.layer.cornerRadius=24
         menuView.translatesAutoresizingMaskIntoConstraints = false
@@ -137,9 +137,7 @@ class TVSettingVC: UIViewController, UIGestureRecognizerDelegate {
     }
     
     override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        
+        super.viewDidLayoutSubviews()        
         backView.snp.makeConstraints { make in
             make.edges.equalTo(menuView)
         }

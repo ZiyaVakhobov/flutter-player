@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/main_dark"
+    android:background="@drawable/background_bottom_sheet"
     android:orientation="vertical"
     android:paddingVertical="10dp">
 
@@ -35,11 +35,11 @@
             android:id="@+id/quality_settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:fontFamily="@font/regular"
-            android:text="Quality"
+            android:text=""
             android:textColor="@color/white"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/quality_settings_value_text"
@@ -51,12 +51,14 @@
             android:paddingEnd="10dp"
             android:text="Auto"
             android:textColor="@color/grey10"
-            android:textSize="16dp" />
+            android:textSize="16sp"
+            tools:ignore="HardcodedText,RtlSymmetry" />
 
         <ImageView
             android:layout_width="18dp"
             android:layout_height="18dp"
-            android:src="@drawable/ic_arrow_forward" />
+            android:src="@drawable/ic_arrow_forward"
+            tools:ignore="ContentDescription" />
 
     </LinearLayout>
 
@@ -71,17 +73,19 @@
         <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/ic_speed" />
+            android:src="@drawable/ic_speed"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/speed_settings_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:fontFamily="@font/regular"
             android:text="Speed"
             android:textColor="@color/white"
-            android:textSize="16dp" />
+            android:textSize="16sp"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:id="@+id/speed_settings_value_text"
@@ -94,12 +98,14 @@
             android:text="1.0x"
             android:textColor="@color/grey10"
             android:textFontWeight="300"
-            android:textSize="16dp" />
+            android:textSize="16sp"
+            tools:ignore="HardcodedText,RtlSymmetry,UnusedAttribute" />
 
         <ImageView
             android:layout_width="18dp"
             android:layout_height="18dp"
-            android:src="@drawable/ic_arrow_forward" />
+            android:src="@drawable/ic_arrow_forward"
+            tools:ignore="ContentDescription" />
 
     </LinearLayout>
 

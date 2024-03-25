@@ -818,7 +818,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     private fun showTvProgramsBottomSheet() {
         currentBottomSheet = BottomSheet.TV_PROGRAMS
-        val bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -847,7 +847,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
     private var backButtonEpisodeBottomSheet: ImageView? = null
     private fun showEpisodesBottomSheet() {
         currentBottomSheet = BottomSheet.EPISODES
-        val bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.episodes)
@@ -919,7 +919,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     private fun showChannelsBottomSheet() {
         currentBottomSheet = BottomSheet.CHANNELS
-        val bottomSheetDialog = BottomSheetDialog(this, R.style.ChannelsBottomSheetDialog)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -971,7 +971,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         }
         isSettingsBottomSheetOpened = true
         currentBottomSheet = BottomSheet.SETTINGS
-        val bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetDialog.setContentView(R.layout.settings_bottom_sheet)
@@ -1028,7 +1028,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         }
         isQualitySpeedBottomSheetOpened = true
         currentBottomSheet = BottomSheet.QUALITY_OR_SPEED
-        val bottomSheetDialog = BottomSheetDialog(this)
+        val bottomSheetDialog = BottomSheetDialog(this, R.style.BottomSheetDialog)
         listOfAllOpenedBottomSheets.add(bottomSheetDialog)
         bottomSheetDialog.behavior.isDraggable = false
         bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
