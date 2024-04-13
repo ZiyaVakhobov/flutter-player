@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import uz.udevs.udevs_video_player.R
@@ -46,8 +47,8 @@ class EpisodesRvAdapter(
     override fun onBindViewHolder(holder: Vh, position: Int) {
         holder.title.text = list[position].title
         if (position == episodeIndex && currentSeasonIndex == seasonIndex) {
-            holder.title.setTextColor(context.resources.getColor(R.color.blue))
-            holder.description.setTextColor(context.resources.getColor(R.color.blue))
+            holder.title.setTextColor(ContextCompat.getColor(context, R.color.blue))
+            holder.description.setTextColor(ContextCompat.getColor(context, R.color.blue))
         }
         holder.description.text = list[position].description
         holder.duration.text = MyHelper().formatDuration(list[position].duration)

@@ -80,7 +80,6 @@ import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import kotlin.math.abs
 
-
 @UnstableApi
 class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
@@ -156,23 +155,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         window.statusBarColor = Color.BLACK
         window.navigationBarColor = Color.BLACK
 
-        // IntentFilter create
-        intentFilter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-
-        // NetworkChangeReceiver create
-        networkChangeReceiver = object : NetworkChangeReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                super.onReceive(context, intent)
-                if (isNetworkAvailable(context!!)) {
-                    Log.d(tag, "Reconnect player: Internet bor")
-                    rePlayVideo()
-                }
-            }
-        }
-
-        // BroadcastReceiver active
-        registerReceiver(networkChangeReceiver, intentFilter)
-
         playerConfiguration = intent.getSerializableExtra(EXTRA_ARGUMENT) as PlayerConfiguration
         seasonIndex = playerConfiguration.seasonIndex
         episodeIndex = playerConfiguration.episodeIndex
@@ -203,37 +185,56 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         maxVolume += 1.0
         volumeSeekBar.progress = volume.toInt()
         playVideo()
+        listenConnection()
+    }
+
+    private fun listenConnection() {
+        // IntentFilter create
+        intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+
+        // NetworkChangeReceiver create
+        networkChangeReceiver = object : NetworkChangeReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                super.onReceive(context, intent)
+                if (isNetworkAvailable(context!!)) {
+                    Log.d(tag, "Reconnect player: Internet bor")
+                    rePlayVideo()
+                }
+            }
+        }
+
+        // BroadcastReceiver active
+        registerReceiver(networkChangeReceiver, intentFilter)
     }
 
     fun isNetworkAvailable(context: Context?): Boolean {
         if (context == null) return false
+
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                when {
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> {
-                        return true
-                    }
+        val capabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+                ?: return false
 
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> {
-                        return true
-                    }
-
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> {
-                        return true
-                    }
-                }
-            }
-        } else {
-            val activeNetworkInfo = connectivityManager.activeNetworkInfo
-            if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
-                return true
-            }
+        // Flexible connectivity check: Any of the specified transports indicates usable connection
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+        ) {
+            return true
         }
+
+        // Optional: Check for validated internet connectivity
+        if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+            return true
+        }
+
         return false
+    }
+
+    private fun rePlayVideo() {
+        player.prepare()
+        player.play()
     }
 
     private val onBackPressedCallback: OnBackPressedCallback =
@@ -306,7 +307,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Log.d(tag, "onPlayerError: ${error.errorCode}")
-                player.pause()
             }
 
             override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
@@ -354,11 +354,6 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             }
         })
         player.playWhenReady = true
-    }
-
-    private fun rePlayVideo() {
-        player.prepare()
-        player.play()
     }
 
     private var lastClicked1: Long = -1L
@@ -708,7 +703,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
             override fun onResponse(
                 call: Call<TvChannelResponse>, response: Response<TvChannelResponse>
             ) {
-                val body = response.body()
+//                val body = response.body()
 //                if (body != null) {
 //                    val map: HashMap<String, Int> = hashMapOf()
 //                    map["Auto"] = body.channelStreamAll
