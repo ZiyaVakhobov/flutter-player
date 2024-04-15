@@ -80,6 +80,7 @@ import uz.udevs.udevs_video_player.services.DownloadUtil
 import uz.udevs.udevs_video_player.services.NetworkChangeReceiver
 import kotlin.math.abs
 
+@Suppress("DEPRECATION")
 @UnstableApi
 class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListener,
     ScaleGestureDetector.OnScaleGestureListener, AudioManager.OnAudioFocusChangeListener {
@@ -255,12 +256,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
         super.onPause()
         val isPlaying = player.isPlaying
         player.playWhenReady = false
-        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                isInPictureInPictureMode
-            } else {
-                false
-            }
-        ) {
+        if (isInPictureInPictureMode) {
             player.playWhenReady = isPlaying
             dismissAllBottomSheets()
         }
@@ -280,12 +276,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
     override fun onStop() {
         super.onStop()
-        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                isInPictureInPictureMode
-            } else {
-                false
-            }
-        ) {
+        if (isInPictureInPictureMode) {
             player.release()
             finish()
         }
@@ -345,6 +336,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
 
                     Player.STATE_ENDED -> {
                         playPause.setImageResource(R.drawable.ic_play)
+                        close.performClick()
                     }
 
                     Player.STATE_IDLE -> {
@@ -507,7 +499,7 @@ class VideoPlayerActivity : AppCompatActivity(), GestureDetector.OnGestureListen
                 player.play()
             }
         }
-        ///TODO:
+
         tvChannels.setOnClickListener {
             showChannelsBottomSheet()
         }
