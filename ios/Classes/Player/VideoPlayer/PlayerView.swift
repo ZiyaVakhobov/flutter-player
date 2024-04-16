@@ -846,6 +846,8 @@ class PlayerView: UIView {
         if keyPath == "status" {
             if player.status == .readyToPlay {
                 handleMediaPlayerReady()
+            } else if player.status == .readyToPlay {
+                
             }
         }
         if keyPath == "timeControlStatus", let change = change, let newValue = change[NSKeyValueChangeKey.newKey] as? Int, let oldValue = change[NSKeyValueChangeKey.oldKey] as? Int {
@@ -870,6 +872,9 @@ class PlayerView: UIView {
                         
                     }
                 }
+            }
+            if player.timeControlStatus == .paused {
+                // Player is paused
             }
         }
     }
@@ -1126,8 +1131,20 @@ class PlayerView: UIView {
         player.seek(to: CMTimeMake(value: Int64(sender.value*1000), timescale: 1000))
     }
     
+    @objc func playerDidFinishPlaying() {
+        purgeMediaPlayer();
+        removeMediaPlayerObservers();
+        delegate?.close(duration: [Int(player.currentTime().seconds),
+            Int(player.currentItem!.duration.seconds)]
+        )
+    }
+    
     /// MARK: - Time logic
     func addTimeObserver() {
+        NotificationCenter.default.addObserver(self,
+                                           selector: #selector(playerDidFinishPlaying),
+                                           name: .AVPlayerItemDidPlayToEndTime,
+                                           object: player.currentItem)
         player.currentItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         player.currentItem?.addObserver(self, forKeyPath: "status", options: .new, context: nil)
         player.addObserver(self, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
@@ -1152,6 +1169,9 @@ class PlayerView: UIView {
     }
     
     func removeMediaPlayerObservers() {
+        NotificationCenter.default.removeObserver(self,
+                                           name: .AVPlayerItemDidPlayToEndTime,
+                                           object: player.currentItem)
         if observingMediaPlayer {
             if let mediaTimeObserverToRemove = mediaTimeObserver {
                 player.removeTimeObserver(mediaTimeObserverToRemove)

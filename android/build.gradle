@@ -73,7 +73,7 @@ android {
 
         implementation 'androidx.appcompat:appcompat:1.6.1'
 
-        implementation 'org.checkerframework:checker-qual:3.33.0'
+        implementation 'org.checkerframework:checker-qual:3.37.0'
         implementation 'com.google.android.gms:play-services-cronet:18.0.1'
     }
 }
