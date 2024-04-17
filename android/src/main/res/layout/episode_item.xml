@@ -33,10 +33,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="5dp"
-            android:fontFamily="@font/regular"
             android:text="35:22"
             android:textColor="@color/white"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            tools:ignore="HardcodedText" />
 
     </androidx.cardview.widget.CardView>
 
@@ -46,11 +46,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:ellipsize="end"
-        android:fontFamily="@font/semibold"
         android:maxLines="1"
         android:text="Женщина-Халк: Адвокат"
         android:textColor="@color/white"
-        android:textSize="17sp" />
+        android:textSize="17sp"
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/episode_item_description"
@@ -58,9 +58,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:ellipsize="end"
-        android:fontFamily="@font/regular"
         android:maxLines="4"
-        android:text="После переливания крови двоюродная сестра Брюса Бэннера юристка Дженнифер Уолтерс получает способность во время стресса перевоплощаться в сверхсильное существо. Дженнифер предстоит научиться управлять этим даром и применять его во благо при этом продолжать работать в недавно созданном Отделе по правам сверхлюдей."
+        android:text=""
         android:textColor="@color/grey10"
         android:textSize="15sp" />
 </LinearLayout>
